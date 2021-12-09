@@ -1,4 +1,4 @@
-rem @echo off
+@echo off
 
 set usd_build_dir=USDBuild
 set usd_build_fullpath="%cd%\USD\%usd_build_dir%"
@@ -40,16 +40,21 @@ devenv installation\ModModifier\ModModifier.sln /Build Release
 rmdir Build /Q /S
 mkdir Build
 
-xcopy /S /Y /I USD\%usd_build_dir%\bin Build\USD\bin
-xcopy /S /Y /I USD\%usd_build_dir%\lib Build\USD\lib
-xcopy /S /Y /I USD\%usd_build_dir%\libraries Build\USD\libraries
-xcopy /S /Y /I USD\%usd_build_dir%\mdl Build\USD\mdl
-xcopy /S /Y /I USD\%usd_build_dir%\plugin Build\USD\plugin
-xcopy /S /Y /I USD\%usd_build_dir%\resources Build\USD\resources
+xcopy /S /Y /I USD\%usd_build_dir%\bin Build\USD\%usd_build_dir%\bin
+xcopy /S /Y /I USD\%usd_build_dir%\lib Build\USD\%usd_build_dir%\lib
+xcopy /S /Y /I USD\%usd_build_dir%\libraries Build\USD\%usd_build_dir%\libraries
+xcopy /S /Y /I USD\%usd_build_dir%\mdl Build\USD\%usd_build_dir%\mdl
+xcopy /S /Y /I USD\%usd_build_dir%\plugin Build\USD\%usd_build_dir%\plugin
+xcopy /S /Y /I USD\%usd_build_dir%\resources Build\USD\%usd_build_dir%\resources
 
 xcopy /S /Y /I maya-usd\build\install\RelWithDebInfo  Build\maya-usd\build\install\RelWithDebInfo
 rename Build\maya-usd\build\install\RelWithDebInfo\mayaUSD.mod RPRMayaUSD.mod
 
-copy /Y build_patch\bin\*.dll Build\USD\\lib\
+copy /Y build_patch\bin\*.dll Build\USD\%usd_build_dir%\lib\
 copy /Y installation\ModModifier\x64\Release\ModModifier.exe Build\ModModifier.exe
+
+echo Building Installer...
+cd installation
+iscc installation.iss
+cd ..
 

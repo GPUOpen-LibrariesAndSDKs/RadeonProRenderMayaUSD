@@ -12,7 +12,9 @@ SetupIconFile=.\ico\AMD.ico
 
 [Files]
 //Source: "..\LICENSE.txt"; DestDir: "{app}";
-Source: "..\Build\maya-usd\build\install\RelWithDebInfo\RPRMayaUSD.mod"; DestDir: "{app}"; Flags: recursesubdirs
+Source: "..\Build\*"; DestDir: "{app}"; Flags: recursesubdirs
+//Source: "..\Build\maya-usd\build\install\RelWithDebInfo\RPRMayaUSD.mod"; DestDir: "{app}\maya-usd\build\install\RelWithDebInfo\"; Flags: recursesubdirs
+//Source: "..\Build\ModModifier.exe"; DestDir: "{app}"; Flags: recursesubdirs
 //Source: ".\binary\windows\inst\VC_redist.x64.exe"; DestDir: "{app}";
 //Source: ".\binary\windows\inst\CheckRprCompatibility.exe"; DestDir: "{app}";
 
@@ -39,10 +41,36 @@ begin
   WizardForm.LicenseAcceptedRadio.Checked := True;
 end;
 
+procedure ModifyModFile();
+var
+  ResultCode: Integer;
+begin
+  if Exec(ExpandConstant('{app}\ModModifier.exe'), 
+      ExpandConstant('"{app}\maya-usd\build\install\RelWithDebInfo\RPRMayaUSD.mod" "{app}"') , '', SW_SHOW, ewWaitUntilTerminated, ResultCode)
+  then 
+  begin
+    if not (ResultCode = 0) then
+      MsgBox('Internal Setup Error: RPRMayaUSD.mod file has not been modified !', mbInformation, MB_OK);
+  end;
+end;
+
 procedure CurStepChanged(CurStep: TSetupStep);
 begin
   if CurStep = ssPostInstall then
   begin
-//    CheckRprCompatibility();
+    ModifyModFile();
+
+    if not FileCopy(ExpandConstant('{app}\maya-usd\build\install\RelWithDebInfo\RPRMayaUSD.mod'), 
+                  ExpandConstant('{commoncf64}\Autodesk Shared\modules\maya\2022\RPRMayaUSD.mod'), false)
+    then
+      MsgBox('Setup Error: RPRMayaUSD.mod file could not be copied to Maya''s modules directory!', mbInformation, MB_OK);     
   end;
+end;
+
+procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
+begin
+  if CurUninstallStep = usPostUninstall then
+  begin
+    DeleteFile(ExpandConstant('{commoncf64}\Autodesk Shared\modules\maya\2022\RPRMayaUSD.mod'));
+  end
 end;
