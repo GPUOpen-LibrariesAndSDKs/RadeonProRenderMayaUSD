@@ -3,7 +3,7 @@
 	url = https://github.com/PixarAnimationStudios/USD.git
 [submodule "maya-usd"]
 	path = maya-usd
-	url = https://github.com/Autodesk/maya-usd.git
+	url = git@github.com:Vsevolod1983/maya-usd.git
 [submodule "RadeonProRenderUSD"]
 	path = RadeonProRenderUSD
 	url = git@github.com:GPUOpen-LibrariesAndSDKs/RadeonProRenderUSD.git
