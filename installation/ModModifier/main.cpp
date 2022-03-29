@@ -52,7 +52,7 @@ int main(int argc, char** argv)
 
 	std::ifstream modFileStream(argv[1]);
 
-	std::map<std::string, std::string> lookupMap = {
+	std::map<std::string, std::string> lookupMapBlockHeads = {
 		{"USD", "/USD/USDBuild"},
 		{"MayaUSD_LIB", "/maya-usd/build/install/RelWithDebInfo"},
 		{"MayaUSD", "/maya-usd/build/install/RelWithDebInfo/plugin/adsk"},
@@ -60,18 +60,22 @@ int main(int argc, char** argv)
 
 	std::string output;
 
+	bool isUSDBlockInside = false;
+
 	std::vector<std::string> elements;
 	for (std::string currentString; std::getline(modFileStream, currentString); )
 	{
 		//if (currentString.substr(0, 2) == "+ ")
 		elements = SplitStringBySpace(currentString);
 
+		// make replacement at the head of the block
 		if (elements[0] == "+" && elements.size() > 3)
 		{
+			isUSDBlockInside = (elements[1] == "USD");
 
 			std::map<std::string, std::string>::const_iterator it;
 
-			for (it = lookupMap.begin(); it != lookupMap.end(); ++it)
+			for (it = lookupMapBlockHeads.begin(); it != lookupMapBlockHeads.end(); ++it)
 			{
 				if (elements[1] == it->first)
 				{
@@ -79,7 +83,7 @@ int main(int argc, char** argv)
 				}
 			}
 
-			if (it != lookupMap.end())
+			if (it != lookupMapBlockHeads.end())
 			{
 				std::string path;
 
@@ -103,6 +107,11 @@ int main(int argc, char** argv)
 
 				currentString += path;
 			}
+		}
+		// make replacement for usd materialx library path
+		else if (isUSDBlockInside && elements[0].find("PXR_MTLX_STDLIB_SEARCH_PATHS") == 0)
+		{
+			currentString = std::string("PXR_USDMTLX_STDLIB_SEARCH_PATHS+=") + appInstaallDir + "/USD/USDBuild/libraries" ;
 		}
 
 		output += currentString + "\n";
