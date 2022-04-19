@@ -1,12 +1,14 @@
+#define AppVersionString '0.1.0'
+
 [Setup]
 AppName=RPRMayaUSD
-AppVersion=0.1.0
+AppVersion={#AppVersionString}
 WizardStyle=modern
 DefaultDirName="{autopf64}\RPRMayaUSD"
 DefaultGroupName=RPRMayaUSD
 ChangesEnvironment=no
 OutputDir=.
-OutputBaseFilename=RPRMayaUSD_Setup
+OutputBaseFilename=RPRMayaUSD_Setup_{#MAYA_VERSION_NAME}_{#AppVersionString}
 SetupIconFile=.\ico\AMD.ico
 //LicenseFile=LICENSE.txt
 
@@ -61,7 +63,7 @@ begin
     ModifyModFile();
 
     if not FileCopy(ExpandConstant('{app}\maya-usd\build\install\RelWithDebInfo\RPRMayaUSD.mod'), 
-                  ExpandConstant('{commoncf64}\Autodesk Shared\modules\maya\2022\RPRMayaUSD.mod'), false)
+                  ExpandConstant('{commoncf64}\Autodesk Shared\modules\maya\{#MAYA_VERSION_NAME}\RPRMayaUSD.mod'), false)
     then
       MsgBox('Setup Error: RPRMayaUSD.mod file could not be copied to Maya''s modules directory!', mbInformation, MB_OK);     
   end;
@@ -71,6 +73,6 @@ procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
 begin
   if CurUninstallStep = usPostUninstall then
   begin
-    DeleteFile(ExpandConstant('{commoncf64}\Autodesk Shared\modules\maya\2022\RPRMayaUSD.mod'));
+    DeleteFile(ExpandConstant('{commoncf64}\Autodesk Shared\modules\maya\{#MAYA_VERSION_NAME}\RPRMayaUSD.mod'));
   end
 end;
