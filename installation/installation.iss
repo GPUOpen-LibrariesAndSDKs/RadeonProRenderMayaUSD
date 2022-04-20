@@ -8,7 +8,7 @@ DefaultDirName="{autopf64}\RPRMayaUSD"
 DefaultGroupName=RPRMayaUSD
 ChangesEnvironment=no
 OutputDir=.
-OutputBaseFilename=RPRMayaUSD_Setup_{#MAYA_VERSION_NAME}_{#AppVersionString}
+OutputBaseFilename=RPRMayaUSD_Setup_{#AppVersionString}
 SetupIconFile=.\ico\AMD.ico
 //LicenseFile=LICENSE.txt
 
@@ -43,29 +43,30 @@ begin
   WizardForm.LicenseAcceptedRadio.Checked := True;
 end;
 
-procedure ModifyModFile();
+procedure ModifyModFileAndCopy(maya_version : String);
 var
   ResultCode: Integer;
 begin
   if Exec(ExpandConstant('{app}\ModModifier.exe'), 
-      ExpandConstant('"{app}\maya-usd\build\install\RelWithDebInfo\RPRMayaUSD.mod" "{app}"') , '', SW_SHOW, ewWaitUntilTerminated, ResultCode)
+      ExpandConstant('"{app}\' + maya_version + '\maya-usd\build\install\RelWithDebInfo\RPRMayaUSD.mod" "{app}\' + maya_version + '"') , '', SW_SHOW, ewWaitUntilTerminated, ResultCode)
   then 
   begin
     if not (ResultCode = 0) then
-      MsgBox('Internal Setup Error: RPRMayaUSD.mod file has not been modified !', mbInformation, MB_OK);
+      MsgBox('Internal Setup Error: RPRMayaUSD.mod file has not been modified ! ' + maya_version, mbInformation, MB_OK);
   end;
+
+  if not FileCopy(ExpandConstant('{app}\' + maya_version + '\maya-usd\build\install\RelWithDebInfo\RPRMayaUSD.mod'), 
+                ExpandConstant('{commoncf64}\Autodesk Shared\modules\maya\' + maya_version + '\RPRMayaUSD.mod'), false)
+  then
+    MsgBox('Setup Error: RPRMayaUSD.mod file could not be copied to Maya''s modules directory! ' + maya_version, mbInformation, MB_OK);     
 end;
 
 procedure CurStepChanged(CurStep: TSetupStep);
 begin
   if CurStep = ssPostInstall then
   begin
-    ModifyModFile();
-
-    if not FileCopy(ExpandConstant('{app}\maya-usd\build\install\RelWithDebInfo\RPRMayaUSD.mod'), 
-                  ExpandConstant('{commoncf64}\Autodesk Shared\modules\maya\{#MAYA_VERSION_NAME}\RPRMayaUSD.mod'), false)
-    then
-      MsgBox('Setup Error: RPRMayaUSD.mod file could not be copied to Maya''s modules directory!', mbInformation, MB_OK);     
+    ModifyModFileAndCopy('2022');
+    ModifyModFileAndCopy('2023');
   end;
 end;
 
@@ -73,6 +74,7 @@ procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
 begin
   if CurUninstallStep = usPostUninstall then
   begin
-    DeleteFile(ExpandConstant('{commoncf64}\Autodesk Shared\modules\maya\{#MAYA_VERSION_NAME}\RPRMayaUSD.mod'));
+    DeleteFile(ExpandConstant('{commoncf64}\Autodesk Shared\modules\maya\2022\RPRMayaUSD.mod'));
+    DeleteFile(ExpandConstant('{commoncf64}\Autodesk Shared\modules\maya\2023\RPRMayaUSD.mod'));
   end
 end;
