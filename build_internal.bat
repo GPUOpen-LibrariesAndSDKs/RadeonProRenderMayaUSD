@@ -34,6 +34,11 @@ echo Python_Library=%Python_Library%
 set usd_build_dir=USDBuild
 set usd_build_fullpath="%cd%\USD\%usd_build_dir%"
 
+
+if "%2"=="skip_usd_build" goto :skip_usd_build
+if "%2"=="skip_mtoh_build" goto :skip_mtoh_build
+
+
 echo Building USD Pixar...
 cd USD
 
@@ -55,12 +60,14 @@ python build.py --qt-location=%QT_LOCATION% --maya-location "%Maya_x64%" --pxrus
 cd ..
 
 
+:skip_mtoh_build
+
 echo Building RadeonProRenderUSD (hdRPR) ...
 cd RadeonProRenderUSD
 rmdir build /Q /S
 mkdir build
 cd build
-cmake -Dpxr_DIR=%usd_build_fullpath% -DCMAKE_INSTALL_PREFIX=%usd_build_fullpath% -DCMAKE_GENERATOR="Visual Studio 15 2017 Win64" ..
+cmake -Dpxr_DIR=%usd_build_fullpath% -DCMAKE_INSTALL_PREFIX=%usd_build_fullpath% -DCMAKE_GENERATOR="Visual Studio 15 2017 Win64" -DPYTHON_INCLUDE_DIR="%Python_Include_Dir%" -DPython_EXECUTABLE="%Maya_x64%/bin/mayapy.exe" -DPYTHON_LIBRARIES="%Python_Library%" -DBUILD_WITH_PYTHON_3_VERSION=%Python_ver% ..
 cmake --build . --config RelWithDebInfo --target install
 cd ../..
 
