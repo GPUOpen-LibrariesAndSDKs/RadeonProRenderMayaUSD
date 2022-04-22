@@ -47,7 +47,7 @@ echo Building USD Pixar to %usd_build_fullpath%
 
 rmdir %usd_build_dir% /Q /S
 
-python build_scripts\build_usd.py %usd_build_fullpath% --openimageio --materialx --build-python-info "%Maya_x64%/bin/mayapy.exe" "%Python_Include_Dir%" "%Python_Library%" %Python_ver%
+"%Maya_x64%/bin/mayapy.exe" build_scripts\build_usd.py %usd_build_fullpath% --openimageio --materialx --build-python-info "%Maya_x64%/bin/mayapy.exe" "%Python_Include_Dir%" "%Python_Library%" %Python_ver%
 
 cd ..
 
@@ -56,18 +56,19 @@ cd ..
 
 echo Building Autodesk's MtoH...
 cd maya-usd
-python build.py --qt-location=%QT_LOCATION% --maya-location "%Maya_x64%" --pxrusd-location %usd_build_fullpath% --devkit-location "%Maya_sdk%" build --build-args="-G \"Visual Studio 15 2017 Win64\" -DBUILD_ADSK_PLUGIN=ON,-DBUILD_PXR_PLUGIN=OFF,-DBUILD_AL_PLUGIN=OFF,-DBUILD_TESTS=OFF,-DBUILD_WITH_PYTHON_3=ON,-DPYTHON_INCLUDE_DIR=\"%Python_Include_Dir%\",-DPython_EXECUTABLE=\"%Maya_x64%/bin/mayapy.exe\",-DPYTHON_LIBRARIES=\"%Python_Library%\",-DBUILD_WITH_PYTHON_3_VERSION=%Python_ver%"
+"%Maya_x64%/bin/mayapy.exe" build.py --qt-location=%QT_LOCATION% --maya-location "%Maya_x64%" --pxrusd-location %usd_build_fullpath% --devkit-location "%Maya_sdk%" build --build-args="-G \"Visual Studio 15 2017 Win64\" -DBUILD_ADSK_PLUGIN=ON,-DBUILD_PXR_PLUGIN=OFF,-DBUILD_AL_PLUGIN=OFF,-DBUILD_TESTS=OFF,-DBUILD_WITH_PYTHON_3=ON,-DPYTHON_INCLUDE_DIR=\"%Python_Include_Dir%\",-DPython_EXECUTABLE=\"%Maya_x64%/bin/mayapy.exe\",-DPYTHON_LIBRARIES=\"%Python_Library%\",-DBUILD_WITH_PYTHON_3_VERSION=%Python_ver%"
 cd ..
 
 
 :skip_mtoh_build
 
 echo Building RadeonProRenderUSD (hdRPR) ...
+
 cd RadeonProRenderUSD
 rmdir build /Q /S
 mkdir build
 cd build
-cmake -Dpxr_DIR=%usd_build_fullpath% -DCMAKE_INSTALL_PREFIX=%usd_build_fullpath% -DCMAKE_GENERATOR="Visual Studio 15 2017 Win64" -DPYTHON_INCLUDE_DIR="%Python_Include_Dir%" -DPython_EXECUTABLE="%Maya_x64%/bin/mayapy.exe" -DPYTHON_LIBRARIES="%Python_Library%" -DBUILD_WITH_PYTHON_3_VERSION=%Python_ver% ..
+cmake -Dpxr_DIR=%usd_build_fullpath% -DCMAKE_INSTALL_PREFIX=%usd_build_fullpath% -DCMAKE_GENERATOR="Visual Studio 15 2017 Win64" -DPYTHON_INCLUDE_DIR="%Python_Include_Dir%" -DPYTHON_EXECUTABLE="%Maya_x64%/bin/mayapy.exe" -DPYTHON_LIBRARIES="%Python_Library%" ..
 cmake --build . --config RelWithDebInfo --target install
 cd ../..
 
