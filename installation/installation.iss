@@ -46,6 +46,7 @@ end;
 procedure ModifyModFileAndCopy(maya_version : String);
 var
   ResultCode: Integer;
+  Path : String;
 begin
   if Exec(ExpandConstant('{app}\ModModifier.exe'), 
       ExpandConstant('"{app}\' + maya_version + '\maya-usd\build\install\RelWithDebInfo\RPRMayaUSD.mod" "{app}\' + maya_version + '"') , '', SW_SHOW, ewWaitUntilTerminated, ResultCode)
@@ -55,11 +56,10 @@ begin
       MsgBox('Internal Setup Error: RPRMayaUSD.mod file has not been modified ! ' + maya_version, mbInformation, MB_OK);
   end;
 
-  path : String
-  path := ExpandConstant('{commoncf64}\Autodesk Shared\modules\maya\' + maya_version;
+  Path := ExpandConstant('{commoncf64}\Autodesk Shared\modules\maya\' + maya_version);
 
-  if DirExists(path) then
-    if not FileCopy(ExpandConstant('{app}\' + maya_version + '\maya-usd\build\install\RelWithDebInfo\RPRMayaUSD.mod'), path + '\RPRMayaUSD.mod'), false)
+  if DirExists(Path) then
+    if not FileCopy(ExpandConstant('{app}\' + maya_version + '\maya-usd\build\install\RelWithDebInfo\RPRMayaUSD.mod'), Path + '\RPRMayaUSD.mod', false)
     then
       MsgBox('Setup Error: RPRMayaUSD.mod file could not be copied to Maya''s modules directory! ' + maya_version, mbInformation, MB_OK);     
 end;
