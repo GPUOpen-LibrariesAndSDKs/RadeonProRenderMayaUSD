@@ -55,10 +55,13 @@ begin
       MsgBox('Internal Setup Error: RPRMayaUSD.mod file has not been modified ! ' + maya_version, mbInformation, MB_OK);
   end;
 
-  if not FileCopy(ExpandConstant('{app}\' + maya_version + '\maya-usd\build\install\RelWithDebInfo\RPRMayaUSD.mod'), 
-                ExpandConstant('{commoncf64}\Autodesk Shared\modules\maya\' + maya_version + '\RPRMayaUSD.mod'), false)
-  then
-    MsgBox('Setup Error: RPRMayaUSD.mod file could not be copied to Maya''s modules directory! ' + maya_version, mbInformation, MB_OK);     
+  path : String
+  path := ExpandConstant('{commoncf64}\Autodesk Shared\modules\maya\' + maya_version;
+
+  if DirExists(path) then
+    if not FileCopy(ExpandConstant('{app}\' + maya_version + '\maya-usd\build\install\RelWithDebInfo\RPRMayaUSD.mod'), path + '\RPRMayaUSD.mod'), false)
+    then
+      MsgBox('Setup Error: RPRMayaUSD.mod file could not be copied to Maya''s modules directory! ' + maya_version, mbInformation, MB_OK);     
 end;
 
 procedure CurStepChanged(CurStep: TSetupStep);
