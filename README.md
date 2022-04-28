@@ -17,6 +17,8 @@ Install all prerequsities for PixarUSD and MtoH ( except Python, we use Maya's p
    mayapy -m pip install Pyside2
    mayapy -m pip install jinja2
    mayapy -m pip install PyOpengl
+8. NASM
+
 Better to do it from an administator mode.
 
  Run build.bat from x64 VS 2017 Build Tools. 
