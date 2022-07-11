@@ -32,6 +32,7 @@
 *.app
 
 Build
+Build_RPRUsdInstall
 Debug*/
 Release*/
 x64/
