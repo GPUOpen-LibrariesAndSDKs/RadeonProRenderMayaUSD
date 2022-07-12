@@ -37,10 +37,9 @@ begin
   WizardForm.LicenseAcceptedRadio.Checked := True;
 end;
 
-procedure ModifyMayaEnvFile(maya_version : String, action : String);
+procedure ModifyMayaEnvFile(maya_version : String; action : String);
 var
   ResultCode: Integer;
-  Path : String;
 begin
   if Exec(ExpandConstant('{app}\MayaEnvModifier.exe'), 
       ExpandConstant(action + ' ' + '"{app}"'), '', SW_SHOW, ewWaitUntilTerminated, ResultCode)
@@ -55,7 +54,7 @@ procedure CurStepChanged(CurStep: TSetupStep);
 begin
   if CurStep = ssPostInstall then
   begin
-    ModifyMayaEnvFile('2023', 'add');
+    ModifyMayaEnvFile('2023', '-add');
   end;
 end;
 
@@ -63,6 +62,6 @@ procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
 begin
   if CurUninstallStep = usPostUninstall then
   begin
-    ModifyMayaEnvFile('2023', 'remove');
+    ModifyMayaEnvFile('2023', '-remove');
   end
 end;
