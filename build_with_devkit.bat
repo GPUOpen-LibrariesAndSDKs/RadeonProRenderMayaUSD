@@ -1,4 +1,4 @@
-# Support for Maya 2023 only for now, It's possible to add 2022 support if needed. However USD is pretty old within MAYA 2022
+rem Support for Maya 2023 only for now, It's possible to add 2022 support if needed. However USD is pretty old within MAYA 2022
 
 set Maya_x64=%MAYA_x64_2023%
 set Maya_sdk=%MAYA_SDK_2023%
@@ -24,12 +24,12 @@ cmake -Dpxr_DIR="%usd_build_fullpath%" -DMAYAUSD_OPENEXR_STATIC=ON -DPXR_USD_LOC
 cmake --build . --config RelWithDebInfo --target install
 cd ../..
 
-rem echo Building Modifier...
-rem devenv installation\ModModifier\ModModifier.sln /Build Release
-rem copy /Y installation\ModModifier\x64\Release\MayaEnvModifier.exe Build_RPRUsdInstall\MayaEnvModifier.exe
+echo Building Modifier...
+devenv installation\ModModifier\ModModifier.sln /Build Release
+copy /Y installation\ModModifier\x64\Release\MayaEnvModifier.exe Build_RPRUsdInstall\MayaEnvModifier.exe
 
-rem echo Building Installer...
-rem cd installation
-rem iscc installation_hdrpr_only.iss
-rem cd ..
+echo Building Installer...
+cd installation
+iscc installation_hdrpr_only.iss
+cd ..
 
