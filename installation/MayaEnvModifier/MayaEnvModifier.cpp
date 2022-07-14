@@ -46,6 +46,10 @@ int main(int argc, char* argv[] )
 	const std::string pxrPluginPathNameString = "PXR_PLUGINPATH_NAME=%PXR_PLUGINPATH_NAME%;" + installationPath + "\\plugin;";
 	const std::string pathString = "PATH=%PATH%;" + installationPath + "\\lib;";
 
+	const std::string cachePath = std::string(std::getenv("LOCALAPPDATA")) + "\\RadeonProRender\\Maya\\USD\\";
+	const std::string cachePathString = "HDRPR_CACHE_PATH_OVERRIDE=" + cachePath;
+
+
 	const std::string mayaEnvFilePath = std::string(std::getenv("USERPROFILE")) + "\\Documents\\Maya\\" + mayaVersion + "\\Maya.env";
 
 	std::cout << "Maya.env filepath to open: " << mayaEnvFilePath.c_str() << std::endl;
@@ -62,7 +66,7 @@ int main(int argc, char* argv[] )
 
 	for (std::string currentString; std::getline(mayaEnvStreamIn, currentString); )
 	{
-		if (currentString == pxrPluginPathNameString || currentString == pathString)
+		if (currentString == pxrPluginPathNameString || currentString == pathString || currentString == cachePathString)
 		{
 			continue;
 		}
@@ -74,6 +78,7 @@ int main(int argc, char* argv[] )
 	{
 		output += pxrPluginPathNameString + "\n";
 		output += pathString + "\n";
+		output += cachePathString + "\n";
 	}
 
 	std::ofstream mayaEnvStreamOut (mayaEnvFilePath);

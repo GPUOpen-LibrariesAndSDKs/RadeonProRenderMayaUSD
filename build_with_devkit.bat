@@ -16,6 +16,8 @@ set usd_build_fullpath=%MAYA_x64_2023%\..\MayaUSD\Maya2023\0.18.0\mayausd\USD
 
 echo Building RadeonProRenderUSD (hdRPR) within builtin Maya's USD package...
 
+rmdir Build_RPRUsdInstall /Q /S
+
 cd RadeonProRenderUSD
 rmdir build /Q /S
 mkdir build
