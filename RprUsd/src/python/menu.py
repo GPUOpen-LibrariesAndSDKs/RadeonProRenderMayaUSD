@@ -3,7 +3,12 @@ import maya.mel
 import os
 import maya.mel as mel
 
-def createFireRenderMenu():
-    gMainWindow = "MayaWindow";
-    rprUsdMenuItem = maya.cmds.menuItem("FrRPRMaterialLibrary", label="RPR USD", p=gMainWindow)
-    maya.cmds.menuItem("FrRPRMaterialLibrary", label="showRPRMaterialXLibrary", p=rprUsdMenuItem, c=showRPRMaterialXLibrary)
+def showRPRMaterialXLibrary(value):
+    import rprMaterialXBrowser
+    rprMaterialXBrowser.show()
+
+def createRprUsdMenu():
+    if not maya.cmds.menu("rprUsdMenuCtrl", exists=1):
+        gMainWindow = "MayaWindow"
+        rprUsdMenuCtrl = maya.cmds.menu("rprUsdMenuCtrl", label="RPR USD", p=gMainWindow)
+        maya.cmds.menuItem("materialXLibraryCtrl", label="MaterialX Library", p=rprUsdMenuCtrl, c=showRPRMaterialXLibrary)

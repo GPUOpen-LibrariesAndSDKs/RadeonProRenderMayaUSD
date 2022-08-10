@@ -10,16 +10,16 @@ PLUGIN_EXPORT MStatus initializePlugin(MObject obj)
 
     MFnPlugin plugin(obj, "AMD", PLUGIN_VERSION, "Any");
 
-    MGlobal::executePythonCommand("import menu\ncreateFireRenderMenu()");
+    MGlobal::executePythonCommand("import menu\nmenu.createRprUsdMenu()");
 
     return ret;
 }
-
+ 
 PLUGIN_EXPORT MStatus uninitializePlugin(MObject obj)
 {
     MFnPlugin plugin(obj, "AMD", PLUGIN_VERSION, "Any");
 
-    MStatus ret = MS::kSuccess;
+    MStatus ret = MS::kSuccess; 
 
-    return ret; 
+    return ret;
 } 

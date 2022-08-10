@@ -80,8 +80,9 @@ md $(SolutionDir)dist\icons
 
 XCOPY /E /Y $(ProjectDir)\scripts\* $(SolutionDir)dist\scripts\
 XCOPY /E /Y $(ProjectDir)\src\python $(SolutionDir)dist\scripts\
-
+echo copying mll file
 COPY $(TargetPath) $(SolutionDir)dist\plug-ins\2023\* /Y
+echo -------------
 XCOPY /E /Y $(ProjectDir)\icons\* $(SolutionDir)dist\icons\
 </Command>
     </PostBuildEvent>
@@ -113,9 +114,15 @@ md $(SolutionDir)dist
 md $(SolutionDir)dist\bin
 md $(SolutionDir)dist\scripts
 md $(SolutionDir)dist\plug-ins
-md $(SolutionDir)dist\plug-ins\$(RPR_MAYA_VERSION)
-md $(SolutionDir)dist\images
-md $(SolutionDir)dist\icons</Command>
+md $(SolutionDir)dist\plug-ins\2023
+md $(SolutionDir)dist\icons
+
+XCOPY /E /Y $(ProjectDir)\scripts\* $(SolutionDir)dist\scripts\
+XCOPY /E /Y $(ProjectDir)\src\python $(SolutionDir)dist\scripts\
+
+COPY $(TargetPath) $(SolutionDir)dist\plug-ins\2023\* /Y
+XCOPY /E /Y $(ProjectDir)\icons\* $(SolutionDir)dist\icons\
+</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -124,6 +131,9 @@ md $(SolutionDir)dist\icons</Command>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\pluginMain.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <UpToDateCheckInput Include="src/python/*.*" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
