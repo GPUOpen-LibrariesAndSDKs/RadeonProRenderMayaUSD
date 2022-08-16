@@ -17,6 +17,7 @@ import json
 import math
 from functools import partial
 from sys import platform
+from client import MatlibClient
 
 
 # Show the material browser window.
@@ -25,12 +26,6 @@ def show() :
 
     print("ML Log: try show RPRMaterialBrowser")
     RPRMaterialBrowser().show()
-
-# Get Library Path.
-# -----------------------------------------------------------------------------
-def getLibPath() :
-
-	return RPRMaterialBrowser().libraryPath
 
 # A material browser window for Radeon Pro Render materials.
 # -----------------------------------------------------------------------------
@@ -58,96 +53,41 @@ class RPRMaterialBrowser(object) :
         # Set the default material icon size.
         self.setMaterialIconSize(self.getDefaultMaterialIconSize())
 
-        # Get the material library path and
-        # ensure that it's formatted correctly.5
-        libraryPath = self.getLibraryPath()
-        print("ML Log: library path = " + libraryPath)		
-		
-        self.libraryPath = libraryPath.replace("\\", "/").rstrip("/")
-
-
-    # Get the library path from the registry or an environment variable.
-    # -----------------------------------------------------------------------------
-    def getLibraryPath(self) :
-
-        # Read the path from the registry if running in Windows.
-        if platform == "win32":
-
-            import sys
-
-            if sys.version_info[0] < 3:
-                import _winreg as winreg
-            else:
-                import winreg
-
-            # Open the key.
-            try:
-                key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, "SOFTWARE\\AMD\\RadeonProRender\\MaterialLibrary\\Maya")
-
-                # Read the value.
-                result = winreg.QueryValueEx(key, "MaterialLibraryPath")
-
-                # Close the key.
-                winreg.CloseKey(key)
-
-                # Return value from the resulting tuple.
-                return result[0]
-
-            except Exception:
-                try:
-                    key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, "SOFTWARE\\AMD\\RadeonProRender\\Maya")
-
-                    # Read the value.
-                    result = winreg.QueryValueEx(key, "MaterialLibraryPath")
-                    # Close the key.
-                    winreg.CloseKey(key)
-                    # Return value from the resulting tuple.		
-                    return result[0]
-
-                except Exception:
-                    pass
-
-        # Otherwise, use an environment variable.
-        return mel.eval("getenv(\"RPR_MATERIAL_LIBRARY_PATH\")")
-
-
     # Show the material browser.
     # -----------------------------------------------------------------------------
     def show(self) :
+        print("ML Log: Begin loading library")
 
-        # Check that the library can be found.
-        if not self.checkLibrary():
-            print("ML Log: ERROR: library path was not found")	
+        #load all material at one time. It's possible to rework to load in chunks if needs
+        maxElementCount = 10000
+
+        self.matlibClient = MatlibClient("https://api.matlib.gpuopen.com")
+        self.categoryListData = self.matlibClient.categories.get_list(maxElementCount, 0)
+
+        if len(self.categoryListData) <= 0 :
+            print("ML Log: ERROR: We couldn't load categories from the Web")	
             return
 
-        # Load material manifest and create the browser layout.
-        print("ML Log: Begin loading library")
-        self.loadManifest()
-		
+        self.categoryDict = dict()
+
+        for category in self.categoryListData :
+            self.categoryDict[category["id"]] = category
+
+        self.materialListData = self.matlibClient.materials.get_list(maxElementCount, 0)
+        self.materialDict = dict()
+
+        self.materialByCategory = dict()
+
+        for material in self.materialListData :
+            self.materialDict[material["id"]] = material
+            categoryId = material["category"]
+
+            if categoryId not in self.materialByCategory :
+                self.materialByCategory[categoryId] = list()
+            self.materialByCategory[categoryId].append(material)
+              	     		
         print("ML Log: Begin creating layout")
         self.createLayout()
-
-
-    # Check that the library has been installed and can be found.
-    # -----------------------------------------------------------------------------
-    def checkLibrary(self):
-
-        # Check that the material library is installed.
-        if len(self.libraryPath) <= 0:
-            cmds.confirmDialog(title="Material Library Not Installed",
-                               message="Please install the Radeon ProRender Material Library to use this feature.",
-                               button ="OK")
-            return False
-
-        # Check that the material library can be found.
-        if not os.path.exists(self.libraryPath):
-            cmds.confirmDialog(title="Material Library Not Found",
-                               message="Radeon ProRender Material Library not found at:\n\"" + self.libraryPath + "\"",
-                               button ="OK")
-            return False
-
-        # Success.
-        return True
 
 
     # Load the material manifest from a Json file.
@@ -198,7 +138,7 @@ class RPRMaterialBrowser(object) :
         cmds.setParent('..')
 
         # Select the first material of the first category.
-        self.selectMaterial(self.manifest["categories"][0]["materials"][0])
+        #self.selectMaterial(self.manifest["categories"][0]["materials"][0])
         self.selectCategory(0)
 
         # Show the material browser window.
@@ -227,10 +167,10 @@ class RPRMaterialBrowser(object) :
         # Add layouts with index based names for easy lookup.
         index = 0
 
-        for category in self.manifest["categories"] :
+        for category in self.categoryListData :
             cmds.iconTextButton("RPRCategory" + str(index), style='iconAndTextHorizontal',
                                 image='material_browser/folder_closed.png',
-                                label=category["name"], height=20,
+                                label=category["title"], height=20,
                                 command=partial(self.selectCategory, index))
             index += 1
 
@@ -439,7 +379,7 @@ class RPRMaterialBrowser(object) :
 	
         print("ML Log: selectCategory")
         # Populate the materials view from the selected category.
-        self.materials = self.manifest["categories"][index]["materials"]
+        self.materials = self.materialByCategory[self.categoryListData[index]["id"]]
         self.populateMaterials()
 
         # Update the folder open / closed state on the category list.
@@ -647,11 +587,11 @@ class RPRMaterialBrowser(object) :
         materialIndex = 0
         # Add materials for the selected category.
         for material in self.materials :
-            fileName = material["fileName"]
-            cmd = partial(self.selectMaterial2, fileName, material["category"]["name"], material["name"], materialIndex)
-            imageFileName = self.libraryPath + "/" + fileName + "/" + fileName + ".jpg"
-
-            materialName = material["name"]
+            fileName = ""
+            cmd = partial(self.selectMaterial2, fileName, self.categoryDict[material["category"]]["title"], material["title"], materialIndex)
+#            imageFileName = self.libraryPath + "/" + fileName + "/" + fileName + ".jpg"
+            imageFileName = ""
+            materialName = material["title"]
 
             # Horizontal layout for small icons.
             if (self.iconSize < 64) :
