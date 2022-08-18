@@ -22,4 +22,4 @@ PLUGIN_EXPORT MStatus uninitializePlugin(MObject obj)
     MStatus ret = MS::kSuccess; 
 
     return ret;
-} 
+}

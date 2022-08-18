@@ -12,7 +12,7 @@
 
 import maya.cmds as cmds
 import maya.mel as mel
-import os.path
+import os
 import json
 import math
 from functools import partial
@@ -63,6 +63,8 @@ class RPRMaterialBrowser(object) :
 
         self.matlibClient = MatlibClient("https://api.matlib.gpuopen.com")
         self.categoryListData = self.matlibClient.categories.get_list(maxElementCount, 0)
+        self.pathRootThumbnail = os.environ["USERPROFILE"] + "/Documents/Maya/RprUsd/WebMatlibCache"
+        os.makedirs(self.pathRootThumbnail, exist_ok=True)
 
         if len(self.categoryListData) <= 0 :
             print("ML Log: ERROR: We couldn't load categories from the Web")	
@@ -89,25 +91,6 @@ class RPRMaterialBrowser(object) :
         print("ML Log: Begin creating layout")
         self.createLayout()
 
-
-    # Load the material manifest from a Json file.
-    # -----------------------------------------------------------------------------
-    def loadManifest(self) :
-
-        # Read the manifest.
-        manifestFile = self.libraryPath + "/manifest.json"
-
-        with open(manifestFile) as dataFile :
-            self.manifest = json.load(dataFile)
-
-        # Map categories to materials.
-        self.categoryMap = {}
-
-        for category in self.manifest["categories"] :
-            for material in category["materials"] :
-                material["category"] = category
-
-
     # Create the browser layout.
     # -----------------------------------------------------------------------------
     def createLayout(self) :
@@ -120,7 +103,7 @@ class RPRMaterialBrowser(object) :
         # Create a new window.
         self.window = cmds.window("RPRMaterialBrowserWindow",
                                   widthHeight=(1200, 700),
-                                  title="Radeon ProRender Material Browser")
+                                  title="Radeon ProRender MaterialX Browser")
 
         # Place UI sections in a horizontal 3 pane layout.
         paneLayout = cmds.paneLayout(configuration='vertical3', staticWidthPane=3,
@@ -187,6 +170,9 @@ class RPRMaterialBrowser(object) :
         cmds.setParent('..')
         cmds.setParent('..')
 
+
+    def getMaterialFullPath(self, fileName) :
+        return os.path.join(self.pathRootThumbnail, fileName)
 
     # Create the materials layout.
     # -----------------------------------------------------------------------------
@@ -282,11 +268,8 @@ class RPRMaterialBrowser(object) :
         # Create tab and form layouts.
         tabLayout = cmds.tabLayout(innerMarginWidth=8, innerMarginHeight=8, borderStyle="full")
         formLayout = cmds.formLayout(numberOfDivisions=100)
-        importButton = cmds.button(label="Import", command=self.importSelectedMaterial)
-        importImagesCheck = cmds.checkBox("RPRImportImagesCheck",
-                                          label="Import images to project",
-                                          value=self.importImagesEnabled(),
-                                          changeCommand=self.importImagesChanged);
+        #importButton = cmds.button(label="Import", command=self.importSelectedMaterial)
+        self.downloadButtons = list()
 
         # Add the RPR logo.
         logoBackground = cmds.canvas("RPRLogoBackground", rgbValue=[0, 0, 0])
@@ -305,6 +288,13 @@ class RPRMaterialBrowser(object) :
         cmds.text(label="File name:", font="boldLabelFont")
         cmds.text("RPRFileNameText", recomputeSize=False)
         cmds.canvas(height=10)
+        cmds.text(label="Type:", font="boldLabelFont")
+        cmds.text("RPRMaterialType", recomputeSize=False)
+        cmds.canvas(height=10)
+        cmds.text(label="License:", font="boldLabelFont")
+        cmds.text("RPRMaterialLicense", recomputeSize=False)
+        cmds.canvas(height=10)
+
 
         cmds.setParent('..')
         cmds.setParent('..')
@@ -314,15 +304,21 @@ class RPRMaterialBrowser(object) :
         cmds.tabLayout(tabLayout, edit=True, tabLabel=((formLayout, 'Info')))
 
         # Lay out components within the form.
+#        cmds.formLayout(formLayout, edit=True,
+#                        attachControl=[(columnLayout, 'top', 10, logo)],
+#                        attachForm=[(logo, 'left', 8), (logo, 'right', 8), (logo, 'top', 8),
+#                                    (logoBackground, 'left', 8), (logoBackground, 'right', 8),
+#                                    (logoBackground, 'top', 8), (importButton, 'left', 10),
+#                                    (importButton, 'bottom', 10), (importButton, 'right', 10),
+#                                    (columnLayout, 'left', 10), (columnLayout, 'right', 10),
+#                                    (importImagesCheck, 'left', 10)])
+
         cmds.formLayout(formLayout, edit=True,
-                        attachControl=[(columnLayout, 'top', 10, logo),
-                                       (importImagesCheck, 'bottom', 10, importButton)],
+                        attachControl=[(columnLayout, 'top', 10, logo)],
                         attachForm=[(logo, 'left', 8), (logo, 'right', 8), (logo, 'top', 8),
                                     (logoBackground, 'left', 8), (logoBackground, 'right', 8),
-                                    (logoBackground, 'top', 8), (importButton, 'left', 10),
-                                    (importButton, 'bottom', 10), (importButton, 'right', 10),
-                                    (columnLayout, 'left', 10), (columnLayout, 'right', 10),
-                                    (importImagesCheck, 'left', 10)])
+                                    (logoBackground, 'top', 8), 
+                                    (columnLayout, 'left', 10), (columnLayout, 'right', 10)])
 
 
     # Create the preview layout.
@@ -352,27 +348,6 @@ class RPRMaterialBrowser(object) :
         cmds.tabLayout(tabLayout, edit=True, tabLabel=((flowLayout, 'Preview')))
 
 
-    # Called when the import images check box changes.
-    # -----------------------------------------------------------------------------
-    def importImagesChanged(self, *args) :
-
-        enabled = cmds.checkBox("RPRImportImagesCheck", query=True, value=True);
-        cmds.optionVar(intValue=("RPR_ImportMaterialImages", int(enabled)));
-        print("Import changed - " + str(enabled));
-
-
-    # Return true if image importing is enabled.
-    # -----------------------------------------------------------------------------
-    def importImagesEnabled(self) :
-
-        # Read the stored setting if it exists.
-        if cmds.optionVar(exists="RPR_ImportMaterialImages"):
-            return cmds.optionVar(query="RPR_ImportMaterialImages") != 0;
-
-        # Default to true.
-        return True;
-
-
     # Select a material category by index.
     # -----------------------------------------------------------------------------
     def selectCategory(self, index) :
@@ -394,11 +369,14 @@ class RPRMaterialBrowser(object) :
         # Clear the search field.
         cmds.textField(self.searchField, edit=True, text="")
 
-    def updateSelectedMaterialPanel(self, fileName, categoryName, materialName) :
+    def downloadMaterial(self, packageId) :
+        print(packageId)
+
+    def updateSelectedMaterialPanel(self, fileName, categoryName, materialName, materialType, license) :
 
         print("ML Log: selectMaterial")
 	
-        imageFileName = self.libraryPath + "/" + fileName + "/" + fileName + ".jpg"
+        imageFileName = self.getMaterialFullPath(fileName)
 		
         print("ML Log: fileName = " + fileName)
         print("ML Log: imageFileName = " + imageFileName)		
@@ -406,24 +384,32 @@ class RPRMaterialBrowser(object) :
         cmds.iconTextStaticLabel("RPRPreviewImage", edit=True, image=imageFileName)
         cmds.text("RPRCategoryText", edit=True, label=categoryName)
         cmds.text("RPRNameText", edit=True, label=materialName)
-        cmds.text("RPRFileNameText", edit=True, label=fileName + ".xml")
+        cmds.text("RPRFileNameText", edit=True, label=fileName)
+        cmds.text("RPRMaterialType", edit=True, label=materialType)
+        cmds.text("RPRMaterialLicense", edit=True, label=license)
+       
+        index = 0                
+         
+        packages = self.selectedMaterial["packages"]
+        for packageId in packages :
+            packageData = self.matlibClient.packages.get(packageId)
+            buttonName = "Import " + packageData["label"] + "( " + packageData["size"] + " )"
+            cmd = partial(self.downloadMaterial, packageId)
+            if (len(self.downloadButtons) <= index) :
+                self.downloadButtons.append(cmds.button(label=buttonName, command=cmd))
+            else :
+                cmds.button(self.downloadButtons[index], edit=True, label=buttonName, command=cmd)
+            index += 1
 
-    # Second function is introduced in order to avoid big lags on Maya 2022 on Windows which may occur on iconTextButton call with passing click callback with material parameter
+#        for
+
+    # Function is introduced in order to avoid big lags on Maya 2022 on Windows which may occur on iconTextButton call with passing click callback with material parameter
     # -----------------------------------------------------------------------------
-    def selectMaterial2(self, fileName, categoryName, materialName, materialIndex) :
-
-        self.updateSelectedMaterialPanel(fileName, categoryName, materialName)
+    def selectMaterial(self, fileName, categoryName, materialName, materialIndex, materialType, license) :
 
         self.selectedMaterial = self.materials[materialIndex]
-        self.updatePreviewLayout()
+        self.updateSelectedMaterialPanel(fileName, categoryName, materialName, materialType, license)
 
-    # Select a material and update the info an preview panels.
-    # -----------------------------------------------------------------------------
-    def selectMaterial(self, material) :
-
-        self.updateSelectedMaterialPanel(material["fileName"], material["category"]["name"], material["name"])
-
-        self.selectedMaterial = material
         self.updatePreviewLayout()
 
     # Update the height of the materials flow layout
@@ -587,10 +573,14 @@ class RPRMaterialBrowser(object) :
         materialIndex = 0
         # Add materials for the selected category.
         for material in self.materials :
-            fileName = ""
-            cmd = partial(self.selectMaterial2, fileName, self.categoryDict[material["category"]]["title"], material["title"], materialIndex)
-#            imageFileName = self.libraryPath + "/" + fileName + "/" + fileName + ".jpg"
-            imageFileName = ""
+            render_id = material["renders_order"][0]
+            fileName = render_id + ".png"
+            cmd = partial(self.selectMaterial, fileName, self.categoryDict[material["category"]]["title"], material["title"], materialIndex, material["material_type"], material["license"])
+            imageFileName = self.getMaterialFullPath(fileName)
+
+            if (not os.path.isfile(imageFileName)) :
+                 self.matlibClient.renders.download_thumbnail(render_id, None, self.pathRootThumbnail, fileName)
+
             materialName = material["title"]
 
             # Horizontal layout for small icons.
@@ -600,19 +590,17 @@ class RPRMaterialBrowser(object) :
                                columnWidth2=(self.iconSize, self.cellWidth - iconWidth - 5))
 
                 cmds.iconTextButton(style='iconOnly', image=imageFileName, width=self.iconSize,
-                                    height=self.iconSize, command=cmd,
-                                    doubleClickCommand=partial(self.importMaterial, material))
+                                    height=self.iconSize, command=cmd)
 
                 cmds.iconTextButton(style='textOnly', height=self.iconSize,
                                     label=self.getTruncatedText(materialName, self.cellWidth - iconWidth - 5),
-                                    align="left", command=partial(self.selectMaterial, material),
-                                    doubleClickCommand=partial(self.importMaterial, material))
+                                    align="left", command=partial(self.selectMaterial, material))
 
             # Vertical layout for large icons.
             else :
                 cmds.columnLayout(width=self.cellWidth, height=self.cellHeight)
                 cmds.iconTextButton(style='iconOnly', image=imageFileName, width=self.iconSize,
-                                    height=self.iconSize, command=cmd, doubleClickCommand=partial(self.importMaterial, material))
+                                    height=self.iconSize, command=cmd)
                 cmds.text(label=self.getTruncatedText(materialName, self.iconSize),
                           align="center", width=self.iconSize)
 
@@ -625,21 +613,9 @@ class RPRMaterialBrowser(object) :
 
     # Import the currently selected material into Maya.
     # -----------------------------------------------------------------------------
-    def importSelectedMaterial(self, *args) :
+    #def importSelectedMaterial(self, *args) :
+    #    self.importMaterial(self.selectedMaterial)
 
-        self.importMaterial(self.selectedMaterial)
-
-
-    # Import a material into Maya.
-    # -----------------------------------------------------------------------------
-    def importMaterial(self, material) :
-	
-        print("ML Log: importMaterial")
-        fileName = material["fileName"]
-        filePath = self.libraryPath + "/" + fileName + "/" + fileName + ".xml"
-        print("ML Log: fileName" + fileName)
-        print("ML Log: filePath" + filePath)
-        cmds.RPRXMLImport(file=filePath, importImages=self.importImagesEnabled())
 
 
     # Return the width of a text UI element given it's label string.
