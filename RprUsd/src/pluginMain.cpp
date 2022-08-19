@@ -14,7 +14,7 @@ PLUGIN_EXPORT MStatus initializePlugin(MObject obj)
 
     return ret;
 }
- 
+
 PLUGIN_EXPORT MStatus uninitializePlugin(MObject obj)
 {
     MFnPlugin plugin(obj, "AMD", PLUGIN_VERSION, "Any");

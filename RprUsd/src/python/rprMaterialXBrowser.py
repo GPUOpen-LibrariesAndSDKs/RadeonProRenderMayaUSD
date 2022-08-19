@@ -295,6 +295,8 @@ class RPRMaterialBrowser(object) :
         cmds.text("RPRMaterialLicense", recomputeSize=False)
         cmds.canvas(height=10)
 
+        self.downloadButtonLayout = cmds.columnLayout(rowSpacing=5, parent=formLayout)
+
 
         cmds.setParent('..')
         cmds.setParent('..')
@@ -318,7 +320,10 @@ class RPRMaterialBrowser(object) :
                         attachForm=[(logo, 'left', 8), (logo, 'right', 8), (logo, 'top', 8),
                                     (logoBackground, 'left', 8), (logoBackground, 'right', 8),
                                     (logoBackground, 'top', 8), 
-                                    (columnLayout, 'left', 10), (columnLayout, 'right', 10)])
+                                    (columnLayout, 'left', 10), (columnLayout, 'right', 10),
+                                    (self.downloadButtonLayout, 'left', 10),
+                                    (self.downloadButtonLayout, 'bottom', 10), 
+                                    (self.downloadButtonLayout, 'right', 10)])
 
 
     # Create the preview layout.
@@ -369,8 +374,16 @@ class RPRMaterialBrowser(object) :
         # Clear the search field.
         cmds.textField(self.searchField, edit=True, text="")
 
-    def downloadMaterial(self, packageId) :
-        print(packageId)
+    def downloadMaterial(self, *args) :
+        package = args[0]
+        print(package)
+        packageId = package["id"]
+        print("ML Log: start downloading packageId=" + packageId)
+        
+        path = cmds.fileDialog2(startingDirectory=package["file"], fileFilter="Mtlx Zip-Archive (*.zip)")
+        if path is not None :
+            print (path[0])
+            self.matlibClient.packages.download(packageId, None, os.path.dirname(path[0]), os.path.basename(path[0]))
 
     def updateSelectedMaterialPanel(self, fileName, categoryName, materialName, materialType, license) :
 
@@ -391,17 +404,28 @@ class RPRMaterialBrowser(object) :
         index = 0                
          
         packages = self.selectedMaterial["packages"]
+
+        packageDataList = list()
         for packageId in packages :
-            packageData = self.matlibClient.packages.get(packageId)
-            buttonName = "Import " + packageData["label"] + "( " + packageData["size"] + " )"
-            cmd = partial(self.downloadMaterial, packageId)
+            packageDataList.append(self.matlibClient.packages.get(packageId))
+
+        def sortAccordingPackageSize(package) :
+            numberDirtyString = package["size"]
+            return float(''.join(c for c in numberDirtyString if (c.isdigit() or c =='.')))
+            
+        packageDataList.sort(key=sortAccordingPackageSize)
+
+        for package in packageDataList:
+            buttonName = "Import " + package["label"] + "( " + package["size"] + " )"
+            cmd = partial(self.downloadMaterial, package)
             if (len(self.downloadButtons) <= index) :
-                self.downloadButtons.append(cmds.button(label=buttonName, command=cmd))
+                self.downloadButtons.append(cmds.button(label=buttonName, width=150, height=30, parent=self.downloadButtonLayout, command=cmd))
             else :
-                cmds.button(self.downloadButtons[index], edit=True, label=buttonName, command=cmd)
+                cmds.button(self.downloadButtons[index], edit=True, label=buttonName, command=cmd, visible=True)
             index += 1
 
-#        for
+        for indexToHide in range(index, len(self.downloadButtons)) :
+            cmds.button(self.downloadButtons[indexToHide], edit=True, visible=False)
 
     # Function is introduced in order to avoid big lags on Maya 2022 on Windows which may occur on iconTextButton call with passing click callback with material parameter
     # -----------------------------------------------------------------------------
@@ -454,7 +478,6 @@ class RPRMaterialBrowser(object) :
     # -----------------------------------------------------------------------------
     def updatePreviewLayout(self) :
 
-        print("ML Log: updatePreviewLayout")
         # Determine the size of the preview area.
         width = cmds.flowLayout("RPRPreviewArea", query=True, width=True)
         height = cmds.flowLayout("RPRPreviewArea", query=True, height=True)
