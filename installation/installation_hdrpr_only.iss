@@ -41,13 +41,18 @@ procedure ModifyMayaEnvFile(maya_version : String; action : String);
 var
   ResultCode: Integer;
 begin
+  //MsgBox('action: ' + action);
+  //MsgBox('ExpandConstant('{app}\hdRPR');
+
   if Exec(ExpandConstant('{app}\MayaEnvModifier.exe'), 
-      ExpandConstant(action + ' ' + '"{app}"'), '', SW_SHOW, ewWaitUntilTerminated, ResultCode)
+      ExpandConstant(action + ' ' + '"{app}\hdRPR"'), '', SW_SHOW, ewWaitUntilTerminated, ResultCode)
   then 
   begin
     if not (ResultCode = 0) then
       MsgBox('Internal Setup Error: Maya.env file has not been modified! ' + maya_version, mbInformation, MB_OK);
   end;
+
+
 end;
 
 procedure CurStepChanged(CurStep: TSetupStep);
@@ -60,7 +65,7 @@ end;
 
 procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
 begin
-  if CurUninstallStep = usPostUninstall then
+  if CurUninstallStep = usUninstall then
   begin
     ModifyMayaEnvFile('2023', '-remove');
   end
