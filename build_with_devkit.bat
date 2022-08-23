@@ -36,6 +36,7 @@ copy /Y RprUsd\mod\rprUsd.mod Build_RPRUsdInstall\RprUsd\rprUsd.mod
 echo Building Modifier...
 devenv installation\ModModifier\ModModifier.sln /Build Release
 copy /Y installation\ModModifier\x64\Release\MayaEnvModifier.exe Build_RPRUsdInstall\MayaEnvModifier.exe
+copy /Y installation\ModModifier\x64\Release\RprUsdModModifier.exe Build_RPRUsdInstall\RprUsdModModifier.exe
 
 echo Building Installer...
 cd installation

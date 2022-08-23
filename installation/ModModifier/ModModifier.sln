@@ -7,6 +7,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ModModifier", "ModModifier.
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MayaEnvModifier", "..\MayaEnvModifier\MayaEnvModifier.vcxproj", "{C1AD6F19-D63C-4CDD-9B47-9430E2F7D36A}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RprUsdModModifier", "..\RprUsdModModifier\RprUsdModModifier.vcxproj", "{54BF711D-F3BF-4667-AE93-174F0A40F2CD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -31,6 +33,14 @@ Global
 		{C1AD6F19-D63C-4CDD-9B47-9430E2F7D36A}.Release|x64.Build.0 = Release|x64
 		{C1AD6F19-D63C-4CDD-9B47-9430E2F7D36A}.Release|x86.ActiveCfg = Release|Win32
 		{C1AD6F19-D63C-4CDD-9B47-9430E2F7D36A}.Release|x86.Build.0 = Release|Win32
+		{54BF711D-F3BF-4667-AE93-174F0A40F2CD}.Debug|x64.ActiveCfg = Debug|x64
+		{54BF711D-F3BF-4667-AE93-174F0A40F2CD}.Debug|x64.Build.0 = Debug|x64
+		{54BF711D-F3BF-4667-AE93-174F0A40F2CD}.Debug|x86.ActiveCfg = Debug|Win32
+		{54BF711D-F3BF-4667-AE93-174F0A40F2CD}.Debug|x86.Build.0 = Debug|Win32
+		{54BF711D-F3BF-4667-AE93-174F0A40F2CD}.Release|x64.ActiveCfg = Release|x64
+		{54BF711D-F3BF-4667-AE93-174F0A40F2CD}.Release|x64.Build.0 = Release|x64
+		{54BF711D-F3BF-4667-AE93-174F0A40F2CD}.Release|x86.ActiveCfg = Release|Win32
+		{54BF711D-F3BF-4667-AE93-174F0A40F2CD}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
