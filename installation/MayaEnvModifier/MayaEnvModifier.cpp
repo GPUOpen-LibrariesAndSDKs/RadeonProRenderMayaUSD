@@ -2,6 +2,9 @@
 //
 #define _CRT_SECURE_NO_WARNINGS
 
+#include <windows.h>
+#include <shlobj.h>
+
 #include <iostream>
 
 #include <string>
@@ -49,8 +52,29 @@ int main(int argc, char* argv[] )
 	const std::string cachePath = std::string(std::getenv("LOCALAPPDATA")) + "\\RadeonProRender\\Maya\\USD\\";
 	const std::string cachePathString = "HDRPR_CACHE_PATH_OVERRIDE=" + cachePath;
 
+	PWSTR ppszPath;    // variable to receive the path memory block pointer.
 
-	const std::string mayaEnvFilePath = std::string(std::getenv("USERPROFILE")) + "\\Documents\\Maya\\" + mayaVersion + "\\Maya.env";
+	HRESULT hr = SHGetKnownFolderPath(FOLDERID_Documents, 0, NULL, &ppszPath);
+
+	std::wstring myPath;
+	if (SUCCEEDED(hr)) 
+	{
+		myPath = ppszPath;      // make a local copy of the path
+	}
+	else
+	{
+		return -1;
+	}
+
+	CoTaskMemFree(ppszPath);    // free up the path memory block
+
+	// We support only ascii path for now (not Unicode)
+	std::string mayaEnvFilePath;
+
+	for (char x : myPath)
+		mayaEnvFilePath += x;
+
+	mayaEnvFilePath += "\\Maya\\" + mayaVersion + "\\Maya.env";
 
 	std::cout << "Maya.env filepath to open: " << mayaEnvFilePath.c_str() << std::endl;
 
