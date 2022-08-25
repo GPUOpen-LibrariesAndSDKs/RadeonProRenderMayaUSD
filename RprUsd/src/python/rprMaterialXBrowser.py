@@ -374,21 +374,29 @@ class RPRMaterialBrowser(object) :
         # Clear the search field.
         cmds.textField(self.searchField, edit=True, text="")
 
+    def downloadPackageCallback(self, size, length) :
+        
+        percent = int(100 * size / length)
+        cmds.progressWindow( edit=True, progress=percent, status=('Downloading: ' + str(percent) + '%' ) )
+
+        return True
+
     def downloadMaterial(self, *args) :
         package = args[0]
-        print(package)
+
         packageId = package["id"]
         print("ML Log: start downloading packageId=" + packageId)
         
         path = cmds.fileDialog2(startingDirectory=package["file"], fileFilter="Mtlx Zip-Archive (*.zip)")
+
+        cmds.progressWindow( title='Downloading Package',progress=0,status='downloading: 0%',isInterruptable=False)
         if path is not None :
-            print (path[0])
-            self.matlibClient.packages.download(packageId, None, os.path.dirname(path[0]), os.path.basename(path[0]))
+            self.matlibClient.packages.download(packageId, self.downloadPackageCallback, os.path.dirname(path[0]), os.path.basename(path[0]))
+                                                                                                               
+        cmds.progressWindow(endProgress=1)
 
     def updateSelectedMaterialPanel(self, fileName, categoryName, materialName, materialType, license) :
 
-        print("ML Log: selectMaterial")
-	
         imageFileName = self.getMaterialFullPath(fileName)
 		
         print("ML Log: fileName = " + fileName)
