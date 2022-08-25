@@ -594,6 +594,8 @@ class RPRMaterialBrowser(object) :
         cmds.flowLayout("RPRMaterialsFlow", columnSpacing=0, wrap=True)
 
         materialIndex = 0
+        progressBarShown = False       
+
         # Add materials for the selected category.
         for material in self.materials :
             render_id = material["renders_order"][0]
@@ -601,8 +603,18 @@ class RPRMaterialBrowser(object) :
             cmd = partial(self.selectMaterial, fileName, self.categoryDict[material["category"]]["title"], material["title"], materialIndex, material["material_type"], material["license"])
             imageFileName = self.getMaterialFullPath(fileName)
 
+            # Checks if end condition has been reached
+
             if (not os.path.isfile(imageFileName)) :
+                 if (not progressBarShown) : 
+                     cmds.progressWindow( title='Opening category',progress=0,status='opening: 0%',isInterruptable=False )
+                     progressBarShown = True 
                  self.matlibClient.renders.download_thumbnail(render_id, None, self.pathRootThumbnail, fileName)
+
+            if (progressBarShown) : 
+                percent = int(100 * materialIndex / len(self.materials))
+                cmds.progressWindow( edit=True, progress=percent, status=('opening: ' + str(percent) + '%' ) )
+
 
             materialName = material["title"]
 
@@ -628,8 +640,10 @@ class RPRMaterialBrowser(object) :
                           align="center", width=self.iconSize)
 
             cmds.setParent('..')
-            materialIndex = materialIndex + 1
+            materialIndex += 1
 
+        if (progressBarShown) : 
+            cmds.progressWindow( endProgress=1 )
         # Perform an initial layout update.
         self.updateMaterialsLayout()
 
