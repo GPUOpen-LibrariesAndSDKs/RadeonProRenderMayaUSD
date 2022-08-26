@@ -199,7 +199,7 @@ class RPRMaterialBrowser(object) :
         cmds.setParent('..')
 
         # Add help text.
-        helpText = cmds.text(label="To import a material, double click it, or select it and click the Import button.")
+        helpText = cmds.text(label="Select material, choose package you wish and click the Download button.")
 
         # Add the background canvas.
         bg = cmds.canvas(rgbValue=self.backgroundColor)
@@ -267,9 +267,7 @@ class RPRMaterialBrowser(object) :
         print("ML Log: createInfoLayout")
         # Create tab and form layouts.
         tabLayout = cmds.tabLayout(innerMarginWidth=8, innerMarginHeight=8, borderStyle="full")
-        formLayout = cmds.formLayout(numberOfDivisions=100)
-        #importButton = cmds.button(label="Import", command=self.importSelectedMaterial)
-        self.downloadButtons = list()
+        formLayout = cmds.formLayout(numberOfDivisions=100)       
 
         # Add the RPR logo.
         logoBackground = cmds.canvas("RPRLogoBackground", rgbValue=[0, 0, 0])
@@ -297,6 +295,8 @@ class RPRMaterialBrowser(object) :
 
         self.downloadButtonLayout = cmds.columnLayout(rowSpacing=5, parent=formLayout)
 
+        self.downloadPackageDropdown = cmds.optionMenu(parent = self.downloadButtonLayout)
+        downloadButton = cmds.button(label="Download", parent = self.downloadButtonLayout, w=100, h=30, command=self.downloadMaterial)
 
         cmds.setParent('..')
         cmds.setParent('..')
@@ -304,16 +304,6 @@ class RPRMaterialBrowser(object) :
 
         # Assign the form to the tab.
         cmds.tabLayout(tabLayout, edit=True, tabLabel=((formLayout, 'Info')))
-
-        # Lay out components within the form.
-#        cmds.formLayout(formLayout, edit=True,
-#                        attachControl=[(columnLayout, 'top', 10, logo)],
-#                        attachForm=[(logo, 'left', 8), (logo, 'right', 8), (logo, 'top', 8),
-#                                    (logoBackground, 'left', 8), (logoBackground, 'right', 8),
-#                                    (logoBackground, 'top', 8), (importButton, 'left', 10),
-#                                    (importButton, 'bottom', 10), (importButton, 'right', 10),
-#                                    (columnLayout, 'left', 10), (columnLayout, 'right', 10),
-#                                    (importImagesCheck, 'left', 10)])
 
         cmds.formLayout(formLayout, edit=True,
                         attachControl=[(columnLayout, 'top', 10, logo)],
@@ -382,8 +372,12 @@ class RPRMaterialBrowser(object) :
         return True
 
     def downloadMaterial(self, *args) :
-        package = args[0]
+        menuItems = cmds.optionMenu(self.downloadPackageDropdown, q=True, itemListLong=True) # itemListLong returns the children
+        index = cmds.optionMenu(self.downloadPackageDropdown, q=True, select=True) - 1
 
+        print(index)
+
+        package = self.packageDataList[index]
         packageId = package["id"]
         print("ML Log: start downloading packageId=" + packageId)
         
@@ -399,8 +393,6 @@ class RPRMaterialBrowser(object) :
 
         imageFileName = self.getMaterialFullPath(fileName)
 		
-        print("ML Log: fileName = " + fileName)
-        print("ML Log: imageFileName = " + imageFileName)		
 
         cmds.iconTextStaticLabel("RPRPreviewImage", edit=True, image=imageFileName)
         cmds.text("RPRCategoryText", edit=True, label=categoryName)
@@ -408,32 +400,31 @@ class RPRMaterialBrowser(object) :
         cmds.text("RPRFileNameText", edit=True, label=fileName)
         cmds.text("RPRMaterialType", edit=True, label=materialType)
         cmds.text("RPRMaterialLicense", edit=True, label=license)
-       
-        index = 0                
-         
+            
         packages = self.selectedMaterial["packages"]
 
-        packageDataList = list()
+        self.packageDataList = list()
         for packageId in packages :
-            packageDataList.append(self.matlibClient.packages.get(packageId))
+            self.packageDataList.append(self.matlibClient.packages.get(packageId))
 
         def sortAccordingPackageSize(package) :
             numberDirtyString = package["size"]
             return float(''.join(c for c in numberDirtyString if (c.isdigit() or c =='.')))
             
-        packageDataList.sort(key=sortAccordingPackageSize)
+        self.packageDataList.sort(key=sortAccordingPackageSize)
 
-        for package in packageDataList:
-            buttonName = "Import " + package["label"] + "( " + package["size"] + " )"
+        menuItems = cmds.optionMenu(self.downloadPackageDropdown, q=True, itemListLong=True) # itemListLong returns the children
+        if menuItems:
+            cmds.deleteUI(menuItems)
+
+        index = 0
+        for package in self.packageDataList:
+            menuItemName = "Package: " + package["label"] + " ( " + package["size"] + " )"
             cmd = partial(self.downloadMaterial, package)
-            if (len(self.downloadButtons) <= index) :
-                self.downloadButtons.append(cmds.button(label=buttonName, width=150, height=30, parent=self.downloadButtonLayout, command=cmd))
-            else :
-                cmds.button(self.downloadButtons[index], edit=True, label=buttonName, command=cmd, visible=True)
-            index += 1
 
-        for indexToHide in range(index, len(self.downloadButtons)) :
-            cmds.button(self.downloadButtons[indexToHide], edit=True, visible=False)
+            cmds.menuItem(p=self.downloadPackageDropdown, l=menuItemName, data=index)
+
+            index += 1
 
     # Function is introduced in order to avoid big lags on Maya 2022 on Windows which may occur on iconTextButton call with passing click callback with material parameter
     # -----------------------------------------------------------------------------
