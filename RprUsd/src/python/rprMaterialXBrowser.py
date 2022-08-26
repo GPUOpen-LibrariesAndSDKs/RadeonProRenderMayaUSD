@@ -264,7 +264,6 @@ class RPRMaterialBrowser(object) :
     # -----------------------------------------------------------------------------
     def createInfoLayout(self) :
 
-        print("ML Log: createInfoLayout")
         # Create tab and form layouts.
         tabLayout = cmds.tabLayout(innerMarginWidth=8, innerMarginHeight=8, borderStyle="full")
         formLayout = cmds.formLayout(numberOfDivisions=100)       
@@ -555,11 +554,9 @@ class RPRMaterialBrowser(object) :
     # -----------------------------------------------------------------------------
     def searchMaterials(self, *args) :
 
-        print("ML Log: searchMaterials")
         # Convert the search string to lower
         # case so the search is not case sensitive.
         searchString = cmds.textField(self.searchField, query=True, text=True).lower()
-        print("ML Log: searchString = " + searchString)
 		
         # Check that the string is long enough
         # to search and not whitespace.
@@ -569,19 +566,16 @@ class RPRMaterialBrowser(object) :
         # Set current materials to the search result.
         self.materials = []
 
-        for category in self.manifest["categories"] :
-            for material in category["materials"] :
-                if (searchString in material["name"].lower()) :
-                    self.materials.append(material)
+        for material in self.materialListData:
+            if (searchString in material["title"].lower()) :
+                self.materials.append(material)
 
         # Repopulate the material view.
         self.populateMaterials()
 
-
     # Populate the materials view with a list of materials.
     # -----------------------------------------------------------------------------
     def populateMaterials(self) :
-        print("ML Log: populateMaterials")	
         # Remove any existing materials.
         if (cmds.layout("RPRMaterialsFlow", exists=True)) :
             cmds.deleteUI("RPRMaterialsFlow", layout=True)
