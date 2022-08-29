@@ -121,8 +121,8 @@ class RPRMaterialBrowser(object) :
         cmds.setParent('..')
 
         # Select the first material of the first category.
-        #self.selectMaterial(self.manifest["categories"][0]["materials"][0])
         self.selectCategory(0)
+        self.selectMaterial(0)
 
         # Show the material browser window.
         cmds.showWindow(self.window)
@@ -170,6 +170,9 @@ class RPRMaterialBrowser(object) :
         cmds.setParent('..')
         cmds.setParent('..')
 
+    def getMaterialFileName(self, material) :
+        render_id = material["renders_order"][0]
+        return render_id + ".png"
 
     def getMaterialFullPath(self, fileName) :
         return os.path.join(self.pathRootThumbnail, fileName)
@@ -390,9 +393,12 @@ class RPRMaterialBrowser(object) :
 
     def updateSelectedMaterialPanel(self, fileName, categoryName, materialName, materialType, license) :
 
+        def sortAccordingPackageSize(package) :
+            numberDirtyString = package["size"]
+            return float(''.join(c for c in numberDirtyString if (c.isdigit() or c =='.')))
+
         imageFileName = self.getMaterialFullPath(fileName)
 		
-
         cmds.iconTextStaticLabel("RPRPreviewImage", edit=True, image=imageFileName)
         cmds.text("RPRCategoryText", edit=True, label=categoryName)
         cmds.text("RPRNameText", edit=True, label=materialName)
@@ -400,16 +406,10 @@ class RPRMaterialBrowser(object) :
         cmds.text("RPRMaterialType", edit=True, label=materialType)
         cmds.text("RPRMaterialLicense", edit=True, label=license)
             
-        packages = self.selectedMaterial["packages"]
-
-        self.packageDataList = list()
-        for packageId in packages :
-            self.packageDataList.append(self.matlibClient.packages.get(packageId))
-
-        def sortAccordingPackageSize(package) :
-            numberDirtyString = package["size"]
-            return float(''.join(c for c in numberDirtyString if (c.isdigit() or c =='.')))
-            
+        params = dict()
+        params["material"] = self.selectedMaterial["id"]
+        self.packageDataList = self.matlibClient.packages.get_list(limit=100, offset=0, params = params)
+          
         self.packageDataList.sort(key=sortAccordingPackageSize)
 
         menuItems = cmds.optionMenu(self.downloadPackageDropdown, q=True, itemListLong=True) # itemListLong returns the children
@@ -425,12 +425,13 @@ class RPRMaterialBrowser(object) :
 
             index += 1
 
-    # Function is introduced in order to avoid big lags on Maya 2022 on Windows which may occur on iconTextButton call with passing click callback with material parameter
-    # -----------------------------------------------------------------------------
-    def selectMaterial(self, fileName, categoryName, materialName, materialIndex, materialType, license) :
+    def selectMaterial(self, materialIndex) :
 
         self.selectedMaterial = self.materials[materialIndex]
-        self.updateSelectedMaterialPanel(fileName, categoryName, materialName, materialType, license)
+        material = self.selectedMaterial
+        fileName = self.getMaterialFileName(self.selectedMaterial)
+
+        self.updateSelectedMaterialPanel(fileName, self.categoryDict[material["category"]]["title"], material["title"], material["material_type"], material["license"])
 
         self.updatePreviewLayout()
 
@@ -591,12 +592,12 @@ class RPRMaterialBrowser(object) :
 
         # Add materials for the selected category.
         for material in self.materials :
-            render_id = material["renders_order"][0]
-            fileName = render_id + ".png"
-            cmd = partial(self.selectMaterial, fileName, self.categoryDict[material["category"]]["title"], material["title"], materialIndex, material["material_type"], material["license"])
+            fileName = self.getMaterialFileName(material)
+            cmd = partial(self.selectMaterial, materialIndex)
             imageFileName = self.getMaterialFullPath(fileName)
 
             # Checks if end condition has been reached
+            render_id = material["renders_order"][0]
 
             if (not os.path.isfile(imageFileName)) :
                  if (not progressBarShown) : 
