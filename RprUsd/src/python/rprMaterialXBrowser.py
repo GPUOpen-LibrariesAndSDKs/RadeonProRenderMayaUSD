@@ -75,9 +75,15 @@ class RPRMaterialBrowser(object) :
         for category in self.categoryListData :
             self.categoryDict[category["id"]] = category
 
+        self.tags = self.matlibClient.tags.get_list(maxElementCount, 0)
+
+        self.tagDict = dict()
+        for tag in self.tags :
+            self.tagDict[tag["id"]] = tag["title"]
+
         self.materialListData = self.matlibClient.materials.get_list(maxElementCount, 0)
         self.materialDict = dict()
-
+      
         self.materialByCategory = dict()
 
         for material in self.materialListData :
@@ -570,6 +576,11 @@ class RPRMaterialBrowser(object) :
         for material in self.materialListData:
             if (searchString in material["title"].lower()) :
                 self.materials.append(material)
+            else :
+                for tagId in material["tags"] :
+                    if (searchString == self.tagDict[tagId].lower()) :
+                        self.materials.append(material)
+                        break;
 
         # Repopulate the material view.
         self.populateMaterials()
