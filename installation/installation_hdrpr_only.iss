@@ -34,34 +34,64 @@ Type: filesandordirs; Name: "{app}"
 [Code]
 procedure InitializeWizard();
 begin
-  WizardForm.LicenseAcceptedRadio.Checked := True;
+  WizardForm.LicenseAcceptedRadio.Checked := True;  
 end;
 
 procedure ModifyMayaEnvFile(maya_version : String; action : String);
 var
-  ResultCode: Integer;
+  resultCode: Integer;
 begin
   if Exec(ExpandConstant('{app}\MayaEnvModifier.exe'), 
-      ExpandConstant(action + ' ' + '"{app}"'), '', SW_SHOW, ewWaitUntilTerminated, ResultCode)
+      ExpandConstant(action + ' ' + '"{app}\hdRPR"'), '', SW_SHOW, ewWaitUntilTerminated, resultCode)
   then 
   begin
-    if not (ResultCode = 0) then
+    if not (resultCode = 0) then
       MsgBox('Internal Setup Error: Maya.env file has not been modified! ' + maya_version, mbInformation, MB_OK);
   end;
+
 end;
 
 procedure CurStepChanged(CurStep: TSetupStep);
+var
+  mayaModulePath : String;
+  resultCode : Integer;
+  mayaVersion : String;
 begin
+  mayaVersion := '2023';
+
   if CurStep = ssPostInstall then
   begin
-    ModifyMayaEnvFile('2023', '-add');
+    ModifyMayaEnvFile(MayaVersion, '-add');
+
+    mayaModulePath := ExpandConstant('{commoncf64}\Autodesk Shared\modules\maya\' + mayaVersion);
+
+    if Exec(ExpandConstant('{app}\rprUsdModModifier.exe'), 
+        ExpandConstant('"{app}\rprUsd\rprUsd.mod" "{app}\rprUsd"'), '', SW_SHOW, ewWaitUntilTerminated, resultCode)
+    then 
+    begin
+      if not (resultCode = 0) then
+        MsgBox('Internal Setup Error: rprUsd.mod file has not been modified! ' + mayaVersion, mbInformation, MB_OK);
+    end;
+    
+    if DirExists(mayaModulePath) then
+      if not FileCopy(ExpandConstant('{app}\rprUsd\rprUsd.mod'), mayaModulePath + '\rprUsd.mod', false)
+      then
+        MsgBox('Setup Error: RprUsd.mod file could not be copied to Maya''s modules directory! ' + mayaVersion, mbInformation, MB_OK);
+
   end;
 end;
 
 procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
+var
+  path : String;
+  mayaVersion : String;
 begin
-  if CurUninstallStep = usPostUninstall then
+  mayaVersion := '2023';
+  if CurUninstallStep = usUninstall then
   begin
-    ModifyMayaEnvFile('2023', '-remove');
+    path := ExpandConstant('{commoncf64}\Autodesk Shared\modules\maya\' + mayaVersion + '\rprUsd.mod');
+    DeleteFile(path);
+
+    ModifyMayaEnvFile(mayaVersion, '-remove');
   end
 end;
