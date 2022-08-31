@@ -18,6 +18,7 @@ import math
 from functools import partial
 from sys import platform
 from client import MatlibClient
+import zipfile
 
 
 # Show the material browser window.
@@ -56,7 +57,6 @@ class RPRMaterialBrowser(object) :
     # Show the material browser.
     # -----------------------------------------------------------------------------
     def show(self) :
-        print("ML Log: Begin loading library")
 
         #load all material at one time. It's possible to rework to load in chunks if needs
         maxElementCount = 10000
@@ -94,14 +94,12 @@ class RPRMaterialBrowser(object) :
                 self.materialByCategory[categoryId] = list()
             self.materialByCategory[categoryId].append(material)
               	     		
-        print("ML Log: Begin creating layout")
         self.createLayout()
 
     # Create the browser layout.
     # -----------------------------------------------------------------------------
     def createLayout(self) :
 
-        print("ML Log: createLayout")
         # Delete any existing window.
         if (cmds.window("RPRMaterialBrowserWindow", exists = True)) :
             cmds.deleteUI("RPRMaterialBrowserWindow")
@@ -141,7 +139,6 @@ class RPRMaterialBrowser(object) :
     # -----------------------------------------------------------------------------
     def createCategoriesLayout(self) :
 
-        print("ML Log: createCategoriesLayout")
         # Create tab, form and scroll layouts.
         tabLayout = cmds.tabLayout(innerMarginWidth=5, innerMarginHeight=15, borderStyle="full")
         formLayout = cmds.formLayout(numberOfDivisions=100)
@@ -187,7 +184,6 @@ class RPRMaterialBrowser(object) :
     # -----------------------------------------------------------------------------
     def createMaterialsLayout(self) :
 	
-        print("ML Log: createMaterialsLayout")
         # Create the tab and form layouts.
         self.materialsTab = cmds.tabLayout(borderStyle="full")
         self.materialsForm = cmds.formLayout(numberOfDivisions=100)
@@ -248,7 +244,6 @@ class RPRMaterialBrowser(object) :
     # -----------------------------------------------------------------------------
     def createSelectedLayout(self) :
 
-        print("ML Log: createSelectedLayout")
         # Create a pane layout to contain material info and preview.
         paneLayout = cmds.paneLayout("RPRSelectedPane", configuration='horizontal2', staticHeightPane=2,
                                      separatorMovedCommand=self.updatePreviewLayout)
@@ -355,7 +350,6 @@ class RPRMaterialBrowser(object) :
     # -----------------------------------------------------------------------------
     def selectCategory(self, index) :
 	
-        print("ML Log: selectCategory")
         # Populate the materials view from the selected category.
         self.materials = self.materialByCategory[self.categoryListData[index]["id"]]
         self.populateMaterials()
@@ -383,17 +377,31 @@ class RPRMaterialBrowser(object) :
         menuItems = cmds.optionMenu(self.downloadPackageDropdown, q=True, itemListLong=True) # itemListLong returns the children
         index = cmds.optionMenu(self.downloadPackageDropdown, q=True, select=True) - 1
 
-        print(index)
-
         package = self.packageDataList[index]
         packageId = package["id"]
-        print("ML Log: start downloading packageId=" + packageId)
         
-        path = cmds.fileDialog2(startingDirectory=package["file"], fileFilter="Mtlx Zip-Archive (*.zip)")
-
+        optionVarNameRecentDirectory = "RprUsd_DownloadPackageRecentDirectory"
+        previousDirectoryUsed = ""
+        if cmds.optionVar(exists=optionVarNameRecentDirectory) :
+            previousDirectoryUsed = cmds.optionVar(query=optionVarNameRecentDirectory)
+        
+        path = cmds.fileDialog2(cap="Select A Directory", startingDirectory=previousDirectoryUsed, fm=3)
         cmds.progressWindow( title='Downloading Package',progress=0,status='downloading: 0%',isInterruptable=False)
         if path is not None :
-            self.matlibClient.packages.download(packageId, self.downloadPackageCallback, os.path.dirname(path[0]), os.path.basename(path[0]))
+            print("ML Log: start downloading packageId=" + packageId)
+            self.matlibClient.packages.download(packageId, self.downloadPackageCallback, path[0], package["file"])
+            cmds.optionVar(sv=(optionVarNameRecentDirectory, path[0]))
+
+            zipFileName = os.path.join(path[0], package["file"])
+        
+            fullPathToExtract = os.path.join(path[0], os.path.splitext(package["file"])[0])
+            os.makedirs(fullPathToExtract, exist_ok=True)
+
+            #unzip
+            with zipfile.ZipFile(zipFileName, 'r') as zip_ref:
+                zip_ref.extractall(fullPathToExtract)
+            # remnove zip-archive
+            os.remove(zipFileName)
                                                                                                                
         cmds.progressWindow(endProgress=1)
 
