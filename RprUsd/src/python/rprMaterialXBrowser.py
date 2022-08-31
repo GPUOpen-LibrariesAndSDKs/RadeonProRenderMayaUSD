@@ -134,7 +134,7 @@ class RPRMaterialBrowser(object) :
         # Initialize the layout.
         self.initializeLayout();
 
-        cmds.dockControl(content=self.window, fl=True, area="bottom")
+        cmds.dockControl( "Radeon ProRender MaterialX Browser", content=self.window, fl=True, area="bottom")
     # Create the material categories layout.
     # -----------------------------------------------------------------------------
     def createCategoriesLayout(self) :
@@ -642,7 +642,7 @@ class RPRMaterialBrowser(object) :
 
                 cmds.iconTextButton(style='textOnly', height=self.iconSize,
                                     label=self.getTruncatedText(materialName, self.cellWidth - iconWidth - 5),
-                                    align="left", command=partial(self.selectMaterial, material))
+                                    align="left", command=cmd)
 
             # Vertical layout for large icons.
             else :
