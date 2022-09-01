@@ -52,29 +52,44 @@ int main(int argc, char* argv[] )
 	const std::string cachePath = std::string(std::getenv("LOCALAPPDATA")) + "\\RadeonProRender\\Maya\\USD\\";
 	const std::string cachePathString = "HDRPR_CACHE_PATH_OVERRIDE=" + cachePath;
 
-	PWSTR ppszPath;    // variable to receive the path memory block pointer.
-
-	HRESULT hr = SHGetKnownFolderPath(FOLDERID_Documents, 0, NULL, &ppszPath);
-
-	std::wstring myPath;
-	if (SUCCEEDED(hr)) 
-	{
-		myPath = ppszPath;      // make a local copy of the path
-	}
-	else
-	{
-		return -1;
-	}
-
-	CoTaskMemFree(ppszPath);    // free up the path memory block
-
 	// We support only ascii path for now (not Unicode)
 	std::string mayaEnvFilePath;
 
-	for (char x : myPath)
-		mayaEnvFilePath += x;
 
-	mayaEnvFilePath += "\\Maya\\" + mayaVersion + "\\Maya.env";
+	char* mayaAppDirEnvVarValue = std::getenv("MAYA_APP_DIR");
+	std::string mayaAppDirEnvVarValueString;
+	if (mayaAppDirEnvVarValue != nullptr)
+	{
+		mayaAppDirEnvVarValueString = mayaAppDirEnvVarValue;
+	}
+
+	if (mayaAppDirEnvVarValueString.empty())
+	{
+		PWSTR ppszPath;    // variable to receive the path memory block pointer.
+
+		HRESULT hr = SHGetKnownFolderPath(FOLDERID_Documents, 0, NULL, &ppszPath);
+
+		std::wstring myPath;
+		if (SUCCEEDED(hr))
+		{
+			myPath = ppszPath;      // make a local copy of the path
+		}
+		else
+		{
+			return -1;
+		}
+
+		CoTaskMemFree(ppszPath);    // free up the path memory block
+
+		for (wchar_t x : myPath)
+			mayaEnvFilePath += (char)x;
+
+		mayaEnvFilePath += "\\Maya\\" + mayaVersion + "\\Maya.env";
+	}
+	else
+	{
+		mayaEnvFilePath = mayaAppDirEnvVarValueString + "\\" + mayaVersion + "\\Maya.env";
+	}
 
 	std::cout << "Maya.env filepath to open: " << mayaEnvFilePath.c_str() << std::endl;
 
