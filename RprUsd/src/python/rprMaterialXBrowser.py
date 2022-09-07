@@ -18,6 +18,7 @@ import math
 from functools import partial
 from sys import platform
 from client import MatlibClient
+import zipfile
 
 
 # Show the material browser window.
@@ -56,7 +57,6 @@ class RPRMaterialBrowser(object) :
     # Show the material browser.
     # -----------------------------------------------------------------------------
     def show(self) :
-        print("ML Log: Begin loading library")
 
         #load all material at one time. It's possible to rework to load in chunks if needs
         maxElementCount = 10000
@@ -75,9 +75,15 @@ class RPRMaterialBrowser(object) :
         for category in self.categoryListData :
             self.categoryDict[category["id"]] = category
 
+        self.tags = self.matlibClient.tags.get_list(maxElementCount, 0)
+
+        self.tagDict = dict()
+        for tag in self.tags :
+            self.tagDict[tag["id"]] = tag["title"]
+
         self.materialListData = self.matlibClient.materials.get_list(maxElementCount, 0)
         self.materialDict = dict()
-
+      
         self.materialByCategory = dict()
 
         for material in self.materialListData :
@@ -88,14 +94,12 @@ class RPRMaterialBrowser(object) :
                 self.materialByCategory[categoryId] = list()
             self.materialByCategory[categoryId].append(material)
               	     		
-        print("ML Log: Begin creating layout")
         self.createLayout()
 
     # Create the browser layout.
     # -----------------------------------------------------------------------------
     def createLayout(self) :
 
-        print("ML Log: createLayout")
         # Delete any existing window.
         if (cmds.window("RPRMaterialBrowserWindow", exists = True)) :
             cmds.deleteUI("RPRMaterialBrowserWindow")
@@ -121,8 +125,8 @@ class RPRMaterialBrowser(object) :
         cmds.setParent('..')
 
         # Select the first material of the first category.
-        #self.selectMaterial(self.manifest["categories"][0]["materials"][0])
         self.selectCategory(0)
+        self.selectMaterial(0)
 
         # Show the material browser window.
         cmds.showWindow(self.window)
@@ -130,12 +134,11 @@ class RPRMaterialBrowser(object) :
         # Initialize the layout.
         self.initializeLayout();
 
-
+        cmds.dockControl( "Radeon ProRender MaterialX Browser", content=self.window, fl=True, area="bottom")
     # Create the material categories layout.
     # -----------------------------------------------------------------------------
     def createCategoriesLayout(self) :
 
-        print("ML Log: createCategoriesLayout")
         # Create tab, form and scroll layouts.
         tabLayout = cmds.tabLayout(innerMarginWidth=5, innerMarginHeight=15, borderStyle="full")
         formLayout = cmds.formLayout(numberOfDivisions=100)
@@ -170,6 +173,9 @@ class RPRMaterialBrowser(object) :
         cmds.setParent('..')
         cmds.setParent('..')
 
+    def getMaterialFileName(self, material) :
+        render_id = material["renders_order"][0]
+        return render_id + ".png"
 
     def getMaterialFullPath(self, fileName) :
         return os.path.join(self.pathRootThumbnail, fileName)
@@ -178,7 +184,6 @@ class RPRMaterialBrowser(object) :
     # -----------------------------------------------------------------------------
     def createMaterialsLayout(self) :
 	
-        print("ML Log: createMaterialsLayout")
         # Create the tab and form layouts.
         self.materialsTab = cmds.tabLayout(borderStyle="full")
         self.materialsForm = cmds.formLayout(numberOfDivisions=100)
@@ -239,7 +244,6 @@ class RPRMaterialBrowser(object) :
     # -----------------------------------------------------------------------------
     def createSelectedLayout(self) :
 
-        print("ML Log: createSelectedLayout")
         # Create a pane layout to contain material info and preview.
         paneLayout = cmds.paneLayout("RPRSelectedPane", configuration='horizontal2', staticHeightPane=2,
                                      separatorMovedCommand=self.updatePreviewLayout)
@@ -346,7 +350,6 @@ class RPRMaterialBrowser(object) :
     # -----------------------------------------------------------------------------
     def selectCategory(self, index) :
 	
-        print("ML Log: selectCategory")
         # Populate the materials view from the selected category.
         self.materials = self.materialByCategory[self.categoryListData[index]["id"]]
         self.populateMaterials()
@@ -374,25 +377,42 @@ class RPRMaterialBrowser(object) :
         menuItems = cmds.optionMenu(self.downloadPackageDropdown, q=True, itemListLong=True) # itemListLong returns the children
         index = cmds.optionMenu(self.downloadPackageDropdown, q=True, select=True) - 1
 
-        print(index)
-
         package = self.packageDataList[index]
         packageId = package["id"]
-        print("ML Log: start downloading packageId=" + packageId)
         
-        path = cmds.fileDialog2(startingDirectory=package["file"], fileFilter="Mtlx Zip-Archive (*.zip)")
-
+        optionVarNameRecentDirectory = "RprUsd_DownloadPackageRecentDirectory"
+        previousDirectoryUsed = ""
+        if cmds.optionVar(exists=optionVarNameRecentDirectory) :
+            previousDirectoryUsed = cmds.optionVar(query=optionVarNameRecentDirectory)
+        
+        path = cmds.fileDialog2(cap="Select A Directory", startingDirectory=previousDirectoryUsed, fm=3)
         cmds.progressWindow( title='Downloading Package',progress=0,status='downloading: 0%',isInterruptable=False)
         if path is not None :
-            self.matlibClient.packages.download(packageId, self.downloadPackageCallback, os.path.dirname(path[0]), os.path.basename(path[0]))
+            print("ML Log: start downloading packageId=" + packageId)
+            self.matlibClient.packages.download(packageId, self.downloadPackageCallback, path[0], package["file"])
+            cmds.optionVar(sv=(optionVarNameRecentDirectory, path[0]))
+
+            zipFileName = os.path.join(path[0], package["file"])
+        
+            fullPathToExtract = os.path.join(path[0], os.path.splitext(package["file"])[0])
+            os.makedirs(fullPathToExtract, exist_ok=True)
+
+            #unzip
+            with zipfile.ZipFile(zipFileName, 'r') as zip_ref:
+                zip_ref.extractall(fullPathToExtract)
+            # remnove zip-archive
+            os.remove(zipFileName)
                                                                                                                
         cmds.progressWindow(endProgress=1)
 
     def updateSelectedMaterialPanel(self, fileName, categoryName, materialName, materialType, license) :
 
+        def sortAccordingPackageSize(package) :
+            numberDirtyString = package["size"]
+            return float(''.join(c for c in numberDirtyString if (c.isdigit() or c =='.')))
+
         imageFileName = self.getMaterialFullPath(fileName)
 		
-
         cmds.iconTextStaticLabel("RPRPreviewImage", edit=True, image=imageFileName)
         cmds.text("RPRCategoryText", edit=True, label=categoryName)
         cmds.text("RPRNameText", edit=True, label=materialName)
@@ -400,16 +420,10 @@ class RPRMaterialBrowser(object) :
         cmds.text("RPRMaterialType", edit=True, label=materialType)
         cmds.text("RPRMaterialLicense", edit=True, label=license)
             
-        packages = self.selectedMaterial["packages"]
-
-        self.packageDataList = list()
-        for packageId in packages :
-            self.packageDataList.append(self.matlibClient.packages.get(packageId))
-
-        def sortAccordingPackageSize(package) :
-            numberDirtyString = package["size"]
-            return float(''.join(c for c in numberDirtyString if (c.isdigit() or c =='.')))
-            
+        params = dict()
+        params["material"] = self.selectedMaterial["id"]
+        self.packageDataList = self.matlibClient.packages.get_list(limit=100, offset=0, params = params)
+          
         self.packageDataList.sort(key=sortAccordingPackageSize)
 
         menuItems = cmds.optionMenu(self.downloadPackageDropdown, q=True, itemListLong=True) # itemListLong returns the children
@@ -425,12 +439,13 @@ class RPRMaterialBrowser(object) :
 
             index += 1
 
-    # Function is introduced in order to avoid big lags on Maya 2022 on Windows which may occur on iconTextButton call with passing click callback with material parameter
-    # -----------------------------------------------------------------------------
-    def selectMaterial(self, fileName, categoryName, materialName, materialIndex, materialType, license) :
+    def selectMaterial(self, materialIndex) :
 
         self.selectedMaterial = self.materials[materialIndex]
-        self.updateSelectedMaterialPanel(fileName, categoryName, materialName, materialType, license)
+        material = self.selectedMaterial
+        fileName = self.getMaterialFileName(self.selectedMaterial)
+
+        self.updateSelectedMaterialPanel(fileName, self.categoryDict[material["category"]]["title"], material["title"], material["material_type"], material["license"])
 
         self.updatePreviewLayout()
 
@@ -569,6 +584,11 @@ class RPRMaterialBrowser(object) :
         for material in self.materialListData:
             if (searchString in material["title"].lower()) :
                 self.materials.append(material)
+            else :
+                for tagId in material["tags"] :
+                    if (searchString == self.tagDict[tagId].lower()) :
+                        self.materials.append(material)
+                        break;
 
         # Repopulate the material view.
         self.populateMaterials()
@@ -591,12 +611,12 @@ class RPRMaterialBrowser(object) :
 
         # Add materials for the selected category.
         for material in self.materials :
-            render_id = material["renders_order"][0]
-            fileName = render_id + ".png"
-            cmd = partial(self.selectMaterial, fileName, self.categoryDict[material["category"]]["title"], material["title"], materialIndex, material["material_type"], material["license"])
+            fileName = self.getMaterialFileName(material)
+            cmd = partial(self.selectMaterial, materialIndex)
             imageFileName = self.getMaterialFullPath(fileName)
 
             # Checks if end condition has been reached
+            render_id = material["renders_order"][0]
 
             if (not os.path.isfile(imageFileName)) :
                  if (not progressBarShown) : 
@@ -622,7 +642,7 @@ class RPRMaterialBrowser(object) :
 
                 cmds.iconTextButton(style='textOnly', height=self.iconSize,
                                     label=self.getTruncatedText(materialName, self.cellWidth - iconWidth - 5),
-                                    align="left", command=partial(self.selectMaterial, material))
+                                    align="left", command=cmd)
 
             # Vertical layout for large icons.
             else :
