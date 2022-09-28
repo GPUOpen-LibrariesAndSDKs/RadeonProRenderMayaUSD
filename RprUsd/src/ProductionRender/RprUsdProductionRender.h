@@ -16,7 +16,6 @@
 #include <maya/MMessage.h>
 
 #include "defaultLightDelegate.h"
-//#include "renderGlobals.h"
 
 #include "RenderProgressBars.h"
 
