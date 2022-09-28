@@ -101,7 +101,7 @@ XCOPY /E /Y $(ProjectDir)\icons\* $(SolutionDir)dist\icons\
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(MAYA_SDK_2023)\include;$(MAYA_x64_2023)\..\MayaUSD\Maya2023\0.18.0\mayausd\USD\include\boost-1_70;$(MAYA_x64_2023)\..\MayaUSD\Maya2023\0.18.0\mayausd\USD\include;$(MAYA_x64_2023)\include\Python39\Python;$(ProjectDir)\src\ProductionRender;$(ProjectDir)\src\ProductionRender\hdMaya\adapters;$(ProjectDir)\src\ProductionRender\hdMaya\delegates;$(ProjectDir)\src\ProductionRender\hdMaya;$(MAYA_SDK_2023)\devkit\ufe\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(MAYA_SDK_2023)\include;$(MAYA_x64_2023)\..\MayaUSD\Maya2023\0.18.0\mayausd\USD\include\boost-1_70;$(MAYA_x64_2023)\..\MayaUSD\Maya2023\0.18.0\mayausd\USD\include;$(MAYA_x64_2023)\include\Python39\Python;$(ProjectDir)\src\ProductionRender;$(MAYA_SDK_2023)\devkit\ufe\include;$(MAYA_x64_2023)\..\MayaUSD\Maya2023\0.18.0\mayausd\MayaUSD\include\hdMaya;$(MAYA_x64_2023)\..\MayaUSD\Maya2023\0.18.0\mayausd\MayaUSD\include;$(MAYA_x64_2023)\..\MayaUSD\Maya2023\0.18.0\mayausd\MayaUSD\include\hdMaya\adapters</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
