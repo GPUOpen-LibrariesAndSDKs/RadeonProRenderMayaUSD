@@ -10,6 +10,8 @@
 #include <string>
 #include <fstream>
 
+#include <set>
+
 
 // 0 - executable path
 // 1 - option - "add" or "remove"
@@ -46,15 +48,24 @@ int main(int argc, char* argv[] )
 
 	const std::string installationPath = argv[2];
 
+
+	std::set <std::string> stringsToAddset;
+
 	const std::string pxrPluginPathNameString = "PXR_PLUGINPATH_NAME=%PXR_PLUGINPATH_NAME%;" + installationPath + "\\plugin;";
+
+	stringsToAddset.insert(pxrPluginPathNameString);
+
 	const std::string pathString = "PATH=%PATH%;" + installationPath + "\\lib;";
+	stringsToAddset.insert(pathString);
 
 	const std::string cachePath = std::string(std::getenv("LOCALAPPDATA")) + "\\RadeonProRender\\Maya\\USD\\";
 	const std::string cachePathString = "HDRPR_CACHE_PATH_OVERRIDE=" + cachePath;
+	stringsToAddset.insert(cachePathString);
+
+	stringsToAddset.insert("GPU_ENABLE_LC=1");
 
 	// We support only ascii path for now (not Unicode)
 	std::string mayaEnvFilePath;
-
 
 	char* mayaAppDirEnvVarValue = std::getenv("MAYA_APP_DIR");
 	std::string mayaAppDirEnvVarValueString;
@@ -105,7 +116,7 @@ int main(int argc, char* argv[] )
 
 	for (std::string currentString; std::getline(mayaEnvStreamIn, currentString); )
 	{
-		if (currentString == pxrPluginPathNameString || currentString == pathString || currentString == cachePathString)
+		if (stringsToAddset.find(currentString) != stringsToAddset.end())
 		{
 			continue;
 		}
@@ -115,9 +126,8 @@ int main(int argc, char* argv[] )
 
 	if (addEnv)
 	{
-		output += pxrPluginPathNameString + "\n";
-		output += pathString + "\n";
-		output += cachePathString + "\n";
+		for (const std::string& str : stringsToAddset)
+			output += str + "\n";
 	}
 
 	std::ofstream mayaEnvStreamOut (mayaEnvFilePath);
