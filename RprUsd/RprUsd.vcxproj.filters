@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Source Files\ProductioonRender">
+      <UniqueIdentifier>{4aaf5acb-24bf-4081-ad83-5b808ebebfcb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -21,10 +24,49 @@
     <ClInclude Include="pch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\ProductionRender\RenderProgressBars.h">
+      <Filter>Source Files\ProductioonRender</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ProductionRender\RprUsdProductionRender.h">
+      <Filter>Source Files\ProductioonRender</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ProductionRender\common.h">
+      <Filter>Source Files\ProductioonRender</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ProductionRender\defaultLightDelegate.h">
+      <Filter>Source Files\ProductioonRender</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ProductionRender\ProductionSettings.h">
+      <Filter>Source Files\ProductioonRender</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ProductionRender\renderGlobals.h">
+      <Filter>Source Files\ProductioonRender</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ProductionRender\RprUsdProductionRenderCmd.h">
+      <Filter>Source Files\ProductioonRender</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\pluginMain.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ProductionRender\common.cpp">
+      <Filter>Source Files\ProductioonRender</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ProductionRender\ProductionSettings.cpp">
+      <Filter>Source Files\ProductioonRender</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ProductionRender\defaultLightDelegate.cpp">
+      <Filter>Source Files\ProductioonRender</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ProductionRender\RenderProgressBars.cpp">
+      <Filter>Source Files\ProductioonRender</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ProductionRender\RprUsdProductionRender.cpp">
+      <Filter>Source Files\ProductioonRender</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ProductionRender\RprUsdProductionRenderCmd.cpp">
+      <Filter>Source Files\ProductioonRender</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
