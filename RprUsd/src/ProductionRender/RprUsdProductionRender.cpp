@@ -102,6 +102,9 @@ void RprUsdProductionRender::RPRMainThreadTimerEventCallback(float, float, void*
 void RprUsdProductionRender::ProcessTimerMessage()
 {
 	HdRenderDelegate* renderDelegate = _renderIndex->GetRenderDelegate();
+
+	assert(renderDelegate);
+
 	VtDictionary dict = renderDelegate->GetRenderStats();
 	double percentDone = dict.find("percentDone")->second.Get<double>();
 	_renderProgressBars->update((int)percentDone);
@@ -114,6 +117,8 @@ bool RprUsdProductionRender::RefreshAndCheck()
 	RefreshRenderView();
 
 	HdRenderBuffer* bufferPtr = _taskController->GetRenderOutput(HdAovTokens->color);
+
+	assert(bufferPtr);
 
 	if (bufferPtr->IsConverged() || (_renderProgressBars && _renderProgressBars->isCancelled()))
 	{
@@ -199,6 +204,7 @@ void RprUsdProductionRender::StopRender()
 	MRenderView::endRender();
 
 	HdRenderDelegate* renderDelegate = _renderIndex->GetRenderDelegate();
+	assert(renderDelegate);
 	renderDelegate->Stop();
 
 
@@ -260,6 +266,8 @@ void RprUsdProductionRender::SaveToFile()
 void RprUsdProductionRender::RefreshRenderView()
 {
 	HdRenderBuffer* bufferPtr = _taskController->GetRenderOutput(HdAovTokens->color);
+	assert(bufferPtr);
+
 	RV_PIXEL* rawBuffer = static_cast<RV_PIXEL*>(bufferPtr->Map());
 
 	// _TODO Remove constants
@@ -407,8 +415,6 @@ MStatus RprUsdProductionRender::Render()
 		_engine.Execute(_renderIndex, &tasks);
 	};
 
-	//GLUniformBufferBindingsSaver bindingsSaver;
-
 	HdxRenderTaskParams params;
 	params.enableLighting = true;
 	params.enableSceneMaterials = true;
@@ -447,8 +453,6 @@ MStatus RprUsdProductionRender::Render()
 		GfMatrix4d viewMatrix = camera.GetFrustum().ComputeViewMatrix();
 
 		_taskController->SetFreeCameraMatrices(viewMatrix, projectionMatrix);
-
-		//camera.getmat
 	}
 
 	_taskController->SetEnablePresentation(false);
@@ -499,7 +503,6 @@ void RprUsdProductionRender::RegisterRenderer(const std::string& controlCreation
 		renderer - rendererUIName $currentRendererName
 			- renderProcedure "rprUsdRenderCmd"
 
-			//-logoImageName              "amd.xpm"
 			rprUsdRender;
 
 		renderer - edit - addGlobalsNode "RprUsdGlobals" rprUsdRender;
@@ -519,7 +522,6 @@ void RprUsdProductionRender::RegisterRenderer(const std::string& controlCreation
 
 	proc SetCameraSelectedAttribute(string $value)
 	{
-		print("Here 333 : " + $value + "\n");
 		setAttr -type "string" defaultRenderGlobals.HdRprPlugin_Prod_Static_usdCameraSelected $value;
 	}
 
@@ -622,15 +624,14 @@ void RprUsdProductionRender::RegisterRenderer(const std::string& controlCreation
 		global string $usdCamerasArray[];
 
 		clear($usdCamerasArray);
-		//SetCameraSelectedAttribute("");
 
 		if (!IsUSDCameraCtrlExist())
 			return;
 
         $items = `optionMenu -q -itemListLong $g_rprHdrUSDCamerasCtrl`;
-        if (size($items) > 0)
+		if (size($items) > 0)
 		{
-            deleteUI($items);
+			deleteUI($items);
 		}
 	}
 
@@ -647,7 +648,6 @@ void RprUsdProductionRender::RegisterRenderer(const std::string& controlCreation
 
 		if (GetCameraSelectedAttribute() == "")
 		{
-			print("Here 1\n");
 			SetCameraSelectedAttribute($cameraName);
 		}
 	}

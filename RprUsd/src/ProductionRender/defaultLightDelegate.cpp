@@ -109,7 +109,6 @@ VtValue MtohDefaultLightDelegate::Get(const SdfPath& id, const TfToken& key)
     if (key == HdLightTokens->params) {
         return VtValue(_light);
     } else if (key == HdTokens->transform) {
-        // return VtValue(MtohDefaultLightDelegate::GetTransform(id));
         return VtValue(GfMatrix4d(1.0));
         // Hydra might crash when this is an empty VtValue.
     } else if (key == HdLightTokens->shadowCollection) {
