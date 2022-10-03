@@ -92,7 +92,6 @@ static MString _MangleColorAttribute(const MString& attrName, unsigned i)
     static const std::array<MString, 4> kColorComponents = { "R", "G", "B", "A" };
     if (i < kColorComponents.size()) {
         return attrName + kMtohCmptToken + kColorComponents[i];
-		//return g_attributePrefix + attrName + kColorComponents[i];
     }
 
 	TF_CODING_ERROR("[mtoh] Cannot mangle component: %u", i);
@@ -535,7 +534,6 @@ std::string ProductionSettings::CreateAttributes()
 
 	TfTokenVector vec;
 	TfToken token;
-	//_CreateEnumAttribute(node, MString(g_attributePrefix.GetText()) + "Static_usdCameraSelected", vec, token, userDefaults);
 	_CreateStringAttribute(node, MString(g_attributePrefix.GetText()) + "Static_usdCameraSelected", "", userDefaults);
 
 	for (const HdRenderSettingDescriptor& attr : rendererSettingDescriptors) {
@@ -850,9 +848,9 @@ void ProductionSettings::attributeChangedCallback(MNodeMessage::AttributeMessage
 		return;
 	}
 
-	std::string name1 = plug.name().asChar();
+	std::string plugName = plug.name().asChar();
 	
-	if ((name1.find(".filePath") != std::string::npos) && (!_usdCameraListRefreshed) && (msg & MNodeMessage::AttributeMessage::kIncomingDirection))
+	if ((plugName.find(".filePath") != std::string::npos) && (!_usdCameraListRefreshed) && (msg & MNodeMessage::AttributeMessage::kIncomingDirection))
 	{
 		_usdCameraListRefreshed = true;
 		UsdCameraListRefresh();	
@@ -867,9 +865,6 @@ void ProductionSettings::nodeAddedCallback(MObject& node, void* pData)
 	}
 
 	MFnDependencyNode depNode(node);
-
-	MString str1 = depNode.absoluteName();
-	MString typeName = depNode.typeName();
 
 	if (MayaUsd::LayerManager::supportedNodeType(depNode.typeId()))
 	{

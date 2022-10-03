@@ -27,8 +27,6 @@
 #include <hdMaya/delegates/delegateRegistry.h>
 #include <hdMaya/delegates/sceneDelegate.h>
 #include <hdMaya/utils.h>
-//#include <mayaUsd/render/px_vp20/utils.h>
-//#include <mayaUsd/utils/hash.h>
 
 #include <pxr/base/tf/debug.h>
 

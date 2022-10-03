@@ -1,9 +1,6 @@
 #ifndef __RPRUSDPRODUCTIONRENDER__
 #define __RPRUSDPRODUCTIONRENDER__
 
-
-//#include <pxr/pxr.h>
-
 #include <pxr/base/tf/singleton.h>
 #include <pxr/imaging/hd/driver.h>
 #include <pxr/imaging/hd/engine.h>

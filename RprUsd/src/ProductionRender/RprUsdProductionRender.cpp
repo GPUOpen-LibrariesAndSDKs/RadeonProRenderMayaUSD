@@ -31,8 +31,6 @@
 #include <hdMaya/delegates/delegateRegistry.h>
 #include <hdMaya/delegates/sceneDelegate.h>
 #include <hdMaya/utils.h>
-//#include <mayaUsd/render/px_vp20/utils.h>
-//#include <mayaUsd/utils/hash.h>
 
 
 #include <pxr/base/tf/debug.h>
@@ -96,6 +94,8 @@ MStatus restoreRenderLayer(const MString& oldLayerName, const MString& newLayerN
 void RprUsdProductionRender::RPRMainThreadTimerEventCallback(float, float, void* pClientData)
 {
 	RprUsdProductionRender* pProductionRender = static_cast<RprUsdProductionRender*> (pClientData);
+
+	assert(pProductionRender);
 	pProductionRender->ProcessTimerMessage();
 }
 

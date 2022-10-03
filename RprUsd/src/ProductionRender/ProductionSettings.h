@@ -16,11 +16,6 @@
 #ifndef PRODUCTION_SETTINGS_H
 #define PRODUCTION_SETTINGS_H
 
-//#include "tokens.h"
-//#include "utils.h"
-
-//#include <hdMaya/delegates/params.h>
-
 #include <pxr/base/gf/vec4f.h>
 #include <pxr/base/tf/token.h>
 #include <pxr/base/vt/value.h>
@@ -72,7 +67,6 @@ private:
 	static void OnBeforeOpenCallback(void* );
 
 private:
-	//static MString _attributePrefix;
 	static MCallbackId _newSceneCallback;
 	static MCallbackId _openSceneCallback;
 	static MCallbackId _importSceneCallback;

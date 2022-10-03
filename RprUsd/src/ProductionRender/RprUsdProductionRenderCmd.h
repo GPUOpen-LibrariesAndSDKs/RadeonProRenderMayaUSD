@@ -21,9 +21,6 @@
 #define kWaitForItTwoStep "-wft"
 #define kWaitForItTwoStepLong "-waitForItTwo"
 
-//#define kProductionIsRunningFlag "-ifr"
-//#define kProductionIsRunningFlagLong "-isProductionRunning"
-
 PXR_NAMESPACE_OPEN_SCOPE
 
 class RprUsdProductionRender;
