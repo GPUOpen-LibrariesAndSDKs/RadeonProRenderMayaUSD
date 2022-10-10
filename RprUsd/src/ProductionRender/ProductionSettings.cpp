@@ -849,8 +849,8 @@ void ProductionSettings::attributeChangedCallback(MNodeMessage::AttributeMessage
 	}
 
 	std::string plugName = plug.name().asChar();
-	
-	if ((plugName.find(".filePath") != std::string::npos) && (!_usdCameraListRefreshed) && (msg & MNodeMessage::AttributeMessage::kIncomingDirection))
+
+	if ((plugName.find(".outTime") != std::string::npos) && (!_usdCameraListRefreshed) && (msg & MNodeMessage::AttributeMessage::kIncomingDirection))
 	{
 		_usdCameraListRefreshed = true;
 		UsdCameraListRefresh();	
