@@ -11,4 +11,4 @@ def getMayaMainWindow():
         return shiboken2.wrapInstance(int(ptr), QtWidgets.QWidget)
 
 def open_window() :
-    RprUsd.devicesConfiguration.open_window(getMayaMainWindow(), QtCore.Qt.Window)
+    RprUsd.devicesConfiguration.open_window(getMayaMainWindow(), QtCore.Qt.Window, True, True)
