@@ -510,6 +510,7 @@ void RprUsdProductionRender::RegisterRenderer(const std::string& controlCreation
 		renderer - edit - addGlobalsNode "defaultResolution" rprUsdRender;
 
 		renderer - edit - addGlobalsTab "Common" "createMayaSoftwareCommonGlobalsTab" "updateMayaSoftwareCommonGlobalsTab" rprUsdRender;
+		renderer - edit - addGlobalsTab "Config" "createRprUsdRenderConfigTab" "updateRprUsdRenderConfigTab" rprUsdRender;
 		renderer - edit - addGlobalsTab "General" "createRprUsdRenderGeneralTab" "updateRprUsdRenderGeneralTab" rprUsdRender;
 		renderer - edit - addGlobalsTab "Camera" "createRprUsdRenderCameraTab" "updateRprUsdRenderCameraTab" rprUsdRender;
 	}
@@ -535,6 +536,25 @@ void RprUsdProductionRender::RegisterRenderer(const std::string& controlCreation
 		return $result;
 	}
 
+	global proc createRprUsdRenderConfigTab()
+	{
+		columnLayout -w 375 -adjustableColumn true rprmayausd_configcolumn;
+
+		button -label "Configure GPU" -command "onConfigureGPU";
+
+		setParent ..;
+	}
+
+	global proc updateRprUsdRenderConfigTab()
+	{
+
+	}
+
+	global proc onConfigureGPU()
+	{
+		python( "import deviceConfigRunner\ndeviceConfigRunner.open_window()" );
+	}
+
 	global proc createRprUsdRenderGeneralTab()
 	{
 		string $parentForm = `setParent -query`;
@@ -556,7 +576,7 @@ void RprUsdProductionRender::RegisterRenderer(const std::string& controlCreation
 	global proc updateRprUsdRenderGeneralTab()
 	{
 
-	}
+	} 
 
     global string $g_rprHdrUSDCamerasCtrl;
     global string $usdCamerasArray[];

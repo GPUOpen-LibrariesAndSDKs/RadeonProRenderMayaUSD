@@ -97,11 +97,13 @@ XCOPY /E /Y $(ProjectDir)\icons\* $(SolutionDir)dist\icons\
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;RPRUSD_EXPORTS;_WINDOWS;_USRDLL;WIN32;MAYAUSD_VERSION=0.18.0;NOMINMAX;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;BOOST_ALL_DYN_LINK;BOOST_CONFIG_SUPPRESS_OUTDATED_MESSAGE;HAVE_SNPRINTF;TBB_SUPPRESS_DEPRECATED_MESSAGES;PXR_PLUGINPATH_NAME=PXR_PLUGINPATH_NAME;WANT_UFE_BUILD;MAYA_ENABLE_NEW_PRIM_DELETE;PXR_PYTHON_ENABLED=1;REQUIRE_IOSTREAM;_BOOL;_AFXDLL;_MBCS;NT_PLUGIN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;RPRUSD_EXPORTS;_WINDOWS;_USRDLL;WIN32;NOMINMAX;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;BOOST_ALL_DYN_LINK;BOOST_CONFIG_SUPPRESS_OUTDATED_MESSAGE;HAVE_SNPRINTF;TBB_SUPPRESS_DEPRECATED_MESSAGES;PXR_PLUGINPATH_NAME=PXR_PLUGINPATH_NAME;WANT_UFE_BUILD;MAYA_ENABLE_NEW_PRIM_DELETE;PXR_PYTHON_ENABLED=1;REQUIRE_IOSTREAM;_BOOL;_AFXDLL;_MBCS;NT_PLUGIN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>$(MAYA_SDK_2023)\include;$(MAYA_x64_2023)\..\MayaUSD\Maya2023\0.19.0\mayausd\USD\include\boost-1_70;$(MAYA_x64_2023)\..\MayaUSD\Maya2023\0.19.0\mayausd\USD\include;$(MAYA_x64_2023)\include\Python39\Python;$(ProjectDir)\src\ProductionRender;$(MAYA_SDK_2023)\devkit\ufe\include;$(MAYA_x64_2023)\..\MayaUSD\Maya2023\0.19.0\mayausd\MayaUSD\include\hdMaya;$(MAYA_x64_2023)\..\MayaUSD\Maya2023\0.19.0\mayausd\MayaUSD\include;$(MAYA_x64_2023)\..\MayaUSD\Maya2023\0.19.0\mayausd\MayaUSD\include\hdMaya\adapters</AdditionalIncludeDirectories>
+      <Optimization>Disabled</Optimization>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -121,8 +123,8 @@ md $(SolutionDir)dist\plug-ins
 md $(SolutionDir)dist\plug-ins\2023
 md $(SolutionDir)dist\icons
 
-XCOPY /E /Y $(ProjectDir)\scripts\* $(SolutionDir)dist\scripts\
-XCOPY /E /Y $(ProjectDir)\src\python $(SolutionDir)dist\scripts\
+XCOPY /E /Y "$(SolutionDir)\src\python" "$(SolutionDir)dist\scripts\"
+XCOPY /E /Y /I "$(SolutionDir)\..\Build_RPRUsdInstall\hdRPR\lib\python\rpr"  "$(SolutionDir)dist\scripts\rpr"
 
 COPY $(TargetPath) $(SolutionDir)dist\plug-ins\2023\* /Y
 XCOPY /E /Y $(ProjectDir)\icons\* $(SolutionDir)dist\icons\
