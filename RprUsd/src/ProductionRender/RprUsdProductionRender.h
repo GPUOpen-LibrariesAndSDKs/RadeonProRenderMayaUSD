@@ -21,6 +21,8 @@ PXR_NAMESPACE_OPEN_SCOPE
 
 using HgiUniquePtr = std::unique_ptr<class Hgi>;
 
+typedef std::chrono::time_point<std::chrono::steady_clock> TimePoint;
+
 class RprUsdProductionRender
 {
 public:
@@ -99,6 +101,8 @@ private:
 	HdxTaskController*                        _taskController = nullptr;
 	HdRenderIndex*                            _renderIndex = nullptr;
 	std::unique_ptr<MtohDefaultLightDelegate> _defaultLightDelegate = nullptr;
+
+	TimePoint m_StartRenderTime;
 };
 
 

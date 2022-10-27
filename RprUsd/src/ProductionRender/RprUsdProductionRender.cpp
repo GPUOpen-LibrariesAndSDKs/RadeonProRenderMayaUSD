@@ -57,6 +57,18 @@ RprUsdProductionRender::~RprUsdProductionRender()
 }
 
 // -----------------------------------------------------------------------------
+
+TimePoint GetCurrentChronoTime()
+{
+	return std::chrono::high_resolution_clock::now();
+}
+
+template <typename T>
+long TimeDiffChrono(TimePoint currTime, TimePoint startTime)
+{
+	return (long)std::chrono::duration_cast<T>(currTime - startTime).count();
+}
+
 MStatus switchRenderLayer(MString& oldLayerName, MString& newLayerName)
 {
 	// Find the current render layer.
@@ -149,6 +161,8 @@ MStatus RprUsdProductionRender::StartRender(unsigned int width, unsigned int hei
 		return MStatus::kFailure;
 	}
 
+	m_StartRenderTime = GetCurrentChronoTime();
+
 	MRenderView::startRender(width, height, false, true);
 
 	if (!synchronousRender)
@@ -188,6 +202,20 @@ void RprUsdProductionRender::ApplySettings()
 	ProductionSettings::ApplySettings(_GetRenderDelegate());
 }
 
+MString GetTimeStringFromMiliseconds(unsigned int secondsTotal)
+{
+	unsigned int hours = secondsTotal / 3600;
+	unsigned int minutes = (secondsTotal / 60) % 60;
+	unsigned int seconds = secondsTotal % 60;
+	return MString((std::to_string(hours) + "h " + std::to_string(minutes) + "m " + std::to_string(seconds) + "s").c_str());
+}
+
+void OutputInfoToMayaConsole(MString text, unsigned int seconds)
+{
+	MGlobal::displayInfo("hdRPR " + text + ": " + GetTimeStringFromMiliseconds(seconds));
+}
+
+
 void RprUsdProductionRender::StopRender()
 {
 	if (!_renderIsStarted)
@@ -207,6 +235,8 @@ void RprUsdProductionRender::StopRender()
 	assert(renderDelegate);
 	renderDelegate->Stop();
 
+	unsigned int totalRenderSeconds = TimeDiffChrono<std::chrono::seconds>(GetCurrentChronoTime(), m_StartRenderTime);
+	OutputInfoToMayaConsole("Total Render Time", totalRenderSeconds);
 
 	// unregsiter timer callback
 	MTimerMessage::removeCallback(_callbackTimerId);
