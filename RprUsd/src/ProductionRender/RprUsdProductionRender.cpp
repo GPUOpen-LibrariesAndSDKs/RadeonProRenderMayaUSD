@@ -156,12 +156,12 @@ MStatus RprUsdProductionRender::StartRender(unsigned int width, unsigned int hei
 	_renderIsStarted = true;
 	switchRenderLayer(_oldLayerName, _newLayerName);
 
+	m_StartRenderTime = GetCurrentChronoTime();
+
 	if (!InitHydraResources())
 	{
 		return MStatus::kFailure;
 	}
-
-	m_StartRenderTime = GetCurrentChronoTime();
 
 	MRenderView::startRender(width, height, false, true);
 
@@ -497,7 +497,12 @@ MStatus RprUsdProductionRender::Render()
 	_taskController->SetCollection(_renderCollection);
 	
 	renderFrame(true);
-	
+
+	// after renderFrame call we can say how much time sync process took
+
+	unsigned int totalSyncTimeSeconds = TimeDiffChrono<std::chrono::seconds>(GetCurrentChronoTime(), m_StartRenderTime);
+	OutputInfoToMayaConsole("Sync Time", totalSyncTimeSeconds);
+
 
 	for (auto& it : _delegates) {
 		it->PostFrame();
