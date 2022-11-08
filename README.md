@@ -1,12 +1,13 @@
 # RPRMayaUSD
 This is project which allows you to work with hdRPR hydra render delegate inside Maya. Also it contains some additional features like AMD MaterialX Library which is available from rprUSD plugin
 
- ## Build modes: 
+## Build modes: 
  - run build_with_devkit.bat from x64 VS2017 command build tools (currently for Maya 2023.2) to build only hdRPR which allows to work together with built-in USD + MtoH. To make it works you need to extract <Maya_2023_ROOT>\..\MayaUSD\Maya2023\0.19.0\mayausd\USD\devkit.zip in place.
  
    - LEGACY MODE: Run build.bat from x64 VS 2017 Build Tools to build full bundle USD + MToH + hdRPR. In order to make it work you need to move built-in mayausd.mod file outside of Maya Modules directory. Look old Legacy Mode section for details
   
 ### OLD LEGACY MODE ( Building the whole bundle USD + MtoH + hdRPR)
+
 ### How to build:
 ##### Install all prerequsities for PixarUSD and MtoH ( except Python, we use Maya's python ):
  - Install Maya 2022 and Maya 2023
@@ -29,4 +30,3 @@ This is project which allows you to work with hdRPR hydra render delegate inside
   After this make force reinstall for PSide2: mayapy -m pip install --force-reinstall --no-deps PySide2
    - Its better to remove visibility of all Pythons in the system because for building everything we use Maya's python (mayapy),
  System's python sometimes takes into account by the build scripts and might fail.
- 
