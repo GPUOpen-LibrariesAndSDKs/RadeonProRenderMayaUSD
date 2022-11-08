@@ -47,6 +47,7 @@ RprUsdProductionRender::RprUsdProductionRender() :
 	, _isConverged(false)
 	, _hgi(Hgi::CreatePlatformDefaultHgi())
 	, _hgiDriver{ HgiTokens->renderDriver, VtValue(_hgi.get()) }
+	, _additionalStatsWasOutput(false)
 {
 
 }
@@ -64,9 +65,30 @@ TimePoint GetCurrentChronoTime()
 }
 
 template <typename T>
-long TimeDiffChrono(TimePoint currTime, TimePoint startTime)
+unsigned long TimeDiffChrono(TimePoint currTime, TimePoint startTime)
 {
 	return (long)std::chrono::duration_cast<T>(currTime - startTime).count();
+}
+
+MString GetTimeStringFromMiliseconds(unsigned long milisecondsTotal)
+{
+	unsigned int ms = milisecondsTotal % 1000;
+	unsigned int secondsTotal = milisecondsTotal / 1000;
+	unsigned int hours = secondsTotal / 3600;
+	unsigned int minutes = (secondsTotal / 60) % 60;
+	unsigned int seconds = secondsTotal % 60;
+
+	return MString((std::to_string(hours) + "h " + std::to_string(minutes) + "m " + std::to_string(seconds) + "s " + std::to_string(ms) + "ms").c_str());
+}
+
+void OutputInfoToMayaConsoleCommon(MString text)
+{
+	MGlobal::displayInfo("hdRPR: " + text);
+}
+
+void OutputInfoToMayaConsole(MString text, unsigned long miliseconds)
+{
+	OutputInfoToMayaConsoleCommon(text + ": " + GetTimeStringFromMiliseconds(miliseconds));
 }
 
 MStatus switchRenderLayer(MString& oldLayerName, MString& newLayerName)
@@ -119,7 +141,20 @@ void RprUsdProductionRender::ProcessTimerMessage()
 
 	VtDictionary dict = renderDelegate->GetRenderStats();
 	double percentDone = dict.find("percentDone")->second.Get<double>();
+
 	_renderProgressBars->update((int)percentDone);
+
+	if (!_additionalStatsWasOutput)
+	{
+		float firstIterationTime = dict.find("firstIterationRenderTime")->second.Get<float>();
+
+		if (firstIterationTime > 0.0f)
+		{
+			OutputInfoToMayaConsole("First Iteration Time: ", (unsigned long)firstIterationTime);
+
+			_additionalStatsWasOutput = true;
+		}
+	}
 
 	RefreshAndCheck();
 }
@@ -156,7 +191,7 @@ MStatus RprUsdProductionRender::StartRender(unsigned int width, unsigned int hei
 	_renderIsStarted = true;
 	switchRenderLayer(_oldLayerName, _newLayerName);
 
-	m_StartRenderTime = GetCurrentChronoTime();
+	_startRenderTime = GetCurrentChronoTime();
 
 	if (!InitHydraResources())
 	{
@@ -202,20 +237,6 @@ void RprUsdProductionRender::ApplySettings()
 	ProductionSettings::ApplySettings(_GetRenderDelegate());
 }
 
-MString GetTimeStringFromMiliseconds(unsigned int secondsTotal)
-{
-	unsigned int hours = secondsTotal / 3600;
-	unsigned int minutes = (secondsTotal / 60) % 60;
-	unsigned int seconds = secondsTotal % 60;
-	return MString((std::to_string(hours) + "h " + std::to_string(minutes) + "m " + std::to_string(seconds) + "s").c_str());
-}
-
-void OutputInfoToMayaConsole(MString text, unsigned int seconds)
-{
-	MGlobal::displayInfo("hdRPR " + text + ": " + GetTimeStringFromMiliseconds(seconds));
-}
-
-
 void RprUsdProductionRender::StopRender()
 {
 	if (!_renderIsStarted)
@@ -235,8 +256,8 @@ void RprUsdProductionRender::StopRender()
 	assert(renderDelegate);
 	renderDelegate->Stop();
 
-	unsigned int totalRenderSeconds = TimeDiffChrono<std::chrono::seconds>(GetCurrentChronoTime(), m_StartRenderTime);
-	OutputInfoToMayaConsole("Total Render Time", totalRenderSeconds);
+	unsigned long totalRenderMiliseconds = TimeDiffChrono<std::chrono::milliseconds>(GetCurrentChronoTime(), _startRenderTime);
+	OutputInfoToMayaConsole("Total Render Time", totalRenderMiliseconds);
 
 	// unregsiter timer callback
 	MTimerMessage::removeCallback(_callbackTimerId);
@@ -246,6 +267,7 @@ void RprUsdProductionRender::StopRender()
 
 	ClearHydraResources();
 	_renderIsStarted = false;
+	_additionalStatsWasOutput = false;
 }
 
 void RprUsdProductionRender::SaveToFile()
@@ -498,17 +520,33 @@ MStatus RprUsdProductionRender::Render()
 	
 	renderFrame(true);
 
-	// after renderFrame call we can say how much time sync process took
-
-	unsigned int totalSyncTimeSeconds = TimeDiffChrono<std::chrono::seconds>(GetCurrentChronoTime(), m_StartRenderTime);
-	OutputInfoToMayaConsole("Sync Time", totalSyncTimeSeconds);
-
+	OutputHardwareSetupAndSyncTime();
 
 	for (auto& it : _delegates) {
 		it->PostFrame();
 	}
 
 	return MStatus::kSuccess;
+}
+
+void RprUsdProductionRender::OutputHardwareSetupAndSyncTime()
+{
+	HdRenderDelegate* renderDelegate = _renderIndex->GetRenderDelegate();
+
+	VtDictionary renderStats = renderDelegate->GetRenderStats();
+	OutputInfoToMayaConsoleCommon("Hardware setup: ");
+	std::vector<std::string> gpusUsedNames = renderStats.find("gpuUsedNames")->second.Get<std::vector<std::string>>();
+	int threadCount = renderStats.find("threadCountUsed")->second.Get<int>();
+
+	for (const std::string& gpuName : gpusUsedNames) {
+		OutputInfoToMayaConsoleCommon(MString("GPU: ") + gpuName.c_str());
+	}
+
+	OutputInfoToMayaConsoleCommon(MString("CPU for rendering: threadCount= ") + std::to_string(threadCount).c_str());
+
+	// after renderFrame call we can say how much time sync process took
+	unsigned long totalSyncTimeMiliseconds = TimeDiffChrono<std::chrono::milliseconds>(GetCurrentChronoTime(), _startRenderTime);
+	OutputInfoToMayaConsole("Sync Time", totalSyncTimeMiliseconds);
 }
 
 void RprUsdProductionRender::Initialize()

@@ -56,6 +56,7 @@ private:
 	void ProcessSyncRender(float refreshRate);
 
 	static void RegisterRenderer(const std::string& controlCreationCmds);
+	void OutputHardwareSetupAndSyncTime();
 
 private:
 	bool _renderIsStarted;
@@ -102,7 +103,8 @@ private:
 	HdRenderIndex*                            _renderIndex = nullptr;
 	std::unique_ptr<MtohDefaultLightDelegate> _defaultLightDelegate = nullptr;
 
-	TimePoint m_StartRenderTime;
+	TimePoint _startRenderTime;
+	bool _additionalStatsWasOutput;
 };
 
 
