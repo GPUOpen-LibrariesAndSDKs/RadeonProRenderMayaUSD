@@ -4,11 +4,9 @@ This is project which allows you to work with hdRPR hydra render delegate inside
 ## Build modes: 
  - run build_with_devkit.bat from x64 VS2017 command build tools (currently for Maya 2023.2) to build only hdRPR which allows to work together with built-in USD + MtoH. To make it works you need to extract <Maya_2023_ROOT>\..\MayaUSD\Maya2023\0.19.0\mayausd\USD\devkit.zip in place.
  
-   - LEGACY MODE: Run build.bat from x64 VS 2017 Build Tools to build full bundle USD + MToH + hdRPR. In order to make it work you need to move built-in mayausd.mod file outside of Maya Modules directory. Look old Legacy Mode section for details
+ - LEGACY MODE: Run build.bat from x64 VS 2017 Build Tools to build full bundle USD + MToH + hdRPR. In order to make it work you need to move built-in mayausd.mod file outside of Maya Modules directory. Look old Legacy Mode section for details.
   
-### OLD LEGACY MODE ( Building the whole bundle USD + MtoH + hdRPR)
-
-### How to build:
+### How to build OLD LEGACY MODE ( Building the whole bundle USD + MtoH + hdRPR):
 ##### Install all prerequsities for PixarUSD and MtoH ( except Python, we use Maya's python ):
  - Install Maya 2022 and Maya 2023
  - Install SDKs for Maya 2022 and 2023
