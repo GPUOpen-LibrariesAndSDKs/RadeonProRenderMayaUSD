@@ -4,6 +4,7 @@
 #include "version.h"
 
 #include "ProductionRender\RprUsdProductionRenderCmd.h"
+#include "BindMtlxCommand/RprUsdBindMtlxCmd.h"
 
 PXR_NAMESPACE_USING_DIRECTIVE
 
@@ -19,6 +20,9 @@ PLUGIN_EXPORT MStatus initializePlugin(MObject obj)
 	CHECK_MSTATUS(status);
 	RprUsdProductionRenderCmd::Initialize();
 
+	status = plugin.registerCommand(RprUsdBiodMtlxCmd::s_commandName, RprUsdBiodMtlxCmd::creator, RprUsdBiodMtlxCmd::newSyntax);
+	CHECK_MSTATUS(status);
+
     return ret;
 }
 
@@ -29,6 +33,7 @@ PLUGIN_EXPORT MStatus uninitializePlugin(MObject obj)
     MStatus ret = MS::kSuccess; 
 
 	plugin.deregisterCommand(RprUsdProductionRenderCmd::s_commandName);
+	plugin.deregisterCommand(RprUsdBiodMtlxCmd::s_commandName);
 
     return ret;
 }

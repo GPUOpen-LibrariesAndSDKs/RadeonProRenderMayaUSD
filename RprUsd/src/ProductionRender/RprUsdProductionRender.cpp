@@ -447,7 +447,7 @@ MStatus RprUsdProductionRender::Render()
 	{	
 		UsdGeomCamera usdGeomCamera(cameraPrim);
 
-		GfCamera camera = usdGeomCamera.GetCamera(ProductionSettings::GetMayaUsdProxyShapeBase()->getTime());
+		GfCamera camera = usdGeomCamera.GetCamera(GetMayaUsdProxyShapeBase()->getTime());
 
 		GfMatrix4d projectionMatrix = camera.GetFrustum().ComputeProjectionMatrix();
 		GfMatrix4d viewMatrix = camera.GetFrustum().ComputeViewMatrix();

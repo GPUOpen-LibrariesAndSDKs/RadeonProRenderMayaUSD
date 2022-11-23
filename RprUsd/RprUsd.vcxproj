@@ -112,7 +112,7 @@ XCOPY /E /Y $(ProjectDir)\icons\* $(SolutionDir)dist\icons\
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
       <AdditionalLibraryDirectories>$(MAYA_SDK_2023)/lib;$(MAYA_x64_2023)/lib;$(MAYA_x64_2023)\..\MayaUSD\Maya2023\0.19.0\mayausd\USD\lib;lib;$(MAYA_SDK_2023)\devkit\ufe\lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>hgiInterop.lib;hgi.lib;OpenMaya.lib;Foundation.lib;usdImaging.lib;hd.lib;usdVol.lib;pxOsd.lib;osdCPU.lib;osdGPU.lib;glf.lib;garch.lib;opengl32.lib;hio.lib;hf.lib;usdHydra.lib;usdLux.lib;usdRender.lib;usdRi.lib;sdr.lib;ndr.lib;usdUtils.lib;ufe_3.lib;OpenMayaFX.lib;OpenMayaRender.lib;OpenMayaUI.lib;OpenMayaAnim.lib;Image.lib;cg.lib;cgGL.lib;clew.lib;tbb.lib;usdGeom.lib;usd.lib;kind.lib;pcp.lib;sdf.lib;ar.lib;plug.lib;vt.lib;gf.lib;work.lib;trace.lib;js.lib;tf.lib;Shlwapi.lib;arch.lib;Ws2_32.lib;hdMaya.lib;mayaUsd.lib;cameraUtil.lib;hdx.lib;hdSt.lib;hgiGL.lib;hdMtlx.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>hgiInterop.lib;hgi.lib;OpenMaya.lib;Foundation.lib;usdImaging.lib;hd.lib;usdVol.lib;pxOsd.lib;osdCPU.lib;osdGPU.lib;glf.lib;garch.lib;opengl32.lib;hio.lib;hf.lib;usdHydra.lib;usdShade.lib;usdLux.lib;usdRender.lib;usdRi.lib;sdr.lib;ndr.lib;usdUtils.lib;ufe_3.lib;OpenMayaFX.lib;OpenMayaRender.lib;OpenMayaUI.lib;OpenMayaAnim.lib;Image.lib;cg.lib;cgGL.lib;clew.lib;tbb.lib;usdGeom.lib;usd.lib;kind.lib;pcp.lib;sdf.lib;ar.lib;plug.lib;vt.lib;gf.lib;work.lib;trace.lib;js.lib;tf.lib;Shlwapi.lib;arch.lib;Ws2_32.lib;hdMaya.lib;mayaUsd.lib;cameraUtil.lib;hdx.lib;hdSt.lib;hgiGL.lib;hdMtlx.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>echo creating dist folders
@@ -137,6 +137,7 @@ XCOPY /E /Y $(ProjectDir)\icons\* $(SolutionDir)dist\icons\
   <ItemGroup>
     <ClInclude Include="framework.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="src\BindMtlxCommand\RprUsdBindMtlxCmd.h" />
     <ClInclude Include="src\ProductionRender\common.h" />
     <ClInclude Include="src\ProductionRender\defaultLightDelegate.h" />
     <ClInclude Include="src\ProductionRender\ProductionSettings.h" />
@@ -146,6 +147,7 @@ XCOPY /E /Y $(ProjectDir)\icons\* $(SolutionDir)dist\icons\
     <ClInclude Include="src\ProductionRender\RprUsdProductionRenderCmd.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\BindMtlxCommand\RprUsdBindMtlxCmd.cpp" />
     <ClCompile Include="src\pluginMain.cpp" />
     <ClCompile Include="src\ProductionRender\common.cpp" />
     <ClCompile Include="src\ProductionRender\defaultLightDelegate.cpp" />
