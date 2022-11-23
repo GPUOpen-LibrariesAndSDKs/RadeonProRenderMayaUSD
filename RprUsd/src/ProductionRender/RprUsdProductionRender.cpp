@@ -486,6 +486,9 @@ void RprUsdProductionRender::Initialize()
 	controlCreationCmds = ProductionSettings::CreateAttributes();
 
 	RprUsdProductionRender::RegisterRenderer(controlCreationCmds);
+
+    // in case if we start the plugin after scene is opened
+    ProductionSettings::UsdCameraListRefresh();
 }
 
 void RprUsdProductionRender::Uninitialize()
