@@ -5,7 +5,8 @@
 
 #include <pxr/usd/usd/references.h>
 #include <pxr/usd/usdShade/materialBindingAPI.h>
-
+#include <MaterialXCore/Document.h>
+#include <MaterialXFormat/XmlIo.h>
 
 
 PXR_NAMESPACE_OPEN_SCOPE
@@ -47,7 +48,8 @@ MStatus RprUsdBiodMtlxCmd::doIt(const MArgList & args)
 	{
 		argData.getFlagArgument(kPrimPathFlag, 0, primPath);
 	}
-	else
+	
+	if (primPath.isEmpty())
 	{
 		MGlobal::displayError("RprUsd: primPath is not defined");
 		return MS::kFailure;
@@ -58,7 +60,8 @@ MStatus RprUsdBiodMtlxCmd::doIt(const MArgList & args)
 	{
 		argData.getFlagArgument(kMtlxFilePathFlag, 0, mtlxFileName);
 	}
-	else
+	
+	if (mtlxFileName.isEmpty())
 	{
 		MGlobal::displayError("RprUsd: mtlxFileName is not defined");
 		return MS::kFailure;
@@ -78,7 +81,22 @@ MStatus RprUsdBiodMtlxCmd::doIt(const MArgList & args)
 	// TODO temp code
 	if (materialName.isEmpty())
 	{
-		materialName = "MaterialX_Graph";
+//		materialName = "MaterialX_Graph";
+
+		MaterialX::DocumentPtr mtlxDocumentPtr = MaterialX::createDocument();
+
+		MaterialX::readFromXmlFile(mtlxDocumentPtr, mtlxFileName.asChar());
+		std::vector<MaterialX::NodePtr> materialOutputVector = mtlxDocumentPtr->getMaterialNodes();
+
+		if (materialOutputVector.empty())
+		{
+			MGlobal::displayError("RprUsd: mtlxFileName does not contain amy material outputs");
+			return MS::kFailure;
+		}
+
+		MaterialX::NodePtr output = materialOutputVector[0];
+
+		materialName = output->getName().c_str();
 	}
 
 	SdfReference sdfRef = SdfReference(mtlxFileName.asChar(), SdfPath("/MaterialX"));
