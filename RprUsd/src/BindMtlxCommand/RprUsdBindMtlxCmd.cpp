@@ -73,36 +73,47 @@ MStatus RprUsdBiodMtlxCmd::doIt(const MArgList & args)
 	{
 		argData.getFlagArgument(kMaterialNameFlag, 0, materialName);
 	}
-	else
-	{
-		MGlobal::displayError("RprUsd: materialName is not defined");
-	}
 
-	// TODO temp code
 	if (materialName.isEmpty())
 	{
-//		materialName = "MaterialX_Graph";
-
 		MaterialX::DocumentPtr mtlxDocumentPtr = MaterialX::createDocument();
 
-		MaterialX::readFromXmlFile(mtlxDocumentPtr, mtlxFileName.asChar());
-		std::vector<MaterialX::NodePtr> materialOutputVector = mtlxDocumentPtr->getMaterialNodes();
-
-		if (materialOutputVector.empty())
+		try
 		{
-			MGlobal::displayError("RprUsd: mtlxFileName does not contain amy material outputs");
+			MaterialX::readFromXmlFile(mtlxDocumentPtr, mtlxFileName.asChar());
+		}
+		catch (const MaterialX::ExceptionParseError& ex)
+		{
+			MGlobal::displayError("RprUsd: mtlxFileName cannot be parsed");
+			return MS::kFailure;
+		}
+		catch (const MaterialX::ExceptionFileMissing ex)
+		{
+			MGlobal::displayError("RprUsd: mtlxFileName does not exist");
 			return MS::kFailure;
 		}
 
-		MaterialX::NodePtr output = materialOutputVector[0];
+		std::vector<MaterialX::NodePtr> materialVector = mtlxDocumentPtr->getMaterialNodes();
+
+		if (materialVector.empty())
+		{
+			MGlobal::displayError("RprUsd: mtlxFileName does not contain amy materials");
+			return MS::kFailure;
+		}
+
+		MaterialX::NodePtr output = materialVector[0];
 
 		materialName = output->getName().c_str();
 	}
 
-	SdfReference sdfRef = SdfReference(mtlxFileName.asChar(), SdfPath("/MaterialX"));
-	//SdfReference sdfRef = SdfReference("C:\\Projects\\Scenes\\WebMatXFolder\\Stone_Wall_Combination_1k_8b\\Stone_Wall_Combination.mtlx", SdfPath("/MaterialX"));
+	if (materialName.isEmpty())
+	{
+		MGlobal::displayError("RprUsd: materialName is not defined");
+		return MS::kFailure;
+	}
 
-	//SdfPath path = SdfPath("/pSphere1");
+	SdfReference sdfRef = SdfReference(mtlxFileName.asChar(), SdfPath("/MaterialX"));
+
 	SdfPath path = SdfPath(primPath.asChar());
 
 	UsdStageRefPtr stage = GetUsdStage();
@@ -115,24 +126,31 @@ MStatus RprUsdBiodMtlxCmd::doIt(const MArgList & args)
 
 	UsdPrim prim = stage->GetPrimAtPath(path);
 
+	if (!prim.IsValid())
+	{
+		MGlobal::displayError("RprUsd: Prim is not valid!");
+		return MS::kFailure;
+	}
+
 	UsdReferences primRefs = prim.GetReferences();
-	primRefs.AddReference(sdfRef);
+	bool b = primRefs.AddReference(sdfRef);
 
 	SdfPath materialPath = SdfPath((primPath + "/Materials/" + materialName).asChar());
 	SdfPath previousMaterialPath;
 
 	UsdShadeMaterial material(stage->GetPrimAtPath(materialPath));
-	if (prim.IsValid() && material) {
+	if ( material) {
 		UsdShadeMaterialBindingAPI bindingAPI;
 		if (prim.HasAPI<UsdShadeMaterialBindingAPI>()) {
 			bindingAPI = UsdShadeMaterialBindingAPI(prim);
-			previousMaterialPath = bindingAPI.GetDirectBinding().GetMaterialPath();
+			previousMaterialPath = bindingAPI.GetDirectBinding().GetMaterialPath(); 
+			std::string name = previousMaterialPath.GetAsString();
 		}
 		else {
 			bindingAPI = UsdShadeMaterialBindingAPI::Apply(prim);
 		}
 
-		bindingAPI.Bind(material);
+		bool b = bindingAPI.Bind(material);
 	}
 	else
 	{
@@ -140,6 +158,7 @@ MStatus RprUsdBiodMtlxCmd::doIt(const MArgList & args)
 		return MS::kFailure;
 	}
 
+	MGlobal::displayInfo("RprUsd: MaterialX applied to prim!");
 	return MStatus::kSuccess;
 }
 
