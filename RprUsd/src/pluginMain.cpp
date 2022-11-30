@@ -19,7 +19,6 @@ PLUGIN_EXPORT MStatus initializePlugin(MObject obj)
 	CHECK_MSTATUS(status);
 	RprUsdProductionRenderCmd::Initialize();
 
-
     return ret;
 }
 
