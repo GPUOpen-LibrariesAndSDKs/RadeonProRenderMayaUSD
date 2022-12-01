@@ -133,7 +133,7 @@ void RprUsdProductionRender::RPRMainThreadTimerEventCallback(float, float, void*
 	pProductionRender->ProcessTimerMessage();
 }
 
-void RprUsdProductionRender::ProcessTimerMessage()
+bool RprUsdProductionRender::ProcessTimerMessage()
 {
 	HdRenderDelegate* renderDelegate = _renderIndex->GetRenderDelegate();
 
@@ -156,7 +156,7 @@ void RprUsdProductionRender::ProcessTimerMessage()
 		}
 	}
 
-	RefreshAndCheck();
+	return RefreshAndCheck();
 }
 
 bool RprUsdProductionRender::RefreshAndCheck()
@@ -200,10 +200,7 @@ MStatus RprUsdProductionRender::StartRender(unsigned int width, unsigned int hei
 
 	MRenderView::startRender(width, height, false, true);
 
-	if (!synchronousRender)
-	{
-		_renderProgressBars = std::make_unique<RenderProgressBars>(false);
-	}
+	_renderProgressBars = std::make_unique<RenderProgressBars>(false);
 
 	ApplySettings();
 	Render();
@@ -229,7 +226,7 @@ void RprUsdProductionRender::ProcessSyncRender(float refreshRate)
 	{
 		std::chrono::duration<float, std::ratio<1>> time(refreshRate);
 		std::this_thread::sleep_for(time);
-	} while (RefreshAndCheck());
+	} while (ProcessTimerMessage());
 }
 
 void RprUsdProductionRender::ApplySettings()
