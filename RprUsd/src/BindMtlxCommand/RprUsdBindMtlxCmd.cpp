@@ -132,8 +132,15 @@ MStatus RprUsdBiodMtlxCmd::doIt(const MArgList & args)
 		return MS::kFailure;
 	}
 
+	const std::string& primTypeName = prim.GetTypeName().GetString();
+	if (primTypeName != "Mesh")
+	{
+		MGlobal::displayError("RprUsd: Selected prim is not a mesh !");
+		return MS::kFailure;
+	}
+
 	UsdReferences primRefs = prim.GetReferences();
-	bool b = primRefs.AddReference(sdfRef);
+	primRefs.AddReference(sdfRef);
 
 	SdfPath materialPath = SdfPath((primPath + "/Materials/" + materialName).asChar());
 	SdfPath previousMaterialPath;
@@ -150,7 +157,7 @@ MStatus RprUsdBiodMtlxCmd::doIt(const MArgList & args)
 			bindingAPI = UsdShadeMaterialBindingAPI::Apply(prim);
 		}
 
-		bool b = bindingAPI.Bind(material);
+		bindingAPI.Bind(material);
 	}
 	else
 	{
