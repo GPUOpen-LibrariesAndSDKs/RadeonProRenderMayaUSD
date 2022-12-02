@@ -151,7 +151,6 @@ MStatus RprUsdBiodMtlxCmd::doIt(const MArgList & args)
 		if (prim.HasAPI<UsdShadeMaterialBindingAPI>()) {
 			bindingAPI = UsdShadeMaterialBindingAPI(prim);
 			previousMaterialPath = bindingAPI.GetDirectBinding().GetMaterialPath(); 
-			std::string name = previousMaterialPath.GetAsString();
 		}
 		else {
 			bindingAPI = UsdShadeMaterialBindingAPI::Apply(prim);
