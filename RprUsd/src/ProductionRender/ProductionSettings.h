@@ -57,10 +57,7 @@ public:
 	static UsdPrim GetUsdCameraPrim();
 	static bool IsUSDCameraToUse();
 
-	static MayaUsdProxyShapeBase* GetMayaUsdProxyShapeBase();
-
 private:
-	static UsdStageRefPtr GetUsdStage();
 	static void attributeChangedCallback(MNodeMessage::AttributeMessage msg, MPlug & plug, MPlug & otherPlug, void* clientData);
 	static void nodeAddedCallback(MObject& node, void* pData);
 
