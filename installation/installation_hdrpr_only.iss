@@ -1,4 +1,4 @@
-#define AppVersionString '0.1.12'
+#define AppVersionString '0.1.13'
 
 [Setup]
 AppName=RPRMayaUSDHdRPR
