@@ -51,7 +51,7 @@ private:
 	bool RefreshAndCheck();
 
 	static void RPRMainThreadTimerEventCallback(float, float, void * pClientData);
-	void ProcessTimerMessage();
+	bool ProcessTimerMessage();
 
 	void ProcessSyncRender(float refreshRate);
 
