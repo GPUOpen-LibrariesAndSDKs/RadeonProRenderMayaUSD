@@ -134,7 +134,6 @@ class RPRMaterialBrowser(object) :
         # Initialize the layout.
         self.initializeLayout();
 
-        cmds.dockControl( "Radeon ProRender MaterialX Browser", content=self.window, fl=True, area="bottom")
     # Create the material categories layout.
     # -----------------------------------------------------------------------------
     def createCategoriesLayout(self) :
