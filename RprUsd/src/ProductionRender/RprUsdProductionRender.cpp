@@ -744,21 +744,16 @@ void RprUsdProductionRender::RegisterRenderer(const std::string& controlCreation
 				-collapsable false
 				-collapse false;
 
-				print("222\n");
-
 				string $name = "Radeon ProRender USD Render Delegate (hdRPR) for Maya(R)\n" + 
 						"Plugin: " + getRprPluginVersion() + " (Core: " + getRprCoreVersion() + ", RIF:" + getRifSdkVersion() + ")\n" +
 						"Copyright (C) 2022 Advanced Micro Devices, Inc. (AMD).\n" +
 						"Portions of this software are created and copyrighted\n" +
 						"to other third parties.";
 
-				print("333\n");
-
 				button -label $name -height 70;
 			setParent..;
 
 		setParent ..;
-		print("444\n");
 	}
 
 	global proc updateRprUsdAboutTab()
