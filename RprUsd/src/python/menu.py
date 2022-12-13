@@ -22,9 +22,11 @@ def BindMaterialXFromFile(value) :
 
     filePath = ret[0]
 
-    selected_path = str(list(gsel).pop().path())
-    selected_path = selected_path[selected_path.find("/"):len(selected_path)]
-    maya.cmds.rprUsdBindMtlx(pp=selected_path, mp=filePath)
+    pathList = list(gsel)    
+    while len(pathList) > 0 :
+        selected_path = str(pathList.pop().path())
+        selected_path = selected_path[selected_path.find("/"):len(selected_path)]
+        maya.cmds.rprUsdBindMtlx(pp=selected_path, mp=filePath)
 
 def createRprUsdMenu():
     if not maya.cmds.menu("rprUsdMenuCtrl", exists=1):
