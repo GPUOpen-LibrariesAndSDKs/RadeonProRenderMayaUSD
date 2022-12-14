@@ -82,12 +82,12 @@ MStatus RprUsdBiodMtlxCmd::doIt(const MArgList & args)
 		{
 			MaterialX::readFromXmlFile(mtlxDocumentPtr, mtlxFileName.asChar());
 		}
-		catch (const MaterialX::ExceptionParseError& ex)
+		catch (const MaterialX::ExceptionParseError& )
 		{
 			MGlobal::displayError("RprUsd: mtlxFileName cannot be parsed");
 			return MS::kFailure;
 		}
-		catch (const MaterialX::ExceptionFileMissing ex)
+		catch (const MaterialX::ExceptionFileMissing& )
 		{
 			MGlobal::displayError("RprUsd: mtlxFileName does not exist");
 			return MS::kFailure;
