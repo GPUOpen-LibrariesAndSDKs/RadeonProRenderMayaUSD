@@ -15,12 +15,18 @@ def BindMaterialXFromFile(value) :
         maya.OpenMaya.MGlobal.displayError("RprUsd: Nothing is selected in USD layout!")
         return
 
-    ret = maya.cmds.fileDialog2(fm = 1, fileFilter="MaterialX (*.mtlx)")
+    optionVarNameRecentDirectory = "RprUsd_RecentBinxMatXDirectory"
+    previousDirectoryUsed = ""
+    if maya.cmds.optionVar(exists=optionVarNameRecentDirectory) :
+        previousDirectoryUsed = maya.cmds.optionVar(query=optionVarNameRecentDirectory)
+        
+    ret = maya.cmds.fileDialog2(startingDirectory=previousDirectoryUsed, fm = 1, fileFilter="MaterialX (*.mtlx)")
 
     if ret is None :
         return
 
     filePath = ret[0]
+    maya.cmds.optionVar(sv=(optionVarNameRecentDirectory, filePath))
 
     pathList = list(gsel)    
     while len(pathList) > 0 :

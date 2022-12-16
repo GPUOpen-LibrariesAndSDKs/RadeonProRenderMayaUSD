@@ -2,6 +2,10 @@
 #include "ProductionSettings.h"
 #include "common.h"
 
+// For getting versions of RPR SDK and RIF SDK
+#include "RadeonProRenderUSD/deps/RIF/include/RadeonImageFilters_version.h"
+#include "RadeonProRenderUSD/deps/RPR/RadeonProRender/inc/RadeonProRender.h"
+
 #include <maya/MGlobal.h>
 #include <maya/MDagPath.h>
 #include <maya/MFnCamera.h>
@@ -31,7 +35,6 @@
 #include <hdMaya/delegates/delegateRegistry.h>
 #include <hdMaya/delegates/sceneDelegate.h>
 #include <hdMaya/utils.h>
-
 
 #include <pxr/base/tf/debug.h>
 #include <thread>
@@ -568,6 +571,9 @@ void RprUsdProductionRender::Uninitialize()
 
 void RprUsdProductionRender::RegisterRenderer(const std::string& controlCreationCmds)
 {
+	std::string rifSdkVersion = std::to_string(RIF_VERSION_MAJOR) + "." + std::to_string(RIF_VERSION_MINOR) + "." + std::to_string(RIF_VERSION_REVISION);
+	std::string rprSdkVersion = std::to_string(RPR_VERSION_MAJOR) + "." + std::to_string(RPR_VERSION_MINOR) + "." + std::to_string(RPR_VERSION_REVISION);
+
 	constexpr auto registerCmd =
 		R"mel(global proc registerRprUsdRenderer()
 	{
@@ -586,6 +592,7 @@ void RprUsdProductionRender::RegisterRenderer(const std::string& controlCreation
 		renderer - edit - addGlobalsTab "Config" "createRprUsdRenderConfigTab" "updateRprUsdRenderConfigTab" rprUsdRender;
 		renderer - edit - addGlobalsTab "General" "createRprUsdRenderGeneralTab" "updateRprUsdRenderGeneralTab" rprUsdRender;
 		renderer - edit - addGlobalsTab "Camera" "createRprUsdRenderCameraTab" "updateRprUsdRenderCameraTab" rprUsdRender;
+		renderer - edit - addGlobalsTab "About" "createRprUsdAboutTab" "updateRprUsdAboutTab" rprUsdRender;
 	}
 
 	proc string GetCameraSelectedAttribute()
@@ -700,6 +707,60 @@ void RprUsdProductionRender::RegisterRenderer(const std::string& controlCreation
 
 	}
 
+	global proc string getRprPluginVersion()
+	{
+		return `pluginInfo -query -version RprUsd`;		
+	}
+
+	global proc string getRprCoreVersion()
+	{
+		return "{RPRSDK_VERSION}";
+	}
+
+	global proc string getRifSdkVersion()
+	{
+		return "{RIFSDK_VERSION}";
+	}
+
+ 	global proc createRprUsdAboutTab()
+	{
+		columnLayout
+			-adjustableColumn true
+			-columnAttach "both" 5
+			-columnWidth 250
+			-columnAlign "center"
+			-rowSpacing 5;
+
+			separator -style "none";
+
+			image
+				-width 250
+				-image "RadeonProRenderLogo.png";
+
+			frameLayout
+				-marginHeight 8
+				-labelVisible false
+				-borderVisible true
+				-collapsable false
+				-collapse false;
+
+				string $name = "Radeon ProRender USD Render Delegate (hdRPR) for Maya(R)\n" + 
+						"Plugin: " + getRprPluginVersion() + " (Core: " + getRprCoreVersion() + ", RIF:" + getRifSdkVersion() + ")\n" +
+						"Copyright (C) 2022 Advanced Micro Devices, Inc. (AMD).\n" +
+						"Portions of this software are created and copyrighted\n" +
+						"to other third parties.";
+
+				button -label $name -height 70;
+			setParent..;
+
+		setParent ..;
+	}
+
+	global proc updateRprUsdAboutTab()
+	{
+
+	}
+
 	global proc int IsUSDCameraCtrlExist()
 	{
 		global string $g_rprHdrUSDCamerasCtrl;
@@ -754,6 +815,8 @@ void RprUsdProductionRender::RegisterRenderer(const std::string& controlCreation
 )mel";
 
 	std::string registerRenderCmd = TfStringReplace(registerCmd, "{CONTROLS_CREATION_CMDS}", controlCreationCmds);
+	registerRenderCmd = TfStringReplace(registerRenderCmd, "{RPRSDK_VERSION}", rprSdkVersion);
+	registerRenderCmd = TfStringReplace(registerRenderCmd, "{RIFSDK_VERSION}", rifSdkVersion);
 
 	MString mstringCmd(registerRenderCmd.c_str());
 	MStatus status = MGlobal::executeCommand(mstringCmd);
