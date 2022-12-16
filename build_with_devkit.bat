@@ -1,5 +1,7 @@
 rem Support for Maya 2023 only for now, It's possible to add 2022 support if needed. However USD is pretty old within MAYA 2022
 
+@echo off
+
 set Maya_x64=%MAYA_x64_2023%
 set Maya_sdk=%MAYA_SDK_2023%
 set Python_ver=3.9
@@ -23,23 +25,37 @@ rmdir build /Q /S
 mkdir build
 cd build
 cmake -Dpxr_DIR="%usd_build_fullpath%" -DMAYAUSD_OPENEXR_STATIC=ON -DPXR_USD_LOCATION="%usd_build_fullpath%" -DCMAKE_INSTALL_PREFIX="..\..\Build_RPRUsdInstall\hdRPR" -DCMAKE_GENERATOR="Visual Studio 15 2017 Win64" -DPYTHON_INCLUDE_DIR="%Python_Include_Dir%" -DPYTHON_EXECUTABLE="%Maya_x64%/bin/mayapy.exe" -DPYTHON_LIBRARIES="%Python_Library%" ..
+IF %ERRORLEVEL% NEQ 0 (Echo An error occured while building hdRPR! &Exit /b 1)
+
 cmake -DOPENEXR_LOCATION=%usd_build_fullpath% ..
+IF %ERRORLEVEL% NEQ 0 (Echo An error occured while building hdRPR! &Exit /b 1)
+
 cmake --build . --config RelWithDebInfo --target install
+IF %ERRORLEVEL% NEQ 0 (Echo An error occured while building hdRPR! &Exit /b 1)
 cd ../..
+
 
 echo Building RPR USD...
 devenv RprUsd\RprUsd.sln /Build Release2023
+
+IF %ERRORLEVEL% NEQ 0 (Echo An error occured while building RPR USD! &Exit /b 1)
+
 xcopy /S /Y /I RprUsd\dist Build_RPRUsdInstall\RprUsd
 copy /Y RprUsd\mod\rprUsd.mod Build_RPRUsdInstall\RprUsd\rprUsd.mod
 
 
-echo Building Modifier...
+echo Building Mod Modifier...
 devenv installation\ModModifier\ModModifier.sln /Build Release
+
+IF %ERRORLEVEL% NEQ 0 (Echo An error occured while building Mod Modifier! &Exit /b 1)
+
 copy /Y installation\ModModifier\x64\Release\MayaEnvModifier.exe Build_RPRUsdInstall\MayaEnvModifier.exe
 copy /Y installation\ModModifier\x64\Release\RprUsdModModifier.exe Build_RPRUsdInstall\RprUsdModModifier.exe
 
 echo Building Installer...
 cd installation
 iscc installation_hdrpr_only.iss
+
+IF %ERRORLEVEL% NEQ 0 (Echo An error occured while building Installer! &Exit /b 1)
 cd ..
 
