@@ -1,6 +1,6 @@
-rem Support for Maya 2023 only for now, It's possible to add 2022 support if needed. However USD is pretty old within MAYA 2022
-
 @echo off
+
+rem Support for Maya 2023 only for now, It's possible to add 2022 support if needed. However USD is pretty old within MAYA 2022
 
 set Maya_x64=%MAYA_x64_2024%
 set Maya_sdk=%MAYA_SDK_2024%
@@ -24,7 +24,7 @@ cd RadeonProRenderUSD
 rmdir build /Q /S
 mkdir build
 cd build
-cmake -Dpxr_DIR="%usd_build_fullpath%" -DMAYAUSD_OPENEXR_STATIC=ON -DPXR_USD_LOCATION="%usd_build_fullpath%" -DCMAKE_INSTALL_PREFIX="..\..\Build_RPRUsdInstall\hdRPR" -DCMAKE_GENERATOR="Visual Studio 15 2017 Win64" -DPYTHON_INCLUDE_DIR="%Python_Include_Dir%" -DPYTHON_EXECUTABLE="%Maya_x64%/bin/mayapy.exe" -DPYTHON_LIBRARIES="%Python_Library%" ..
+cmake -Dpxr_DIR="%usd_build_fullpath%" -DMAYAUSD_OPENEXR_STATIC=ON -DPXR_USD_LOCATION="%usd_build_fullpath%" -DCMAKE_INSTALL_PREFIX="..\..\Build_RPRUsdInstall\hdRPR" -DCMAKE_GENERATOR="Visual Studio 16 2019" -DCMAKE_GENERATOR_PLATFORM="x64" -DPYTHON_INCLUDE_DIR="%Python_Include_Dir%" -DPYTHON_EXECUTABLE="%Maya_x64%/bin/mayapy.exe" -DPYTHON_LIBRARIES="%Python_Library%" ..
 IF %ERRORLEVEL% NEQ 0 (Echo An error occured while building hdRPR! &Exit /b 1)
 
 cmake -DOPENEXR_LOCATION=%usd_build_fullpath% ..
@@ -36,6 +36,8 @@ cd ../..
 
 
 echo Building RPR USD...
+rmdir RprUsd\dist /Q /S
+devenv RprUsd\RprUsd.sln /Clean Release2024
 devenv RprUsd\RprUsd.sln /Build Release2024
 
 IF %ERRORLEVEL% NEQ 0 (Echo An error occured while building RPR USD! &Exit /b 1)
@@ -45,6 +47,7 @@ copy /Y RprUsd\mod\rprUsd.mod Build_RPRUsdInstall\RprUsd\rprUsd.mod
 
 
 echo Building Mod Modifier...
+devenv installation\ModModifier\ModModifier.sln /Clean Release
 devenv installation\ModModifier\ModModifier.sln /Build Release
 
 IF %ERRORLEVEL% NEQ 0 (Echo An error occured while building Mod Modifier! &Exit /b 1)
@@ -54,7 +57,7 @@ copy /Y installation\ModModifier\x64\Release\RprUsdModModifier.exe Build_RPRUsdI
 
 echo Building Installer...
 cd installation
-iscc installation_hdrpr_only.iss
+iscc installation_hdrpr_only.iss "/DMayaVersionString=2024"
 
 IF %ERRORLEVEL% NEQ 0 (Echo An error occured while building Installer! &Exit /b 1)
 cd ..

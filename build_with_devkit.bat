@@ -36,6 +36,8 @@ cd ../..
 
 
 echo Building RPR USD...
+rmdir RprUsd\dist /Q /S
+devenv RprUsd\RprUsd.sln /Clean Release2023
 devenv RprUsd\RprUsd.sln /Build Release2023
 
 IF %ERRORLEVEL% NEQ 0 (Echo An error occured while building RPR USD! &Exit /b 1)
@@ -45,6 +47,7 @@ copy /Y RprUsd\mod\rprUsd.mod Build_RPRUsdInstall\RprUsd\rprUsd.mod
 
 
 echo Building Mod Modifier...
+devenv installation\ModModifier\ModModifier.sln /Clean Release
 devenv installation\ModModifier\ModModifier.sln /Build Release
 
 IF %ERRORLEVEL% NEQ 0 (Echo An error occured while building Mod Modifier! &Exit /b 1)
@@ -54,7 +57,7 @@ copy /Y installation\ModModifier\x64\Release\RprUsdModModifier.exe Build_RPRUsdI
 
 echo Building Installer...
 cd installation
-iscc installation_hdrpr_only.iss
+iscc installation_hdrpr_only.iss "/DMayaVersionString=2023"
 
 IF %ERRORLEVEL% NEQ 0 (Echo An error occured while building Installer! &Exit /b 1)
 cd ..

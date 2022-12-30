@@ -181,13 +181,13 @@ md $(SolutionDir)dist
 md $(SolutionDir)dist\bin
 md $(SolutionDir)dist\scripts
 md $(SolutionDir)dist\plug-ins
-md $(SolutionDir)dist\plug-ins\2023
+md $(SolutionDir)dist\plug-ins\2024
 md $(SolutionDir)dist\icons
 
 XCOPY /E /Y "$(SolutionDir)\src\python" "$(SolutionDir)dist\scripts\"
 XCOPY /E /Y /I "$(SolutionDir)\..\Build_RPRUsdInstall\hdRPR\lib\python\rpr"  "$(SolutionDir)dist\scripts\rpr"
 
-COPY $(TargetPath) $(SolutionDir)dist\plug-ins\2023\* /Y
+COPY $(TargetPath) $(SolutionDir)dist\plug-ins\2024\* /Y
 XCOPY /E /Y $(ProjectDir)\icons\* $(SolutionDir)dist\icons\
 </Command>
     </PostBuildEvent>
