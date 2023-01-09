@@ -16,6 +16,9 @@
     <Filter Include="Source Files\ProductioonRender">
       <UniqueIdentifier>{4aaf5acb-24bf-4081-ad83-5b808ebebfcb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\BindMtlxCommand">
+      <UniqueIdentifier>{eb5f3795-c207-4e61-88b8-95d93eeed8fc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -45,6 +48,9 @@
     <ClInclude Include="src\ProductionRender\RprUsdProductionRenderCmd.h">
       <Filter>Source Files\ProductioonRender</Filter>
     </ClInclude>
+    <ClInclude Include="src\BindMtlxCommand\RprUsdBindMtlxCmd.h">
+      <Filter>Source Files\BindMtlxCommand</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\pluginMain.cpp">
@@ -67,6 +73,9 @@
     </ClCompile>
     <ClCompile Include="src\ProductionRender\RprUsdProductionRenderCmd.cpp">
       <Filter>Source Files\ProductioonRender</Filter>
+    </ClCompile>
+    <ClCompile Include="src\BindMtlxCommand\RprUsdBindMtlxCmd.cpp">
+      <Filter>Source Files\BindMtlxCommand</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

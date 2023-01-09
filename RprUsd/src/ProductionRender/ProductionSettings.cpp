@@ -21,7 +21,6 @@
 
 #include <mayaUsd/nodes/layerManager.h>
 
-
 #include <functional>
 #include <sstream>
 
@@ -729,41 +728,6 @@ void ProductionSettings::CheckRenderGlobals()
 void ProductionSettings::ClearUsdCameraAttributes()
 {
 	MGlobal::executeCommand("HdRpr_clearUSDCameras();"); 
-}
-
-MayaUsdProxyShapeBase* ProductionSettings::GetMayaUsdProxyShapeBase()
-{
-	MFnDependencyNode  fn;
-	MItDependencyNodes iter(MFn::kPluginDependNode);
-	for (; !iter.isDone(); iter.next()) {
-		MObject mobj = iter.thisNode();
-		fn.setObject(mobj);
-		MTypeId id = fn.typeId();
-		MString typeName = fn.typeName();
-		MString str = fn.absoluteName();
-
-		MString origRTypeName = MayaUsdProxyShapeBase::typeName;
-		if (!fn.isFromReferencedFile() && (MayaUsd::LayerManager::supportedNodeType(fn.typeId()))) {
-			MayaUsdProxyShapeBase* pShape = static_cast<MayaUsdProxyShapeBase*>(fn.userNode());
-			if (pShape) {
-				return pShape;
-			}
-		}
-	}
-
-	return nullptr;
-}
-
-UsdStageRefPtr ProductionSettings::GetUsdStage()
-{
-	MayaUsdProxyShapeBase* pShape = GetMayaUsdProxyShapeBase();
-
-	if (pShape)
-	{
-		return pShape->getUsdStage();
-	}
-
-	return nullptr;
 }
 
 
