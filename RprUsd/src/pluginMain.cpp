@@ -20,7 +20,7 @@ PLUGIN_EXPORT MStatus initializePlugin(MObject obj)
 	CHECK_MSTATUS(status);
 	RprUsdProductionRenderCmd::Initialize();
 
-	status = plugin.registerCommand(RprUsdBiodMtlxCmd::s_commandName, RprUsdBiodMtlxCmd::creator, RprUsdBiodMtlxCmd::newSyntax);
+    status = plugin.registerCommand(RprUsdBiodMtlxCmd::s_commandName, RprUsdBiodMtlxCmd::creator, RprUsdBiodMtlxCmd::newSyntax);
 	CHECK_MSTATUS(status);
 
     return ret;
@@ -30,10 +30,15 @@ PLUGIN_EXPORT MStatus uninitializePlugin(MObject obj)
 {
     MFnPlugin plugin(obj, "AMD", PLUGIN_VERSION, "Any");
 
-    MStatus ret = MS::kSuccess; 
+    MStatus status = MS::kSuccess;
 
-	plugin.deregisterCommand(RprUsdProductionRenderCmd::s_commandName);
-	plugin.deregisterCommand(RprUsdBiodMtlxCmd::s_commandName);
+    status = plugin.deregisterCommand(RprUsdProductionRenderCmd::s_commandName);
+    CHECK_MSTATUS(status);
 
-    return ret;
+    status = plugin.deregisterCommand(RprUsdBiodMtlxCmd::s_commandName);
+    CHECK_MSTATUS(status);
+
+    MGlobal::executePythonCommand("import menu\nmenu.removeRprUsdMenu()");
+    
+    return status;
 }
