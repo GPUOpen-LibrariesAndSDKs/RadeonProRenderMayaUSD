@@ -10,20 +10,20 @@ PXR_NAMESPACE_USING_DIRECTIVE
 
 PLUGIN_EXPORT MStatus initializePlugin(MObject obj)
 {
-    MStatus ret = MS::kSuccess;
+    MStatus status = MS::kSuccess;
 
     MFnPlugin plugin(obj, "AMD", PLUGIN_VERSION, "Any");
 
     MGlobal::executePythonCommand("import menu\nmenu.createRprUsdMenu()");
 
-	MStatus status = plugin.registerCommand(RprUsdProductionRenderCmd::s_commandName, RprUsdProductionRenderCmd::creator, RprUsdProductionRenderCmd::newSyntax);
+	status = plugin.registerCommand(RprUsdProductionRenderCmd::s_commandName, RprUsdProductionRenderCmd::creator, RprUsdProductionRenderCmd::newSyntax);
 	CHECK_MSTATUS(status);
 	RprUsdProductionRenderCmd::Initialize();
 
     status = plugin.registerCommand(RprUsdBiodMtlxCmd::s_commandName, RprUsdBiodMtlxCmd::creator, RprUsdBiodMtlxCmd::newSyntax);
 	CHECK_MSTATUS(status);
 
-    return ret;
+    return status;
 }
 
 PLUGIN_EXPORT MStatus uninitializePlugin(MObject obj)
@@ -34,6 +34,8 @@ PLUGIN_EXPORT MStatus uninitializePlugin(MObject obj)
 
     status = plugin.deregisterCommand(RprUsdProductionRenderCmd::s_commandName);
     CHECK_MSTATUS(status);
+
+    RprUsdProductionRenderCmd::Uninitialize();
 
     status = plugin.deregisterCommand(RprUsdBiodMtlxCmd::s_commandName);
     CHECK_MSTATUS(status);
