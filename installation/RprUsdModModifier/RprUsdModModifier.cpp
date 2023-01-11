@@ -7,19 +7,24 @@
 
 #include <string>
 #include <fstream>
+#include <map>
 
 
 // argc[0] - executable file itself
 // argc[1] - mod file path to modify
 // argc[2] - path to rprUsd plugin to be put into rprUsd.mod file
+// argc[3] - maya version e.g. "2023"
 
 int main(int argc, char* argv[])
 {
-	if (argc < 3)
+	if (argc < 4)
 	{
 		return -1;
 	}
+
 	std::string modFilePath = argv[1];
+	std::string pathToReplace = argv[2];
+	std::string mayaVersion = argv[3];
 
 	std::ifstream rprUsdModFileStream(modFilePath);
 
@@ -30,14 +35,21 @@ int main(int argc, char* argv[])
 	}
 
 	std::string output;
-	std::string strToSubstitute = "<PATH_TO_SUBSTITUTE>";
+
+	std::map<std::string, std::string> replacementMap;
+
+	replacementMap["<PATH_TO_REPLACE>"] = pathToReplace;
+	replacementMap["<MAYA_VERSION>"] = mayaVersion;
 
 	for (std::string currentString; std::getline(rprUsdModFileStream, currentString); )
 	{
-		size_t pos = currentString.find(strToSubstitute);
-		if ( pos != std::string::npos)
+		for (auto it = replacementMap.begin(); it != replacementMap.end(); ++it)
 		{
-			currentString.replace(pos, strToSubstitute.length(), argv[2]);
+			size_t pos = currentString.find(it->first);
+			if (pos != std::string::npos)
+			{
+				currentString.replace(pos, it->first.length(), it->second);
+			}
 		}
 
 		output += currentString + "\n";

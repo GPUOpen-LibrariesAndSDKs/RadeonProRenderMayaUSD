@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.32602.291
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.2017
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RprUsd", "RprUsd.vcxproj", "{CA2FAB6D-43B3-4260-91E5-FC883DCA9EB6}"
 EndProject
@@ -9,12 +9,15 @@ Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug2023|x64 = Debug2023|x64
 		Release2023|x64 = Release2023|x64
+		Release2024|x64 = Release2024|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{CA2FAB6D-43B3-4260-91E5-FC883DCA9EB6}.Debug2023|x64.ActiveCfg = Debug2023|x64
 		{CA2FAB6D-43B3-4260-91E5-FC883DCA9EB6}.Debug2023|x64.Build.0 = Debug2023|x64
 		{CA2FAB6D-43B3-4260-91E5-FC883DCA9EB6}.Release2023|x64.ActiveCfg = Release2023|x64
 		{CA2FAB6D-43B3-4260-91E5-FC883DCA9EB6}.Release2023|x64.Build.0 = Release2023|x64
+		{CA2FAB6D-43B3-4260-91E5-FC883DCA9EB6}.Release2024|x64.ActiveCfg = Release2024|x64
+		{CA2FAB6D-43B3-4260-91E5-FC883DCA9EB6}.Release2024|x64.Build.0 = Release2024|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
