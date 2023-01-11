@@ -40,3 +40,7 @@ def createRprUsdMenu():
         rprUsdMenuCtrl = maya.cmds.menu("rprUsdMenuCtrl", label="RPR USD", p=gMainWindow)
         maya.cmds.menuItem("materialXLibraryCtrl", label="MaterialX Library", p=rprUsdMenuCtrl, c=showRPRMaterialXLibrary)
         maya.cmds.menuItem("bindMaterialXCtrl",label="Bind MaterialX To Selected Mesh", p=rprUsdMenuCtrl, c=BindMaterialXFromFile)
+
+def removeRprUsdMenu():
+    if maya.cmds.menu("rprUsdMenuCtrl", exists=1):
+        maya.cmds.deleteUI("rprUsdMenuCtrl")
