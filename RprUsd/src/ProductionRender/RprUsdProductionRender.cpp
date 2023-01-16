@@ -39,6 +39,8 @@
 #include <pxr/base/tf/debug.h>
 #include <thread>
 
+#include <fstream>
+
 PXR_NAMESPACE_OPEN_SCOPE
 
 TfToken RprUsdProductionRender::_rendererName;
@@ -672,10 +674,16 @@ void RprUsdProductionRender::RegisterRenderer(const std::map<std::string, std::s
 
 	global proc createRprUsdRenderCameraTab()
 	{
+		string $parentForm = `setParent -query`;
+
 		global string $g_rprHdrUSDCamerasCtrl;
 		global string $usdCamerasArray[];
 
-		columnLayout -w 375 -adjustableColumn true rprmayausd_cameracolumn;
+		scrollLayout horizontalScrollBarThickness 0 rprmayausd_camerascroll;
+		columnLayout adjustableColumn true;
+
+		frameLayout - label "Usd Camera" - cll true - cl false;
+
 		attrControlGrp -label "Enable USD Camera" -attribute "defaultRenderGlobals.HdRprPlugin_Prod_Static_useUSDCamera" -changeCommand "OnIsUseUsdCameraChanged";
 		$g_rprHdrUSDCamerasCtrl = `optionMenu -l "USD Camera: " -changeCommand "OnUsdCameraChanged"`;
 		setParent ..;
@@ -691,10 +699,19 @@ void RprUsdProductionRender::RegisterRenderer(const std::map<std::string, std::s
 		{
 			optionMenu -e -v $value $g_rprHdrUSDCamerasCtrl; 
 		}
+		setParent ..;
 
 		{CAMERA_CONTROLS_CREATION_CMDS}
 
 		OnIsUseUsdCameraChanged();
+
+		formLayout
+			-edit
+			-af rprmayausd_camerascroll "top" 0
+			-af rprmayausd_camerascroll "bottom" 0
+			-af rprmayausd_camerascroll "left" 0
+			-af rprmayausd_camerascroll "right" 0
+			$parentForm;
 	}
 
 	global proc OnUsdCameraChanged()
@@ -852,6 +869,12 @@ void RprUsdProductionRender::RegisterRenderer(const std::map<std::string, std::s
 	registerRenderCmd = TfStringReplace(registerRenderCmd, "{CAMERA_CONTROLS_CREATION_CMDS}", cameraTabData);
 	registerRenderCmd = TfStringReplace(registerRenderCmd, "{RPRSDK_VERSION}", rprSdkVersion);
 	registerRenderCmd = TfStringReplace(registerRenderCmd, "{RIFSDK_VERSION}", rifSdkVersion);
+
+	std::ofstream file("C:/projects/log.txt");
+
+	file << registerRenderCmd;
+
+	file.close();
 
 	MString mstringCmd(registerRenderCmd.c_str());
 	MStatus status = MGlobal::executeCommand(mstringCmd);

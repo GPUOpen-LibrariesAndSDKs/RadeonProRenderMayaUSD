@@ -200,7 +200,8 @@ void _CreateStringAttribute(
     MFnDependencyNode& node,
     const MString&     attrName,
     const std::string& defValue,
-    bool               useUserOptions)
+    bool               useUserOptions,
+	bool               usedasFilename = false)
 {
 
     const auto attr = node.attribute(attrName);
@@ -221,6 +222,8 @@ void _CreateStringAttribute(
         MObject       defObj = strData.create(defValue.c_str());
         tAttr.setDefault(defObj);
     }
+
+	tAttr.setUsedAsFilename(usedasFilename);
     node.addAttribute(obj);
 
     if (!existed && useUserOptions) {
@@ -398,6 +401,11 @@ template <> void _GetFromPlug<TfEnum>(const MPlug& plug, TfEnum& out)
     out = TfEnum(out.GetType(), plug.asInt());
 }
 
+template <> void _GetFromPlug<SdfAssetPath>(const MPlug& plug, SdfAssetPath& out)
+{
+	out = SdfAssetPath(std::string(plug.asString().asChar())); //  (out.GetType(), plug.asInt());
+}
+
 template <> void _GetFromPlug<TfToken>(const MPlug& plug, TfToken& out)
 {
     MObject attribute = plug.attribute();
@@ -473,7 +481,7 @@ bool _IsSupportedAttribute(const VtValue& v)
 {
     return v.IsHolding<bool>() || v.IsHolding<int>() || v.IsHolding<float>()
         || v.IsHolding<GfVec3f>() || v.IsHolding<GfVec4f>() || v.IsHolding<TfToken>()
-        || v.IsHolding<std::string>() || v.IsHolding<TfEnum>();
+		|| v.IsHolding<std::string>() || v.IsHolding<TfEnum>() || v.IsHolding<SdfAssetPath>();
 }
 
 MObject GetSettingsNode()
@@ -738,6 +746,14 @@ void ProductionSettings::CreateAttributes(std::map<std::string, std::string>& ct
 						attr.defaultValue.UncheckedGet<std::string>(),
 						userDefaults);
 				}
+				else if (attr.defaultValue.IsHolding<SdfAssetPath>()) {
+					_CreateStringAttribute(
+						node,
+						attrName,
+						attr.defaultValue.UncheckedGet<SdfAssetPath>().GetAssetPath(),
+						userDefaults,
+						true);
+				}
 				else if (attr.defaultValue.IsHolding<TfEnum>()) {
 					_CreateEnumAttribute(
 						node,
@@ -786,68 +802,79 @@ void ProductionSettings::ApplySettings(HdRenderDelegate* renderDelegate)
 
 	bool storeUserSetting = false;
 
-	for (const HdRenderSettingDescriptor& attr : rendererSettingDescriptors) {
-		MString attrName = _MangleName(attr.key, g_attributePrefix).GetText();
+//	for (const HdRenderSettingDescriptor& attr : rendererSettingDescriptors) {
+	for (TabDescriptionPtr tabPtr : _tabsLogicalStructure) {
+		for (GroupDescriptionPtr groupPtr : tabPtr->groupVector) {
+			for (AttributeDescriptionPtr attrPtr : groupPtr->attributeVector) {
+				HdRenderSettingDescriptor& attr = *attrPtr;
+				MString attrName = _MangleName(attr.key, g_attributePrefix).GetText();
 
-		bool valueGot = true;
+				bool valueGot = true;
 
-		VtValue vtValue;
-		if (attr.defaultValue.IsHolding<bool>()) {
-			auto v = attr.defaultValue.UncheckedGet<bool>();
-			_GetAttribute(node, attrName, v, storeUserSetting);
-			vtValue = v;
-		}
-		else if (attr.defaultValue.IsHolding<int>()) {
-			auto v = attr.defaultValue.UncheckedGet<int>();
-			_GetAttribute(node, attrName, v, storeUserSetting);
-			vtValue = v;
-		}
-		else if (attr.defaultValue.IsHolding<float>()) {
-			auto v = attr.defaultValue.UncheckedGet<float>();
-			_GetAttribute(node, attrName, v, storeUserSetting);
-			vtValue = v;
-		}
-		else if (attr.defaultValue.IsHolding<GfVec3f>()) {
-			auto v = attr.defaultValue.UncheckedGet<GfVec3f>();
-			_GetAttribute(node, attrName, v, storeUserSetting);
-			vtValue = v;
-		}
-		else if (attr.defaultValue.IsHolding<GfVec4f>()) {
-			auto v = attr.defaultValue.UncheckedGet<GfVec4f>();
-			_GetAttribute(node, attrName, v, storeUserSetting);
-			vtValue = v;
-		}
-		else if (attr.defaultValue.IsHolding<TfToken>()) {
-			auto v = attr.defaultValue.UncheckedGet<TfToken>();
-			_GetAttribute(node, attrName, v, storeUserSetting);
-			vtValue = v;
-		}
-		else if (attr.defaultValue.IsHolding<std::string>()) {
-			auto v = attr.defaultValue.UncheckedGet<std::string>();
-			_GetAttribute(node, attrName, v, storeUserSetting);
-			vtValue = v;
-		}
-		else if (attr.defaultValue.IsHolding<TfEnum>()) {
-			auto v = attr.defaultValue.UncheckedGet<TfEnum>();
-			_GetAttribute(node, attrName, v, storeUserSetting);
-			vtValue = v;
-		}
-		else {
-			assert(
-				!_IsSupportedAttribute(attr.defaultValue)
-				&& "_IsSupportedAttribute out of synch");
+				VtValue vtValue;
+				if (attr.defaultValue.IsHolding<bool>()) {
+					auto v = attr.defaultValue.UncheckedGet<bool>();
+					_GetAttribute(node, attrName, v, storeUserSetting);
+					vtValue = v;
+				}
+				else if (attr.defaultValue.IsHolding<int>()) {
+					auto v = attr.defaultValue.UncheckedGet<int>();
+					_GetAttribute(node, attrName, v, storeUserSetting);
+					vtValue = v;
+				}
+				else if (attr.defaultValue.IsHolding<float>()) {
+					auto v = attr.defaultValue.UncheckedGet<float>();
+					_GetAttribute(node, attrName, v, storeUserSetting);
+					vtValue = v;
+				}
+				else if (attr.defaultValue.IsHolding<GfVec3f>()) {
+					auto v = attr.defaultValue.UncheckedGet<GfVec3f>();
+					_GetAttribute(node, attrName, v, storeUserSetting);
+					vtValue = v;
+				}
+				else if (attr.defaultValue.IsHolding<GfVec4f>()) {
+					auto v = attr.defaultValue.UncheckedGet<GfVec4f>();
+					_GetAttribute(node, attrName, v, storeUserSetting);
+					vtValue = v;
+				}
+				else if (attr.defaultValue.IsHolding<TfToken>()) {
+					auto v = attr.defaultValue.UncheckedGet<TfToken>();
+					_GetAttribute(node, attrName, v, storeUserSetting);
+					vtValue = v;
+				}
+				else if (attr.defaultValue.IsHolding<SdfAssetPath>()) {
+					auto v = attr.defaultValue.UncheckedGet<SdfAssetPath>();
+					_GetAttribute(node, attrName, v, storeUserSetting);
+					vtValue = v;
+				}
+				else if (attr.defaultValue.IsHolding<std::string>()) {
+					auto v = attr.defaultValue.UncheckedGet<std::string>();
+					_GetAttribute(node, attrName, v, storeUserSetting);
+					vtValue = v;
+				}
+				else if (attr.defaultValue.IsHolding<TfEnum>()) {
+					auto v = attr.defaultValue.UncheckedGet<TfEnum>();
+					_GetAttribute(node, attrName, v, storeUserSetting);
+					vtValue = v;
+				}
+				else {
+					assert(
+						!_IsSupportedAttribute(attr.defaultValue)
+						&& "_IsSupportedAttribute out of synch");
 
-			TF_WARN(
-				"[rprUsd] Can't get setting: '%s' for %s",
-				attr.key.GetText(),
-				"HdRprPlugin");
+					TF_WARN(
+						"[rprUsd] Can't get setting: '%s' for %s",
+						attr.key.GetText(),
+						"HdRprPlugin");
 
-			valueGot = false;
-		}
+					valueGot = false;
+				}
 
-		if (valueGot)
-		{
-			renderDelegate->SetRenderSetting(attr.key, vtValue);
+				if (valueGot)
+				{
+					renderDelegate->SetRenderSetting(attr.key, vtValue);
+				}
+			}
 		}
 	}
 }
