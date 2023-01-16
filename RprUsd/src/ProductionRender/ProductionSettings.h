@@ -36,6 +36,40 @@
 PXR_NAMESPACE_OPEN_SCOPE
 
 
+// Logical structure of attributes - Tabs and Groups
+/*struct AttributeDescription
+{
+	AttributeDescription(const std::string& attrSchemaName, const std::string& attrlabel) :
+		schemaAttrbiuteName(attrSchemaName)
+		, label(attrlabel) {}
+
+	std::string schemaAttrbiuteName;
+	std::string label;
+};*/
+
+typedef std::shared_ptr<HdRenderSettingDescriptor> AttributeDescriptionPtr;
+
+struct GroupDescription
+{
+	GroupDescription(const std::string& groupName) : name(groupName) {}
+
+	std::string name;
+	std::vector<AttributeDescriptionPtr> attributeVector;
+};
+
+typedef std::shared_ptr<GroupDescription> GroupDescriptionPtr;
+
+struct TabDescription
+{
+	TabDescription(const std::string& tabName) : name(tabName) {}
+
+	std::string name;
+	std::vector<GroupDescriptionPtr> groupVector;
+};
+
+typedef std::shared_ptr<TabDescription> TabDescriptionPtr;
+
+
 class ProductionSettings
 {
 public:
@@ -43,7 +77,7 @@ public:
     ~ProductionSettings() = default;
  
     // Creating render globals attributes on "defaultRenderGlobals"
-	static std::string CreateAttributes();
+	static void CreateAttributes(std::map<std::string, std::string>& ctrlCreationForTabs);
 	static void ClearUsdCameraAttributes();
 	static void ApplySettings(HdRenderDelegate* renderDelegate);
 
@@ -63,6 +97,9 @@ private:
 
 	static void OnBeforeOpenCallback(void* );
 
+	static void MakeAttributeLogicalStructure();
+	static void AddAttributeToGroupIfExist(GroupDescriptionPtr groupPtr, const std::string& attrSchemaName);
+
 private:
 	static MCallbackId _newSceneCallback;
 	static MCallbackId _openSceneCallback;
@@ -72,7 +109,10 @@ private:
 	static MCallbackId _nodeAddedCallback;
 
 	static bool _usdCameraListRefreshed;
-	static bool _IsOpeningScene;
+	static bool _isOpeningScene;
+
+	static std::map<std::string, AttributeDescriptionPtr> _attributeMap;
+	static std::vector<TabDescriptionPtr> _tabsLogicalStructure;
 };
 
 PXR_NAMESPACE_CLOSE_SCOPE

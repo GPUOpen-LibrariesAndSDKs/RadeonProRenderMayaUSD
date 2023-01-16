@@ -553,10 +553,10 @@ void RprUsdProductionRender::Initialize()
 {
 	_rendererName = TfToken(GetRendererName());
 
-	std::string controlCreationCmds;
+	std::map<std::string, std::string> controlCreationCmds;
 
 	ProductionSettings::RegisterCallbacks();
-	controlCreationCmds = ProductionSettings::CreateAttributes();
+	ProductionSettings::CreateAttributes(controlCreationCmds);
 
 	RprUsdProductionRender::RegisterRenderer(controlCreationCmds);
 
@@ -575,7 +575,7 @@ void RprUsdProductionRender::UnregisterRenderer()
 	MStatus status = MGlobal::executeCommand("unregisterRprUsdRenderer();");
 }
 
-void RprUsdProductionRender::RegisterRenderer(const std::string& controlCreationCmds)
+void RprUsdProductionRender::RegisterRenderer(const std::map<std::string, std::string>& controlCreationCmds)
 {
 	std::string rifSdkVersion = std::to_string(RIF_VERSION_MAJOR) + "." + std::to_string(RIF_VERSION_MINOR) + "." + std::to_string(RIF_VERSION_REVISION);
 	std::string rprSdkVersion = std::to_string(RPR_VERSION_MAJOR) + "." + std::to_string(RPR_VERSION_MINOR) + "." + std::to_string(RPR_VERSION_REVISION);
@@ -594,7 +594,7 @@ void RprUsdProductionRender::RegisterRenderer(const std::string& controlCreation
 
 		renderer - edit - addGlobalsTab "Common" "createMayaSoftwareCommonGlobalsTab" "updateMayaSoftwareCommonGlobalsTab" rprUsdRender;
 		renderer - edit - addGlobalsTab "Config" "createRprUsdRenderConfigTab" "updateRprUsdRenderConfigTab" rprUsdRender;
-		renderer - edit - addGlobalsTab "General" "createRprUsdRenderGeneralTab" "updateRprUsdRenderGeneralTab" rprUsdRender;
+		renderer - edit - addGlobalsTab "Quality" "createRprUsdRenderQualityTab" "updateRprUsdRenderQualityTab" rprUsdRender;
 		renderer - edit - addGlobalsTab "Camera" "createRprUsdRenderCameraTab" "updateRprUsdRenderCameraTab" rprUsdRender;
 		renderer - edit - addGlobalsTab "About" "createRprUsdAboutTab" "updateRprUsdAboutTab" rprUsdRender;
 	}
@@ -629,7 +629,7 @@ void RprUsdProductionRender::RegisterRenderer(const std::string& controlCreation
 	{
 		columnLayout -w 375 -adjustableColumn true rprmayausd_configcolumn;
 
-		button -label "Configure GPU" -command "onConfigureGPU";
+		button -label "Configure Hardware" -command "onConfigureGPU";
 
 		setParent ..;
 	}
@@ -644,14 +644,14 @@ void RprUsdProductionRender::RegisterRenderer(const std::string& controlCreation
 		python( "import deviceConfigRunner\ndeviceConfigRunner.open_window()" );
 	}
 
-	global proc createRprUsdRenderGeneralTab()
+	global proc createRprUsdRenderQualityTab()
 	{
 		string $parentForm = `setParent -query`;
 
 		scrollLayout -w 375 -horizontalScrollBarThickness 0 rprmayausd_scrollLayout;
 		columnLayout -w 375 -adjustableColumn true rprmayausd_tabcolumn;
 
-		{CONTROLS_CREATION_CMDS}
+		{QUALITY_CONTROLS_CREATION_CMDS}
 
 		formLayout
 			-edit
@@ -662,7 +662,7 @@ void RprUsdProductionRender::RegisterRenderer(const std::string& controlCreation
 			$parentForm;
 	}
 
-	global proc updateRprUsdRenderGeneralTab()
+	global proc updateRprUsdRenderQualityTab()
 	{
 
 	} 
@@ -691,6 +691,8 @@ void RprUsdProductionRender::RegisterRenderer(const std::string& controlCreation
 		{
 			optionMenu -e -v $value $g_rprHdrUSDCamerasCtrl; 
 		}
+
+		{CAMERA_CONTROLS_CREATION_CMDS}
 
 		OnIsUseUsdCameraChanged();
 	}
@@ -823,7 +825,31 @@ void RprUsdProductionRender::RegisterRenderer(const std::string& controlCreation
 	registerRprUsdRenderer();
 )mel";
 
-	std::string registerRenderCmd = TfStringReplace(registerCmd, "{CONTROLS_CREATION_CMDS}", controlCreationCmds);
+	std::string qualityTabData;
+	std::string cameraTabData;
+
+	auto it = controlCreationCmds.find("Quality");
+	if (it != controlCreationCmds.end())
+	{
+		qualityTabData = it->second;
+	}
+	else
+	{
+		assert(false);
+	}
+
+	it = controlCreationCmds.find("Camera");
+	if (it != controlCreationCmds.end())
+	{
+		cameraTabData = it->second;
+	}
+	else
+	{
+		assert(false);
+	}
+
+	std::string registerRenderCmd = TfStringReplace(registerCmd, "{QUALITY_CONTROLS_CREATION_CMDS}", qualityTabData);
+	registerRenderCmd = TfStringReplace(registerRenderCmd, "{CAMERA_CONTROLS_CREATION_CMDS}", cameraTabData);
 	registerRenderCmd = TfStringReplace(registerRenderCmd, "{RPRSDK_VERSION}", rprSdkVersion);
 	registerRenderCmd = TfStringReplace(registerRenderCmd, "{RIFSDK_VERSION}", rifSdkVersion);
 
