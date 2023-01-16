@@ -39,7 +39,6 @@
 #include <pxr/base/tf/debug.h>
 #include <thread>
 
-#include <fstream>
 
 PXR_NAMESPACE_OPEN_SCOPE
 
@@ -679,8 +678,8 @@ void RprUsdProductionRender::RegisterRenderer(const std::map<std::string, std::s
 		global string $g_rprHdrUSDCamerasCtrl;
 		global string $usdCamerasArray[];
 
-		scrollLayout horizontalScrollBarThickness 0 rprmayausd_camerascroll;
-		columnLayout adjustableColumn true;
+		scrollLayout -horizontalScrollBarThickness 0 rprmayausd_camerascroll;
+		columnLayout -adjustableColumn true;
 
 		frameLayout - label "Usd Camera" - cll true - cl false;
 
@@ -869,12 +868,6 @@ void RprUsdProductionRender::RegisterRenderer(const std::map<std::string, std::s
 	registerRenderCmd = TfStringReplace(registerRenderCmd, "{CAMERA_CONTROLS_CREATION_CMDS}", cameraTabData);
 	registerRenderCmd = TfStringReplace(registerRenderCmd, "{RPRSDK_VERSION}", rprSdkVersion);
 	registerRenderCmd = TfStringReplace(registerRenderCmd, "{RIFSDK_VERSION}", rifSdkVersion);
-
-	std::ofstream file("C:/projects/log.txt");
-
-	file << registerRenderCmd;
-
-	file.close();
 
 	MString mstringCmd(registerRenderCmd.c_str());
 	MStatus status = MGlobal::executeCommand(mstringCmd);
