@@ -37,15 +37,6 @@ PXR_NAMESPACE_OPEN_SCOPE
 
 
 // Logical structure of attributes - Tabs and Groups
-/*struct AttributeDescription
-{
-	AttributeDescription(const std::string& attrSchemaName, const std::string& attrlabel) :
-		schemaAttrbiuteName(attrSchemaName)
-		, label(attrlabel) {}
-
-	std::string schemaAttrbiuteName;
-	std::string label;
-};*/
 
 typedef std::shared_ptr<HdRenderSettingDescriptor> AttributeDescriptionPtr;
 
@@ -77,7 +68,7 @@ public:
     ~ProductionSettings() = default;
  
     // Creating render globals attributes on "defaultRenderGlobals"
-	static void CreateAttributes(std::map<std::string, std::string>& ctrlCreationForTabs);
+	static void CreateAttributes(std::map<std::string, std::string>* pMapCtrlCreationForTabs = nullptr);
 	static void ClearUsdCameraAttributes();
 	static void ApplySettings(HdRenderDelegate* renderDelegate);
 

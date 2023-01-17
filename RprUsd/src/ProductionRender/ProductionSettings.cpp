@@ -201,7 +201,7 @@ void _CreateStringAttribute(
     const MString&     attrName,
     const std::string& defValue,
     bool               useUserOptions,
-	bool               usedasFilename = false)
+    bool               usedasFilename = false)
 {
 
     const auto attr = node.attribute(attrName);
@@ -403,7 +403,7 @@ template <> void _GetFromPlug<TfEnum>(const MPlug& plug, TfEnum& out)
 
 template <> void _GetFromPlug<SdfAssetPath>(const MPlug& plug, SdfAssetPath& out)
 {
-	out = SdfAssetPath(std::string(plug.asString().asChar())); //  (out.GetType(), plug.asInt());
+	out = SdfAssetPath(std::string(plug.asString().asChar()));
 }
 
 template <> void _GetFromPlug<TfToken>(const MPlug& plug, TfToken& out)
@@ -606,7 +606,7 @@ void ProductionSettings::MakeAttributeLogicalStructure()
 	cameraTabDescPtr->groupVector.push_back(cameraMiscModeGroupPtr);
 }
 
-void ProductionSettings::CreateAttributes(std::map<std::string, std::string>& ctrlCreationForTabs)
+void ProductionSettings::CreateAttributes(std::map<std::string, std::string>* pMapCtrlCreationForTabs)
 {
 	std::string rendererName = GetRendererName();
 	HdRendererPlugin* rendererPlugin = HdRendererPluginRegistry::GetInstance().GetRendererPlugin(TfToken(rendererName));
@@ -783,7 +783,9 @@ void ProductionSettings::CreateAttributes(std::map<std::string, std::string>& ct
 			tabCtrlCreationCommands += "setParent ..;\n";
 		}
 
-		ctrlCreationForTabs[tabPtr->name] = tabCtrlCreationCommands;
+		if (pMapCtrlCreationForTabs) {
+			(*pMapCtrlCreationForTabs)[tabPtr->name] = tabCtrlCreationCommands; 
+		}
 	}
 }
 
@@ -802,7 +804,6 @@ void ProductionSettings::ApplySettings(HdRenderDelegate* renderDelegate)
 
 	bool storeUserSetting = false;
 
-//	for (const HdRenderSettingDescriptor& attr : rendererSettingDescriptors) {
 	for (TabDescriptionPtr tabPtr : _tabsLogicalStructure) {
 		for (GroupDescriptionPtr groupPtr : tabPtr->groupVector) {
 			for (AttributeDescriptionPtr attrPtr : groupPtr->attributeVector) {
@@ -881,8 +882,7 @@ void ProductionSettings::ApplySettings(HdRenderDelegate* renderDelegate)
 
 void ProductionSettings::CheckRenderGlobals()
 {
-	std::map<std::string, std::string> map;
-	CreateAttributes(map);
+	CreateAttributes();
 }
 
 void ProductionSettings::ClearUsdCameraAttributes()

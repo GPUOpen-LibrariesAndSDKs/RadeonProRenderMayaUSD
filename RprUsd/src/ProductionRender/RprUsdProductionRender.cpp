@@ -557,7 +557,7 @@ void RprUsdProductionRender::Initialize()
 	std::map<std::string, std::string> controlCreationCmds;
 
 	ProductionSettings::RegisterCallbacks();
-	ProductionSettings::CreateAttributes(controlCreationCmds);
+	ProductionSettings::CreateAttributes(&controlCreationCmds);
 
 	RprUsdProductionRender::RegisterRenderer(controlCreationCmds);
 
