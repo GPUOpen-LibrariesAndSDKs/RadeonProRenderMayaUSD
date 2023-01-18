@@ -56,6 +56,8 @@ private:
 	void ProcessSyncRender(float refreshRate);
 
 	static void RegisterRenderer(const std::string& controlCreationCmds);
+	static void UnregisterRenderer();
+
 	void OutputHardwareSetupAndSyncTime();
 
 private:

@@ -1,3 +1,3 @@
-+ MAYAVERSION:2023 RprUsd 0.1.17 <PATH_TO_SUBSTITUTE>
++ MAYAVERSION:<MAYA_VERSION> RprUsd 0.1.18 <PATH_TO_REPLACE>
 scripts: scripts
-plug-ins: plug-ins/2023
+plug-ins: plug-ins/<MAYA_VERSION>

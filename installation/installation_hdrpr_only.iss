@@ -1,14 +1,14 @@
-#define AppVersionString '0.1.17'
+#define AppVersionString '0.1.18'
 
 [Setup]
-AppName=RPRMayaUSDHdRPR
+AppName=RPRMayaUSD_{#MayaVersionString}
 AppVersion={#AppVersionString}
 WizardStyle=modern
-DefaultDirName="{autopf64}\RPRMayaUSDHdRPR"
-DefaultGroupName=RPRMayaUSDHdRPR
+DefaultDirName="{autopf64}\RPRMayaUSD_{#MayaVersionString}"
+DefaultGroupName=RPRMayaUSD_{#MayaVersionString}
 ChangesEnvironment=no
 OutputDir=.
-OutputBaseFilename=RPRMayaUSDHdRPR_Setup_{#AppVersionString}
+OutputBaseFilename=RPRMayaUSD_{#MayaVersionString}_{#AppVersionString}_Setup
 SetupIconFile=.\ico\AMD.ico
 //LicenseFile=LICENSE.txt
 
@@ -42,7 +42,7 @@ var
   resultCode: Integer;
 begin
   if Exec(ExpandConstant('{app}\MayaEnvModifier.exe'), 
-      ExpandConstant(action + ' ' + '"{app}\hdRPR"'), '', SW_SHOW, ewWaitUntilTerminated, resultCode)
+      ExpandConstant(action + ' ' + '"{app}\hdRPR"' + ' ' + maya_version), '', SW_SHOW, ewWaitUntilTerminated, resultCode)
   then 
   begin
     if not (resultCode = 0) then
@@ -57,7 +57,7 @@ var
   resultCode : Integer;
   mayaVersion : String;
 begin
-  mayaVersion := '2023';
+  mayaVersion := ExpandConstant('{#MayaVersionString}');
 
   if CurStep = ssPostInstall then
   begin
@@ -66,7 +66,7 @@ begin
     mayaModulePath := ExpandConstant('{commoncf64}\Autodesk Shared\modules\maya\' + mayaVersion);
 
     if Exec(ExpandConstant('{app}\rprUsdModModifier.exe'), 
-        ExpandConstant('"{app}\rprUsd\rprUsd.mod" "{app}\rprUsd"'), '', SW_SHOW, ewWaitUntilTerminated, resultCode)
+        ExpandConstant('"{app}\rprUsd\rprUsd.mod" "{app}\rprUsd" ' + mayaVersion), '', SW_SHOW, ewWaitUntilTerminated, resultCode)
     then 
     begin
       if not (resultCode = 0) then
@@ -86,7 +86,7 @@ var
   path : String;
   mayaVersion : String;
 begin
-  mayaVersion := '2023';
+  mayaVersion := ExpandConstant('{#MayaVersionString}');
   if CurUninstallStep = usUninstall then
   begin
     path := ExpandConstant('{commoncf64}\Autodesk Shared\modules\maya\' + mayaVersion + '\rprUsd.mod');

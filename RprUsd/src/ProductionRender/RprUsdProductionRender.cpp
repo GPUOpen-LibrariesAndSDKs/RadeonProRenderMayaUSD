@@ -567,6 +567,12 @@ void RprUsdProductionRender::Initialize()
 void RprUsdProductionRender::Uninitialize()
 {
 	ProductionSettings::UnregisterCallbacks();
+	RprUsdProductionRender::UnregisterRenderer();
+}
+
+void RprUsdProductionRender::UnregisterRenderer()
+{
+	MStatus status = MGlobal::executeCommand("unregisterRprUsdRenderer();");
 }
 
 void RprUsdProductionRender::RegisterRenderer(const std::string& controlCreationCmds)
@@ -580,9 +586,7 @@ void RprUsdProductionRender::RegisterRenderer(const std::string& controlCreation
 		string $currentRendererName = "hdRPR";
 
 		renderer - rendererUIName $currentRendererName
-			- renderProcedure "rprUsdRenderCmd"
-
-			rprUsdRender;
+			- renderProcedure "rprUsdRenderCmd" rprUsdRender;
 
 		renderer - edit - addGlobalsNode "RprUsdGlobals" rprUsdRender;
 		renderer - edit - addGlobalsNode "defaultRenderGlobals" rprUsdRender;
@@ -593,6 +597,11 @@ void RprUsdProductionRender::RegisterRenderer(const std::string& controlCreation
 		renderer - edit - addGlobalsTab "General" "createRprUsdRenderGeneralTab" "updateRprUsdRenderGeneralTab" rprUsdRender;
 		renderer - edit - addGlobalsTab "Camera" "createRprUsdRenderCameraTab" "updateRprUsdRenderCameraTab" rprUsdRender;
 		renderer - edit - addGlobalsTab "About" "createRprUsdAboutTab" "updateRprUsdAboutTab" rprUsdRender;
+	}
+
+	global proc unregisterRprUsdRenderer()
+	{
+		renderer -unregisterRenderer rprUsdRender;
 	}
 
 	proc string GetCameraSelectedAttribute()
