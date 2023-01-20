@@ -24,8 +24,6 @@ import zipfile
 # Show the material browser window.
 # -----------------------------------------------------------------------------
 def show() :
-
-    print("ML Log: try show RPRMaterialBrowser")
     RPRMaterialBrowser().show()
 
 # A material browser window for Radeon Pro Render materials.
@@ -179,6 +177,17 @@ class RPRMaterialBrowser(object) :
     def getMaterialFullPath(self, fileName) :
         return os.path.join(self.pathRootThumbnail, fileName)
 
+    def onSortModeChanged(self, modeName) :
+        mode = cmds.optionMenu(self.sortDropdown, q=True, select=True)
+        self.sortMaterials(mode)
+        self.populateMaterialsInternal()
+
+    # 1 - No Sort, 2 - Ascending, 3 - Descending
+    def sortMaterials(self, mode) :
+        if mode == 1 :
+            self.materials = self.nonSortedMaterials.copy()
+        else :
+            self.materials = sorted(self.nonSortedMaterials, key=lambda material: material["title"], reverse = (mode == 3) )
     # Create the materials layout.
     # -----------------------------------------------------------------------------
     def createMaterialsLayout(self) :
@@ -196,10 +205,18 @@ class RPRMaterialBrowser(object) :
         cmds.setParent('..')
 
         # Add the search field.
-        searchRow = cmds.rowLayout(numberOfColumns=2)
+        searchRow = cmds.rowLayout(numberOfColumns=4)
+
+        helpText = cmds.text(label="Sort Mode: ")
+        self.sortDropdown = cmds.optionMenu(cc=self.onSortModeChanged)
+        cmds.menuItem(p=self.sortDropdown, l="No Sort")
+        cmds.menuItem(p=self.sortDropdown, l="Sort Ascending")
+        cmds.menuItem(p=self.sortDropdown, l="Sort Descending")
+
         cmds.image(image='material_browser/search.png')
         self.searchField = cmds.textField(placeholderText="Search...", width=250, height=22,
                                           textChangedCommand=self.searchMaterials)
+
         cmds.setParent('..')
 
         # Add help text.
@@ -322,7 +339,6 @@ class RPRMaterialBrowser(object) :
     # -----------------------------------------------------------------------------
     def createPreviewLayout(self) :
 
-        print("ML Log: createPreviewLayout")
         # Create tab layout.
         tabLayout = cmds.tabLayout(borderStyle="full")
 
@@ -594,7 +610,14 @@ class RPRMaterialBrowser(object) :
 
     # Populate the materials view with a list of materials.
     # -----------------------------------------------------------------------------
+
     def populateMaterials(self) :
+        self.nonSortedMaterials = self.materials.copy()
+        self.sortMaterials(cmds.optionMenu(self.sortDropdown, q=True, select=True))
+        self.populateMaterialsInternal()
+
+
+    def populateMaterialsInternal(self) :
         # Remove any existing materials.
         if (cmds.layout("RPRMaterialsFlow", exists=True)) :
             cmds.deleteUI("RPRMaterialsFlow", layout=True)
