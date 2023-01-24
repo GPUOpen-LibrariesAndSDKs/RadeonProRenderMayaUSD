@@ -162,7 +162,7 @@ XCOPY /E /Y $(ProjectDir)\icons\* $(SolutionDir)dist\icons\
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(MAYA_SDK_2024)\include;$(MAYA_x64_2024)\..\MayaUSD\Maya2024\0.21.0_202212080023-25d1998\mayausd\USD\include\boost-1_76;$(MAYA_x64_2024)\..\MayaUSD\Maya2024\0.21.0_202212080023-25d1998\mayausd\USD\include;$(MAYA_x64_2024)\include\Python310\Python;$(ProjectDir)\src\ProductionRender;$(MAYA_SDK_2024)\devkit\ufe\include;$(MAYA_x64_2024)\..\MayaUSD\Maya2024\0.21.0_202212080023-25d1998\mayausd\MayaUSD\include\hdMaya;$(MAYA_x64_2024)\..\MayaUSD\Maya2024\0.21.0_202212080023-25d1998\mayausd\MayaUSD\include;$(MAYA_x64_2024)\..\MayaUSD\Maya2024\0.21.0_202212080023-25d1998\mayausd\MayaUSD\include\hdMaya\adapters;./../</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(MAYA_SDK_2024)\include;$(MAYA_x64_2024)\..\MayaUSD\Maya2024\0.22.0_202301152314-a488582\mayausd\USD\include\boost-1_76;$(MAYA_x64_2024)\..\MayaUSD\Maya2024\0.22.0_202301152314-a488582\mayausd\USD\include;$(MAYA_x64_2024)\include\Python310\Python;$(ProjectDir)\src\ProductionRender;$(MAYA_SDK_2024)\devkit\ufe\include;$(MAYA_x64_2024)\..\MayaUSD\Maya2024\0.22.0_202301152314-a488582\mayausd\MayaUSD\include\hdMaya;$(MAYA_x64_2024)\..\MayaUSD\Maya2024\0.22.0_202301152314-a488582\mayausd\MayaUSD\include;$(MAYA_x64_2024)\..\MayaUSD\Maya2024\0.22.0_202301152314-a488582\mayausd\MayaUSD\include\hdMaya\adapters;./../</AdditionalIncludeDirectories>
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>Default</InlineFunctionExpansion>
     </ClCompile>
@@ -172,7 +172,7 @@ XCOPY /E /Y $(ProjectDir)\icons\* $(SolutionDir)dist\icons\
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalLibraryDirectories>$(MAYA_SDK_2024)/lib;$(MAYA_x64_2024)/lib;$(MAYA_x64_2024)\..\MayaUSD\Maya2024\0.21.0_202212080023-25d1998\mayausd\USD\lib;lib\2024;$(MAYA_SDK_2024)\devkit\ufe\lib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(MAYA_SDK_2024)/lib;$(MAYA_x64_2024)/lib;$(MAYA_x64_2024)\..\MayaUSD\Maya2024\0.22.0_202301152314-a488582\mayausd\USD\lib;lib\2024;$(MAYA_SDK_2024)\devkit\ufe\lib</AdditionalLibraryDirectories>
       <AdditionalDependencies>usd_hgiInterop.lib;usd_hgi.lib;usd_usdImaging.lib;usd_hd.lib;usd_usdVol.lib;usd_pxOsd.lib;usd_glf.lib;usd_garch.lib;usd_hio.lib;usd_hf.lib;usd_usdHydra.lib;usd_usdShade.lib;usd_usdLux.lib;usd_usdRender.lib;usd_usdRi.lib;usd_sdr.lib;usd_ndr.lib;usd_usdUtils.lib;usd_usdGeom.lib;usd_usd.lib;usd_kind.lib;usd_pcp.lib;usd_sdf.lib;usd_ar.lib;usd_plug.lib;usd_vt.lib;usd_gf.lib;usd_work.lib;usd_trace.lib;usd_js.lib;usd_tf.lib;usd_cameraUtil.lib;usd_hdx.lib;usd_hdSt.lib;usd_hgiGL.lib;usd_hdMtlx.lib;usd_arch.lib;opengl32.lib;Shlwapi.lib;OpenMaya.lib;Foundation.lib;ufe_0.lib;OpenMayaFX.lib;OpenMayaRender.lib;OpenMayaUI.lib;OpenMayaAnim.lib;Image.lib;cg.lib;cgGL.lib;clew.lib;tbb.lib;Ws2_32.lib;hdMaya.lib;mayaUsd.lib;MaterialXFormatMayaUSD.lib;MaterialXCoreMayaUSD.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
