@@ -196,16 +196,14 @@ XCOPY /E /Y $(ProjectDir)\icons\* $(SolutionDir)dist\icons\
     </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="framework.h" />
-    <ClInclude Include="pch.h" />
     <ClInclude Include="src\BindMtlxCommand\RprUsdBindMtlxCmd.h" />
     <ClInclude Include="src\ProductionRender\common.h" />
     <ClInclude Include="src\ProductionRender\defaultLightDelegate.h" />
     <ClInclude Include="src\ProductionRender\ProductionSettings.h" />
-    <ClInclude Include="src\ProductionRender\renderGlobals.h" />
     <ClInclude Include="src\ProductionRender\RenderProgressBars.h" />
     <ClInclude Include="src\ProductionRender\RprUsdProductionRender.h" />
     <ClInclude Include="src\ProductionRender\RprUsdProductionRenderCmd.h" />
+    <ClInclude Include="src\version.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\BindMtlxCommand\RprUsdBindMtlxCmd.cpp" />
