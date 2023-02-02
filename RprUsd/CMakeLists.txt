@@ -162,9 +162,9 @@ use_props(${PROJECT_NAME} "${CMAKE_CONFIGURATION_TYPES}" "${DEFAULT_CXX_PROPS}")
 set(ROOT_NAMESPACE RprUsd)
 
 
-
 set_target_properties(${PROJECT_NAME} PROPERTIES
     VS_GLOBAL_KEYWORD "Win32Proj"
+    SUFFIX ".mll"
 )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
