@@ -37,23 +37,43 @@ cd ../..
 
 echo Building RPR USD...
 rmdir RprUsd\dist /Q /S
-devenv RprUsd\RprUsd.sln /Clean Release2024
-devenv RprUsd\RprUsd.sln /Build Release2024
 
-IF %ERRORLEVEL% NEQ 0 (Echo An error occured while building RPR USD! &Exit /b 1)
+cd RprUsd
+rmdir build /Q /S
+mkdir build
+
+cd build
+
+cmake -G "Visual Studio 16 2019" -A "x64" -T v142 ..
+IF %ERRORLEVEL% NEQ 0 (Echo An error occured while building RPR USD! (Maya RprUsd project failed) &Exit /b 1)
+
+cmake --build . --config Release2024
+IF %ERRORLEVEL% NEQ 0 (Echo An error occured while building RPR USD! (Maya RprUsd project failed) &Exit /b 1)
+
+cd ../..
 
 xcopy /S /Y /I RprUsd\dist Build_RPRUsdInstall\RprUsd
 copy /Y RprUsd\mod\rprUsd.mod Build_RPRUsdInstall\RprUsd\rprUsd.mod
 
 
 echo Building Mod Modifier...
-devenv installation\ModModifier\ModModifier.sln /Clean Release
-devenv installation\ModModifier\ModModifier.sln /Build Release
+cd installation\ModModifier
+rmdir build /Q /S
+mkdir build
 
+cd build
+
+cmake -G "Visual Studio 16 2019" -A "x64" ..
 IF %ERRORLEVEL% NEQ 0 (Echo An error occured while building Mod Modifier! &Exit /b 1)
+
+cmake --build . --config Release
+IF %ERRORLEVEL% NEQ 0 (Echo An error occured while building Mod Modifier! &Exit /b 1)
+
+cd ..\..\..
 
 copy /Y installation\ModModifier\x64\Release\MayaEnvModifier.exe Build_RPRUsdInstall\MayaEnvModifier.exe
 copy /Y installation\ModModifier\x64\Release\RprUsdModModifier.exe Build_RPRUsdInstall\RprUsdModModifier.exe
+
 
 echo Building Installer...
 cd installation
