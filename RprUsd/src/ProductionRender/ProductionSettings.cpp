@@ -796,7 +796,7 @@ void ProductionSettings::ApplySettings(HdRenderDelegate* renderDelegate)
 	MObject nodeObj = GetSettingsNode();
 	if (nodeObj.isNull())
 	{
-		TF_WARN("[hdRPR production] render settings node was not found");
+		TF_WARN("hdRPR: production render settings node was not found");
 		return;
 	}
 
@@ -864,7 +864,7 @@ void ProductionSettings::ApplySettings(HdRenderDelegate* renderDelegate)
 						&& "_IsSupportedAttribute out of synch");
 
 					TF_WARN(
-						"[rprUsd] Can't get setting: '%s' for %s",
+						"hdRPR: Can't get setting: '%s' for %s",
 						attr.key.GetText(),
 						"HdRprPlugin");
 
@@ -874,6 +874,57 @@ void ProductionSettings::ApplySettings(HdRenderDelegate* renderDelegate)
 				if (valueGot)
 				{
 					renderDelegate->SetRenderSetting(attr.key, vtValue);
+					// check if attribute is supported or not and display a warning if not
+					CheckUnsupportedAttributeAndDisplayWarning(attr.key.GetText(), vtValue, nodeObj);
+				}
+			}
+		}
+	}
+}
+
+void ProductionSettings::CheckUnsupportedAttributeAndDisplayWarning(const std::string& attrName, const VtValue& vtValue, const MFnDependencyNode& depNode)
+{
+	// Ambient Occulsion is not supprted in both engines
+	if (attrName == "rpr:core:renderMode") {
+		TfToken tfToken;
+		if ( (vtValue.IsHolding<TfToken>())) {
+			tfToken = vtValue.UncheckedGet<TfToken>();
+		}
+
+		std::string mode = tfToken.GetString();
+		if (mode == "Ambient Occlusion") {
+			TF_WARN("hdRPR: Ambient Occlusion mode is not currently supported!");
+		}
+	}
+
+	if (attrName == "rpr:ocio:configPath") {
+		SdfAssetPath assetPath;
+		if ((vtValue.IsHolding<SdfAssetPath>())) {
+			assetPath = vtValue.UncheckedGet<SdfAssetPath>();
+		}
+
+		std::string configPath = assetPath.GetAssetPath();
+		if (!configPath.empty()) {
+			TF_WARN("hdRPR: OCIO is not currently supported in hdRPR!");
+		}
+	}
+
+	if (attrName == "rpr:cryptomatte:outputPath") {
+		SdfAssetPath assetPath;
+		if ((vtValue.IsHolding<SdfAssetPath>())) {
+			assetPath = vtValue.UncheckedGet<SdfAssetPath>();
+
+			std::string outputPath = assetPath.GetAssetPath();
+			if (!outputPath.empty()) {
+
+				// get engine
+				MString attrMangledName = _MangleName(TfToken("rpr:core:renderQuality"), g_attributePrefix).GetText();
+
+				TfToken tfTokenEngine;
+				_GetAttribute(depNode, attrMangledName, tfTokenEngine, false);
+
+				if (tfTokenEngine.GetString() != "Northstar") {
+					TF_WARN("hdRPR: cryptomatte is currently supported only in NorthStar moed!");
 				}
 			}
 		}
