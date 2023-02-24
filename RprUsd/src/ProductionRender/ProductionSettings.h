@@ -82,6 +82,8 @@ public:
 	static UsdPrim GetUsdCameraPrim();
 	static bool IsUSDCameraToUse();
 
+	static void CheckUnsupportedAttributeAndDisplayWarning(const std::string& attrName, const VtValue& value, const MFnDependencyNode& depNode);
+
 private:
 	static void attributeChangedCallback(MNodeMessage::AttributeMessage msg, MPlug & plug, MPlug & otherPlug, void* clientData);
 	static void nodeAddedCallback(MObject& node, void* pData);

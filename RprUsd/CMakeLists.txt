@@ -314,23 +314,23 @@ add_custom_command_if(
     COMMAND   $<CONFIG:Debug2023> echo -------------
     COMMAND   $<CONFIG:Debug2023> XCOPY /E /Y $<SHELL_PATH:${CMAKE_CURRENT_SOURCE_DIR}/>\\icons\\* $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\icons\\
     COMMAND $<CONFIG:Release2023> echo creating dist folders
-    COMMAND $<CONFIG:Release2023> md $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist
-    COMMAND $<CONFIG:Release2023> md $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\bin
-    COMMAND $<CONFIG:Release2023> md $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\scripts
-    COMMAND $<CONFIG:Release2023> md $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\plug-ins
-    COMMAND $<CONFIG:Release2023> md $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\plug-ins\\2023
-    COMMAND $<CONFIG:Release2023> md $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\icons
+    COMMAND $<CONFIG:Release2023> if not exist $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist md $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist
+    COMMAND $<CONFIG:Release2023> if not exist $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\bin md $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\bin
+    COMMAND $<CONFIG:Release2023> if not exist $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\scripts md $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\scripts
+    COMMAND $<CONFIG:Release2023> if not exist $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\plug-ins md $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\plug-ins
+    COMMAND $<CONFIG:Release2023> if not exist $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\plug-ins\\2023 md $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\plug-ins\\2023
+    COMMAND $<CONFIG:Release2023> if not exist $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\icons md $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\icons
     COMMAND $<CONFIG:Release2023> XCOPY /E /Y "$<SHELL_PATH:${CMAKE_SOURCE_DIR}/>\\src\\python" "$<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\scripts\\"
     COMMAND $<CONFIG:Release2023> XCOPY /E /Y /I "$<SHELL_PATH:${CMAKE_SOURCE_DIR}/>\\..\\Build_RPRUsdInstall\\hdRPR\\lib\\python\\rpr"  "$<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\scripts\\rpr"
     COMMAND $<CONFIG:Release2023> COPY $<SHELL_PATH:$<TARGET_FILE:${PROJECT_NAME}>> $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\plug-ins\\2023\\* /Y
     COMMAND $<CONFIG:Release2023> XCOPY /E /Y $<SHELL_PATH:${CMAKE_CURRENT_SOURCE_DIR}/>\\icons\\* $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\icons\\
     COMMAND $<CONFIG:Release2024> echo creating dist folders
-    COMMAND $<CONFIG:Release2024> md $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist
-    COMMAND $<CONFIG:Release2024> md $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\bin
-    COMMAND $<CONFIG:Release2024> md $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\scripts
-    COMMAND $<CONFIG:Release2024> md $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\plug-ins
-    COMMAND $<CONFIG:Release2024> md $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\plug-ins\\2024
-    COMMAND $<CONFIG:Release2024> md $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\icons
+    COMMAND $<CONFIG:Release2024> if not exist $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist md $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist
+    COMMAND $<CONFIG:Release2024> if not exist $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\bin md $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\bin
+    COMMAND $<CONFIG:Release2024> if not exist $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\scripts md $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\scripts
+    COMMAND $<CONFIG:Release2024> if not exist $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\plug-ins md $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\plug-ins
+    COMMAND $<CONFIG:Release2024> if not exist $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\plug-ins\\2024 md $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\plug-ins\\2024
+    COMMAND $<CONFIG:Release2024> if not exist $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\icons md $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\icons
     COMMAND $<CONFIG:Release2024> XCOPY /E /Y "$<SHELL_PATH:${CMAKE_SOURCE_DIR}/>\\src\\python" "$<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\scripts\\"
     COMMAND $<CONFIG:Release2024> XCOPY /E /Y /I "$<SHELL_PATH:${CMAKE_SOURCE_DIR}/>\\..\\Build_RPRUsdInstall\\hdRPR\\lib\\python\\rpr"  "$<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\scripts\\rpr"
     COMMAND $<CONFIG:Release2024> COPY $<SHELL_PATH:$<TARGET_FILE:${PROJECT_NAME}>> $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\plug-ins\\2024\\* /Y
