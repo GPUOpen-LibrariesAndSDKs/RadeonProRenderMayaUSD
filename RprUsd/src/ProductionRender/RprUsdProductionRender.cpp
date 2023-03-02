@@ -35,7 +35,7 @@
 #include <hdMaya/delegates/delegateRegistry.h>
 #include <hdMaya/delegates/sceneDelegate.h>
 #include <hdMaya/utils.h>
-#include <hdMaya\adapters\proxyAdapter.h>
+#include <hdMaya/adapters/proxyAdapter.h>
 
 #include <pxr/base/tf/debug.h>
 #include <thread>
