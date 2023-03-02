@@ -35,6 +35,7 @@
 #include <hdMaya/delegates/delegateRegistry.h>
 #include <hdMaya/delegates/sceneDelegate.h>
 #include <hdMaya/utils.h>
+#include <hdMaya\adapters\proxyAdapter.h>
 
 #include <pxr/base/tf/debug.h>
 #include <thread>
@@ -383,6 +384,12 @@ bool RprUsdProductionRender::InitHydraResources()
 	auto delegateNames = HdMayaDelegateRegistry::GetDelegateNames();
 	auto creators = HdMayaDelegateRegistry::GetDelegateCreators();
 	TF_VERIFY(delegateNames.size() == creators.size());
+
+	HdMayaSceneDelegate* pMayaSceneDelegate = nullptr;
+
+	SdfPath proxyAdapterPath;
+	MayaUsdProxyShapeBase* pShapeBase = GetMayaUsdProxyShapeBase();
+
 	for (size_t i = 0, n = creators.size(); i < n; ++i) {
 		const auto& creator = creators[i];
 		if (creator == nullptr) {
@@ -391,10 +398,24 @@ bool RprUsdProductionRender::InitHydraResources()
 		delegateInitData.name = delegateNames[i];
 		delegateInitData.delegateID = _ID.AppendChild(
 			TfToken(TfStringPrintf("_Delegate_%s_%lu_%p", delegateNames[i].GetText(), i, this)));
+
 		auto newDelegate = creator(delegateInitData);
 		if (newDelegate) {
 			// Call SetLightsEnabled before the delegate is populated
 			newDelegate->SetLightsEnabled(!_hasDefaultLighting);
+
+			if (delegateInitData.name == "HdMayaSceneDelegate") {
+				pMayaSceneDelegate = static_cast<HdMayaSceneDelegate*> (newDelegate.get());
+
+				if (pShapeBase != nullptr) {
+					MFnDagNode fn(pShapeBase->thisMObject());
+					MDagPath   proxyTransformPath;
+					fn.getPath(proxyTransformPath);
+
+					proxyAdapterPath = pMayaSceneDelegate->GetPrimPath(proxyTransformPath, false);
+				}
+			}
+
 			_delegates.emplace_back(std::move(newDelegate));
 		}
 	}
@@ -407,6 +428,23 @@ bool RprUsdProductionRender::InitHydraResources()
 	for (auto& it : _delegates) {
 		it->Populate();
 	}
+
+	if (pMayaSceneDelegate) {
+		HdMayaProxyAdapter* pProxyAdapter = static_cast<HdMayaProxyAdapter*> (pMayaSceneDelegate->GetShapeAdapter(proxyAdapterPath).get());
+
+		if (pProxyAdapter != nullptr) {
+			UsdImagingDelegate* pImagingDelegate = nullptr;
+
+			// Temporary Hack! We access private variable here because we cannot modify MtoH directly.
+			// I want to contribute getter method for this variable in MtoH. If they approve we will remove the hack.
+			void* addr = (char*) pProxyAdapter + sizeof(HdMayaShapeAdapter) + sizeof(TfWeakBase) + sizeof(MayaUsdProxyShapeBase*);
+			pImagingDelegate = ((std::unique_ptr<HdMayaProxyUsdImagingDelegate>*)(addr))->get();
+
+			pImagingDelegate->SetTime(pShapeBase->getTime());
+			pImagingDelegate->SetSceneMaterialsEnabled(true);
+		}
+	}
+
 	if (_defaultLightDelegate) {
 		_defaultLightDelegate->Populate();
 	}
@@ -476,8 +514,13 @@ MStatus RprUsdProductionRender::Render()
 
 	MStatus  status;
 
-	UsdPrim cameraPrim = ProductionSettings::GetUsdCameraPrim();
-	bool isUsdCamera = ProductionSettings::IsUSDCameraToUse() && cameraPrim.IsValid();
+	UsdPrim cameraPrim;
+	bool isUsdCamera = false;
+
+	if (ProductionSettings::IsUSDCameraToUse()) {
+		cameraPrim = ProductionSettings::GetUsdCameraPrim();
+		isUsdCamera = cameraPrim.IsValid();
+	}
 
 	if (!isUsdCamera)
 	{

@@ -15,9 +15,6 @@ MayaUsdProxyShapeBase* GetMayaUsdProxyShapeBase()
 	for (; !iter.isDone(); iter.next()) {
 		MObject mobj = iter.thisNode();
 		fn.setObject(mobj);
-		MTypeId id = fn.typeId();
-		MString typeName = fn.typeName();
-		MString str = fn.absoluteName();
 
 		MString origRTypeName = MayaUsdProxyShapeBase::typeName;
 		if (!fn.isFromReferencedFile() && (MayaUsd::LayerManager::supportedNodeType(fn.typeId()))) {
