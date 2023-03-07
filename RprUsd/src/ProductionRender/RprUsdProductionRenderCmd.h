@@ -21,6 +21,10 @@
 #define kWaitForItTwoStep "-wft"
 #define kWaitForItTwoStepLong "-waitForItTwo"
 
+// Misc flag. Its not related to rendering itself
+#define kUSDCameraListRefreshFlag "-ucr"
+#define kUSDCameraListRefreshFlagLong "-usdCameraListRefresh"
+
 PXR_NAMESPACE_OPEN_SCOPE
 
 class RprUsdProductionRender;

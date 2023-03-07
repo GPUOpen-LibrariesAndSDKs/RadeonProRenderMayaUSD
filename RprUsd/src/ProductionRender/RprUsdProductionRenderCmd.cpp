@@ -1,6 +1,7 @@
 
 #include "RprUsdProductionRenderCmd.h"
 #include "RprUsdProductionRender.h"
+#include "ProductionSettings.h"
 
 #include "maya/MGlobal.h"
 #include "maya/MDagPath.h"
@@ -65,6 +66,8 @@ MSyntax RprUsdProductionRenderCmd::newSyntax()
 
 	CHECK_MSTATUS(syntax.addFlag(kWaitForItTwoStep, kWaitForItTwoStepLong, MSyntax::kNoArg));
 
+	CHECK_MSTATUS(syntax.addFlag(kUSDCameraListRefreshFlag, kUSDCameraListRefreshFlagLong, MSyntax::kNoArg));
+
 	return syntax;
 }
 
@@ -122,6 +125,11 @@ MStatus RprUsdProductionRenderCmd::doIt(const MArgList & args)
 {
 	// Parse arguments.
 	MArgDatabase argData(syntax(), args);
+
+	if (argData.isFlagSet(kUSDCameraListRefreshFlag) || argData.isFlagSet(kUSDCameraListRefreshFlagLong)) {
+		ProductionSettings::UsdCameraListRefresh();
+		return MStatus::kSuccess;
+	}
 
 	if (argData.isFlagSet(kWaitForItTwoStep) || argData.isFlagSet(kWaitForItTwoStepLong)) {
 		s_waitForIt = true;
