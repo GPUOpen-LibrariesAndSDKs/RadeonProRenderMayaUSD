@@ -1,4 +1,4 @@
-#define AppVersionString '0.1.26'
+#define AppVersionString '0.1.27'
 
 [Setup]
 AppName=RPRMayaUSD_{#MayaVersionString}
