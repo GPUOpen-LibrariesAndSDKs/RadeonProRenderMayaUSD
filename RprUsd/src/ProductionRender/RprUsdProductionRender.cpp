@@ -683,22 +683,40 @@ void RprUsdProductionRender::RegisterRenderer(const std::map<std::string, std::s
 
 		frameLayout - label "Usd Camera" - cll true - cl false;
 
-		attrControlGrp -label "Enable USD Camera" -attribute "defaultRenderGlobals.HdRprPlugin_Prod_Static_useUSDCamera" -changeCommand "OnIsUseUsdCameraChanged";
-		$g_rprHdrUSDCamerasCtrl = `optionMenu -l "USD Camera: " -changeCommand "OnUsdCameraChanged"`;
-		setParent ..;
+			columnLayout  -adjustableColumn false;
 
-		for ($i = 0; $i < size($usdCamerasArray); $i++) 
-		{
-			$cameraName = $usdCamerasArray[$i];
-			menuItem -parent $g_rprHdrUSDCamerasCtrl -label $cameraName;
-		}
+				columnLayout  -adjustableColumn false -co "left" 140;
+					button -label "Refresh USD Camera List" -width 160 -command "OnUSDCameraListRefresh";
+				setParent ..;
 
-		$value = GetCameraSelectedAttribute();
-		if ($value != "")
-		{
-			optionMenu -e -v $value $g_rprHdrUSDCamerasCtrl; 
-		}
-		setParent ..;
+				attrControlGrp -label "Enable USD Camera" -attribute "defaultRenderGlobals.HdRprPlugin_Prod_Static_useUSDCamera" -changeCommand "OnIsUseUsdCameraChanged";
+
+				columnLayout  -adjustableColumn false -co "left" 140;
+					$g_rprHdrUSDCamerasCtrl = `optionMenu -l "USD Camera: " -changeCommand "OnUsdCameraChanged"`;
+					setParent ..;
+				setParent ..;
+
+				$value = GetCameraSelectedAttribute();
+
+				$valueExist = 0;
+				for ($i = 0; $i < size($usdCamerasArray); $i++) 
+				{
+					$cameraName = $usdCamerasArray[$i];
+					menuItem -parent $g_rprHdrUSDCamerasCtrl -label $cameraName;
+
+					if ($cameraName == $value)
+					{
+						$valueExist = 1;
+					}
+				}
+
+				if ($value != "" && $valueExist > 0)
+				{
+					optionMenu -e -v $value $g_rprHdrUSDCamerasCtrl; 
+				}
+			setParent ..; // columnLayout
+
+		setParent ..; // frameLayout
 
 		{CAMERA_CONTROLS_CREATION_CMDS}
 
@@ -727,6 +745,11 @@ void RprUsdProductionRender::RegisterRenderer(const std::map<std::string, std::s
 
 		$enabled = `getAttr defaultRenderGlobals.HdRprPlugin_Prod_Static_useUSDCamera`;
 		optionMenu -e -en $enabled $g_rprHdrUSDCamerasCtrl;
+	}
+
+	global proc OnUSDCameraListRefresh()
+	{
+		rprUsdRender -ucr;
 	}
 
 	global proc updateRprUsdRenderCameraTab()
