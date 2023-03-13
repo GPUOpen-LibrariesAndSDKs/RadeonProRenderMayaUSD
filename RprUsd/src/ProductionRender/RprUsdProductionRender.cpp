@@ -418,6 +418,7 @@ bool RprUsdProductionRender::InitHydraResources()
 
 					// Temporary Hack! We access private variable here because we cannot modify MtoH directly.
 					// I want to contribute setter method for this variable in MtoH. If they approve we will remove the hack.
+					// We are accessing privte variable HdMayaSceneDelegate::_enableMaterials here
 					unsigned int classAlignment = alignof(HdMayaSceneDelegate);
 					char* adr = ((char*)pMayaSceneDelegate) + sizeof(HdMayaSceneDelegate) - sizeof(bool);
 					long offset = (long)adr % classAlignment;
