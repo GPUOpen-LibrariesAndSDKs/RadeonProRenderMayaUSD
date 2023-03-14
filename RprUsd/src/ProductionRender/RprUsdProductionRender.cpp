@@ -407,12 +407,23 @@ bool RprUsdProductionRender::InitHydraResources()
 			if (delegateInitData.name == "HdMayaSceneDelegate") {
 				pMayaSceneDelegate = static_cast<HdMayaSceneDelegate*> (newDelegate.get());
 
-				if (pShapeBase != nullptr) {
-					MFnDagNode fn(pShapeBase->thisMObject());
-					MDagPath   proxyTransformPath;
-					fn.getPath(proxyTransformPath);
+				if (pMayaSceneDelegate != nullptr) {
+					if (pShapeBase != nullptr) {
+						MFnDagNode fn(pShapeBase->thisMObject());
+						MDagPath   proxyTransformPath;
+						fn.getPath(proxyTransformPath);
 
-					proxyAdapterPath = pMayaSceneDelegate->GetPrimPath(proxyTransformPath, false);
+						proxyAdapterPath = pMayaSceneDelegate->GetPrimPath(proxyTransformPath, false);
+					}
+
+					// Temporary Hack! We access private variable here because we cannot modify MtoH directly.
+					// I want to contribute setter method for this variable in MtoH. If they approve we will remove the hack.
+					// We are accessing privte variable HdMayaSceneDelegate::_enableMaterials here
+					unsigned int classAlignment = alignof(HdMayaSceneDelegate);
+					char* adr = ((char*)pMayaSceneDelegate) + sizeof(HdMayaSceneDelegate) - sizeof(bool);
+					long offset = (long)adr % classAlignment;
+					adr -= offset;
+					*((bool*)adr) = true;
 				}
 			}
 
@@ -436,7 +447,7 @@ bool RprUsdProductionRender::InitHydraResources()
 			UsdImagingDelegate* pImagingDelegate = nullptr;
 
 			// Temporary Hack! We access private variable here because we cannot modify MtoH directly.
-			// I want to contribute getter method for this variable in MtoH. If they approve we will remove the hack.
+			// Getter method is contributed to MtoH. We will remove the hack once maya with fix is published.
 			void* addr = (char*) pProxyAdapter + sizeof(HdMayaShapeAdapter) + sizeof(TfWeakBase) + sizeof(MayaUsdProxyShapeBase*);
 			pImagingDelegate = ((std::unique_ptr<HdMayaProxyUsdImagingDelegate>*)(addr))->get();
 
