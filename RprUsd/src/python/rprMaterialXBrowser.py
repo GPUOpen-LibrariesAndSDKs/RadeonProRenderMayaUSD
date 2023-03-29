@@ -19,6 +19,7 @@ from functools import partial
 from sys import platform
 from client import MatlibClient
 import zipfile
+import threading
 
 
 # Show the material browser window.
@@ -616,6 +617,8 @@ class RPRMaterialBrowser(object) :
         self.sortMaterials(cmds.optionMenu(self.sortDropdown, q=True, select=True))
         self.populateMaterialsInternal()
 
+    def threadProcDownloadThumbnail(self, render_id, fileName) :
+        self.matlibClient.renders.download_thumbnail(render_id, None, self.pathRootThumbnail, fileName)
 
     def populateMaterialsInternal(self) :
         # Remove any existing materials.
@@ -628,28 +631,46 @@ class RPRMaterialBrowser(object) :
         # Create the new flow layout.
         cmds.flowLayout("RPRMaterialsFlow", columnSpacing=0, wrap=True)
 
-        materialIndex = 0
-        progressBarShown = False       
+        threadCount = 0
+        progressBarShown = False
 
-        # Add materials for the selected category.
+###############################
+
+        threads = []        
         for material in self.materials :
             fileName = self.getMaterialFileName(material)
-            cmd = partial(self.selectMaterial, materialIndex)
             imageFileName = self.getMaterialFullPath(fileName)
 
             # Checks if end condition has been reached
             render_id = material["renders_order"][0]
 
             if (not os.path.isfile(imageFileName)) :
-                 if (not progressBarShown) : 
-                     cmds.progressWindow( title='Opening category',progress=0,status='opening: 0%',isInterruptable=False )
-                     progressBarShown = True 
-                 self.matlibClient.renders.download_thumbnail(render_id, None, self.pathRootThumbnail, fileName)
+                if (not progressBarShown) : 
+                    cmds.progressWindow( title='Opening materials ', progress=0, status='opening: 0%', isInterruptable=False )
+                    progressBarShown = True 
 
-            if (progressBarShown) : 
-                percent = int(100 * materialIndex / len(self.materials))
-                cmds.progressWindow( edit=True, progress=percent, status=('opening: ' + str(percent) + '%' ) )
+                thread = threading.Thread(target=self.threadProcDownloadThumbnail, args=(render_id, fileName))
+                threads.append(thread)
+                thread.start()
 
+        for thread in threads:
+            thread.join()
+            threadCount += 1
+            percent = int(100 * threadCount / len(threads))
+            cmds.progressWindow( edit=True, progress=percent, status=('opening: ' + str(percent) + '%' ) )
+
+        if (progressBarShown) : 
+            cmds.progressWindow( endProgress=1 )
+
+################################
+
+        materialIndex = 0
+
+        # Add materials for the selected category.
+        for material in self.materials :
+            fileName = self.getMaterialFileName(material)
+            cmd = partial(self.selectMaterial, materialIndex)
+            imageFileName = self.getMaterialFullPath(fileName)
 
             materialName = material["title"]
 
@@ -677,8 +698,6 @@ class RPRMaterialBrowser(object) :
             cmds.setParent('..')
             materialIndex += 1
 
-        if (progressBarShown) : 
-            cmds.progressWindow( endProgress=1 )
         # Perform an initial layout update.
         self.updateMaterialsLayout()
 
