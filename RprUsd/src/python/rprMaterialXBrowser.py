@@ -620,21 +620,9 @@ class RPRMaterialBrowser(object) :
     def threadProcDownloadThumbnail(self, render_id, fileName) :
         self.matlibClient.renders.download_thumbnail(render_id, None, self.pathRootThumbnail, fileName)
 
-    def populateMaterialsInternal(self) :
-        # Remove any existing materials.
-        if (cmds.layout("RPRMaterialsFlow", exists=True)) :
-            cmds.deleteUI("RPRMaterialsFlow", layout=True)
-
-        # Ensure that the material container is the current parent.
-        cmds.setParent(self.materialsContainer)
-
-        # Create the new flow layout.
-        cmds.flowLayout("RPRMaterialsFlow", columnSpacing=0, wrap=True)
-
+    def downloadThumbnails(self) :
         threadCount = 0
         progressBarShown = False
-
-###############################
 
         threads = []        
         for material in self.materials :
@@ -661,8 +649,20 @@ class RPRMaterialBrowser(object) :
 
         if (progressBarShown) : 
             cmds.progressWindow( endProgress=1 )
+      
 
-################################
+    def populateMaterialsInternal(self) :
+        # Remove any existing materials.
+        if (cmds.layout("RPRMaterialsFlow", exists=True)) :
+            cmds.deleteUI("RPRMaterialsFlow", layout=True)
+
+        # Ensure that the material container is the current parent.
+        cmds.setParent(self.materialsContainer)
+
+        # Create the new flow layout.
+        cmds.flowLayout("RPRMaterialsFlow", columnSpacing=0, wrap=True)
+
+        self.downloadThumbnails()
 
         materialIndex = 0
 
