@@ -170,7 +170,10 @@ set(ALL_FILES
     ${Source_Files}
     ${Source_Files__BindMtlxCommand}
     ${Source_Files__ProductioonRender}
-    ${Source_Files__ViewportRender}
+
+    "$<$<CONFIG:Release2024>:"
+     ${Source_Files__ViewportRender}
+    ">"
 )
 
 ################################################################################
@@ -243,10 +246,12 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE
     "$<$<CONFIG:Release2023>:"
         "NDEBUG;"
         "MATERIALX_BUILD_SHARED_LIBS"
+        "MAYA_VERSION=23"
     ">"
     "$<$<CONFIG:Release2024>:"
         "NDEBUG;"
         "MATERIALX_BUILD_SHARED_LIBS"
+        "MAYA_VERSION=24"
     ">"
     "RPRUSD_EXPORTS;"
     "_WINDOWS;"
@@ -352,7 +357,7 @@ add_custom_command_if(
     COMMAND $<CONFIG:Release2024> if not exist $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\plug-ins\\2024 md $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\plug-ins\\2024
     COMMAND $<CONFIG:Release2024> if not exist $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\icons md $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\icons
     COMMAND $<CONFIG:Release2024> XCOPY /E /Y "$<SHELL_PATH:${CMAKE_SOURCE_DIR}/>src\\python" "$<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\scripts\\"
-    COMMAND $<CONFIG:Release2024> XCOPY /Y "$<SHELL_PATH:${CMAKE_SOURCE_DIR}/>lib\\2024\\hdMaya.dll" "$<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\bin\\hdMaya.dll"
+    COMMAND $<CONFIG:Release2024> COPY /Y "$<SHELL_PATH:${CMAKE_SOURCE_DIR}/>lib\\2024\\hdMaya.dll" "$<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\bin\\hdMaya.dll"
     COMMAND $<CONFIG:Release2024> XCOPY /E /Y /I "$<SHELL_PATH:${CMAKE_SOURCE_DIR}/>\\..\\Build_RPRUsdInstall\\hdRPR\\lib\\python\\rpr"  "$<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\scripts\\rpr"
     COMMAND $<CONFIG:Release2024> COPY $<SHELL_PATH:$<TARGET_FILE:${PROJECT_NAME}>> $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\plug-ins\\2024\\* /Y
     COMMAND $<CONFIG:Release2024> XCOPY /E /Y $<SHELL_PATH:${CMAKE_CURRENT_SOURCE_DIR}/>\\icons\\* $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\icons\\

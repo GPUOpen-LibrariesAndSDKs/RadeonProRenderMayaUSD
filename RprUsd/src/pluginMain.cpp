@@ -1,12 +1,14 @@
 #include <maya/MFnPlugin.h>
 #include <maya/MGlobal.h>
 
+
+#if MAYA_VERSION >= 24
 #include <hdMaya/adapters/adapter.h>
 #include <mayaUsd/utils/plugRegistryHelper.h>
-
 #include "ViewportRender/renderGlobals.h"
 #include "ViewportRender/renderOverride.h"
 #include "ViewportRender/viewCommand.h"
+#endif
 
 
 #include "version.h"
@@ -15,8 +17,10 @@
 #include "BindMtlxCommand/RprUsdBindMtlxCmd.h"
 
 
+#if MAYA_VERSION >= 24
 using MtohRenderOverridePtr = std::unique_ptr<MtohRenderOverride>;
 static std::vector<MtohRenderOverridePtr> gsRenderOverrides;
+#endif
 
 
 PXR_NAMESPACE_USING_DIRECTIVE
@@ -38,6 +42,7 @@ PLUGIN_EXPORT MStatus initializePlugin(MObject obj)
 
 
 
+#if MAYA_VERSION >= 24
     // Initialize Viewport
 
     MStatus ret = MS::kSuccess;
@@ -77,6 +82,7 @@ PLUGIN_EXPORT MStatus initializePlugin(MObject obj)
                 mtohRenderer = nullptr;
         }
     }
+#endif
 
     return status;
 }
@@ -98,6 +104,7 @@ PLUGIN_EXPORT MStatus uninitializePlugin(MObject obj)
     MGlobal::executePythonCommand("import menu\nmenu.removeRprUsdMenu()");
 
 
+#if MAYA_VERSION >= 24
     // DeinitializeViewport
 
     if (auto* renderer = MHWRender::MRenderer::theRenderer()) {
@@ -119,6 +126,7 @@ PLUGIN_EXPORT MStatus uninitializePlugin(MObject obj)
         status = MS::kFailure;
         status.perror("Error deregistering mtoh command!");
     }
-    
+#endif 
+
     return status;
 }
