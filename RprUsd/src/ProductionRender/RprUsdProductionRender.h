@@ -12,7 +12,7 @@
 
 #include <maya/MMessage.h>
 
-#include "defaultLightDelegate.h"
+#include "../defaultLightDelegate.h"
 
 #include "RenderProgressBars.h"
 

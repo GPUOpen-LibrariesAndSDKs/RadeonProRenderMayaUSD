@@ -121,6 +121,8 @@ set(PROJECT_NAME RprUsd)
 ################################################################################
 set(Source_Files
     "src/pluginMain.cpp"
+    "src/defaultLightDelegate.cpp"
+    "src/defaultLightDelegate.h"
     "src/version.h"
 )
 source_group("Source Files" FILES ${Source_Files})
@@ -134,8 +136,6 @@ source_group("Source Files\\BindMtlxCommand" FILES ${Source_Files__BindMtlxComma
 set(Source_Files__ProductioonRender
     "src/ProductionRender/common.cpp"
     "src/ProductionRender/common.h"
-    "src/ProductionRender/defaultLightDelegate.cpp"
-    "src/ProductionRender/defaultLightDelegate.h"
     "src/ProductionRender/ProductionSettings.cpp"
     "src/ProductionRender/ProductionSettings.h"
     "src/ProductionRender/RenderProgressBars.cpp"
@@ -147,10 +147,30 @@ set(Source_Files__ProductioonRender
 )
 source_group("Source Files\\ProductioonRender" FILES ${Source_Files__ProductioonRender})
 
+set(Source_Files__ViewportRender
+    "src/ViewportRender/pluginDebugCodes.cpp"
+    "src/ViewportRender/pluginDebugCodes.h"
+    "src/ViewportRender/renderGlobals.cpp"
+    "src/ViewportRender/renderGlobals.h"
+    "src/ViewportRender/renderOverride.cpp"
+    "src/ViewportRender/renderOverride.h"
+    "src/ViewportRender/renderOverrideUtils.h"
+    "src/ViewportRender/tokens.cpp"
+    "src/ViewportRender/tokens.h"
+    "src/ViewportRender/utils.cpp"
+    "src/ViewportRender/utils.h"
+    "src/ViewportRender/viewCommand.cpp"
+    "src/ViewportRender/viewCommand.h"
+    "src/ViewportRender/shadingModeExporter.cpp"
+)
+source_group("Source Files\\ViewportRender" FILES ${Source_Files__ViewportRender})
+
+
 set(ALL_FILES
     ${Source_Files}
     ${Source_Files__BindMtlxCommand}
     ${Source_Files__ProductioonRender}
+    ${Source_Files__ViewportRender}
 )
 
 ################################################################################
@@ -320,7 +340,7 @@ add_custom_command_if(
     COMMAND $<CONFIG:Release2023> if not exist $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\plug-ins md $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\plug-ins
     COMMAND $<CONFIG:Release2023> if not exist $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\plug-ins\\2023 md $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\plug-ins\\2023
     COMMAND $<CONFIG:Release2023> if not exist $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\icons md $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\icons
-    COMMAND $<CONFIG:Release2023> XCOPY /E /Y "$<SHELL_PATH:${CMAKE_SOURCE_DIR}/>\\src\\python" "$<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\scripts\\"
+    COMMAND $<CONFIG:Release2023> XCOPY /E /Y "$<SHELL_PATH:${CMAKE_SOURCE_DIR}/>src\\python" "$<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\scripts\\"
     COMMAND $<CONFIG:Release2023> XCOPY /E /Y /I "$<SHELL_PATH:${CMAKE_SOURCE_DIR}/>\\..\\Build_RPRUsdInstall\\hdRPR\\lib\\python\\rpr"  "$<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\scripts\\rpr"
     COMMAND $<CONFIG:Release2023> COPY $<SHELL_PATH:$<TARGET_FILE:${PROJECT_NAME}>> $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\plug-ins\\2023\\* /Y
     COMMAND $<CONFIG:Release2023> XCOPY /E /Y $<SHELL_PATH:${CMAKE_CURRENT_SOURCE_DIR}/>\\icons\\* $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\icons\\
@@ -331,7 +351,8 @@ add_custom_command_if(
     COMMAND $<CONFIG:Release2024> if not exist $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\plug-ins md $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\plug-ins
     COMMAND $<CONFIG:Release2024> if not exist $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\plug-ins\\2024 md $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\plug-ins\\2024
     COMMAND $<CONFIG:Release2024> if not exist $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\icons md $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\icons
-    COMMAND $<CONFIG:Release2024> XCOPY /E /Y "$<SHELL_PATH:${CMAKE_SOURCE_DIR}/>\\src\\python" "$<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\scripts\\"
+    COMMAND $<CONFIG:Release2024> XCOPY /E /Y "$<SHELL_PATH:${CMAKE_SOURCE_DIR}/>src\\python" "$<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\scripts\\"
+    COMMAND $<CONFIG:Release2024> XCOPY /Y "$<SHELL_PATH:${CMAKE_SOURCE_DIR}/>lib\\2024\\hdMaya.dll" "$<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\bin\\hdMaya.dll"
     COMMAND $<CONFIG:Release2024> XCOPY /E /Y /I "$<SHELL_PATH:${CMAKE_SOURCE_DIR}/>\\..\\Build_RPRUsdInstall\\hdRPR\\lib\\python\\rpr"  "$<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\scripts\\rpr"
     COMMAND $<CONFIG:Release2024> COPY $<SHELL_PATH:$<TARGET_FILE:${PROJECT_NAME}>> $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\plug-ins\\2024\\* /Y
     COMMAND $<CONFIG:Release2024> XCOPY /E /Y $<SHELL_PATH:${CMAKE_CURRENT_SOURCE_DIR}/>\\icons\\* $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\icons\\
@@ -403,6 +424,7 @@ set(ADDITIONAL_LIBRARY_DEPENDENCIES
         "usd_hgiInterop;"
         "usd_hgi;"
         "usd_usdImaging;"
+        "usd_usdImagingGL;"
         "usd_hd;"
         "usd_usdVol;"
         "usd_pxOsd;"
@@ -439,7 +461,7 @@ set(ADDITIONAL_LIBRARY_DEPENDENCIES
         "usd_arch;"
         "opengl32;"
         "Shlwapi;"
-        "ufe_0;"
+        "ufe_4;"
         "OpenMayaFX;"
         "OpenMayaRender;"
         "OpenMayaUI;"
