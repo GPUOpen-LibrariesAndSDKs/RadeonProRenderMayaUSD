@@ -230,6 +230,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
         "$ENV{MAYA_x64_2024}/../MayaUSD/Maya2024/0.22.0/mayausd/MayaUSD/include;"
         "$ENV{MAYA_x64_2024}/../MayaUSD/Maya2024/0.22.0/mayausd/MayaUSD/include/hdMaya/adapters;"
         "${CMAKE_CURRENT_SOURCE_DIR}/.."
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/Maya2024_hdMaya"
     ">"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/ProductionRender"
 )
