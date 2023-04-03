@@ -502,7 +502,7 @@ target_link_directories(${PROJECT_NAME} PUBLIC
     "$<$<CONFIG:Release2024>:"
         "$ENV{MAYA_SDK_2024}/lib;"
         "$ENV{MAYA_x64_2024}/lib;"
-        "$ENV{MAYA_x64_2024}/../MayaUSD/Maya2024/0.22.0_202301152314-a488582/mayausd/USD/lib;"
+        "$ENV{MAYA_x64_2024}/../MayaUSD/Maya2024/0.22.0/mayausd/USD/lib;"
         "${CMAKE_CURRENT_SOURCE_DIR}/lib/2024;"
         "$ENV{MAYA_SDK_2024}/devkit/ufe/lib"
     ">"
