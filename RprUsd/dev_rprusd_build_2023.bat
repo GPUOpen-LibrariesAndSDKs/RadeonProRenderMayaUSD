@@ -5,4 +5,4 @@ mkdir build
 cd build
 
 cmake -G "Visual Studio 16 2019" -A "x64" -T v141 ..
-cmake --build . --config Release2023
+#rem cmake --build . --config Release2023
