@@ -27,7 +27,7 @@
 
 PXR_NAMESPACE_OPEN_SCOPE
 
-const MString MtohViewCmd::name("mtoh");
+const MString MtohViewCmd::name("mtoh_rpr");
 
 namespace {
 
