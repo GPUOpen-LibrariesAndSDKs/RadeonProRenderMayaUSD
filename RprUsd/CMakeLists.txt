@@ -188,6 +188,8 @@ set(ROOT_NAMESPACE RprUsd)
 set_target_properties(${PROJECT_NAME} PROPERTIES
     VS_GLOBAL_KEYWORD "Win32Proj"
     SUFFIX ".mll"
+
+    VS_DEBUGGER_COMMAND "$(MAYA_x64_2024)/bin/maya.exe"
 )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES

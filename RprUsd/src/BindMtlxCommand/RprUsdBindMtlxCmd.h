@@ -20,6 +20,11 @@
 #define kMaterialNameFlag "-mn"
 #define kMaterialNameFlagLong "-materialName"
 
+// clearAllReference
+#define kClearAllReferencesFlag "-car"
+#define kClearAllReferencesFlagLong "-clearAllReferences"
+
+
 PXR_NAMESPACE_OPEN_SCOPE
 
 class RprUsdProductionRender;
