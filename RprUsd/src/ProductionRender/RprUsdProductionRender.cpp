@@ -91,6 +91,11 @@ void OutputInfoToMayaConsoleCommon(MString text)
 	MGlobal::displayInfo("hdRPR: " + text);
 }
 
+void OutputWarningToMayaConsoleCommon(MString text)
+{
+	MGlobal::displayWarning("hdRPR: " + text);
+}
+
 void OutputInfoToMayaConsole(MString text, unsigned long miliseconds)
 {
 	OutputInfoToMayaConsoleCommon(text + ": " + GetTimeStringFromMiliseconds(miliseconds));
@@ -585,12 +590,27 @@ void RprUsdProductionRender::OutputHardwareSetupAndSyncTime()
 
 	VtDictionary renderStats = renderDelegate->GetRenderStats();
 	OutputInfoToMayaConsoleCommon("Hardware setup: ");
-	std::vector<std::string> gpusUsedNames = renderStats.find("gpuUsedNames")->second.Get<std::vector<std::string>>();
+
 	int threadCount = renderStats.find("threadCountUsed")->second.Get<int>();
 
-	for (const std::string& gpuName : gpusUsedNames) {
-		OutputInfoToMayaConsoleCommon(MString("GPU: ") + gpuName.c_str());
+	VtValue renderStatsVal = renderStats.find("gpuUsedNames")->second;
+	if (renderStatsVal.IsHolding<std::vector<std::string>>())
+	{
+		std::vector<std::string> gpusUsedNames = renderStats.find("gpuUsedNames")->second.Get<std::vector<std::string>>();
+
+		for (const std::string& gpuName : gpusUsedNames) {
+			OutputInfoToMayaConsoleCommon(MString("GPU: ") + gpuName.c_str());
+		}
 	}
+	else if (renderStatsVal.IsHolding<std::string>())
+	{
+		OutputInfoToMayaConsoleCommon(MString("GPU: ") + renderStatsVal.Get<std::string>().c_str());
+	}
+	else
+	{
+		OutputWarningToMayaConsoleCommon("No GPU info have been read !");
+	}
+
 
 	OutputInfoToMayaConsoleCommon(MString("CPU for rendering: threadCount= ") + std::to_string(threadCount).c_str());
 
