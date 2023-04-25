@@ -34,6 +34,9 @@ MSyntax RprUsdBiodMtlxCmd::newSyntax()
 	CHECK_MSTATUS(syntax.addFlag(kMtlxFilePathFlag, kMtlxFilePathFlagLong, MSyntax::kString));
 	CHECK_MSTATUS(syntax.addFlag(kMaterialNameFlag, kMaterialNameFlagLong, MSyntax::kString));
 
+	CHECK_MSTATUS(syntax.addFlag(kClearAllReferencesFlag, kClearAllReferencesFlagLong, MSyntax::kNoArg));
+	
+
 	return syntax;
 }
 
@@ -54,6 +57,42 @@ MStatus RprUsdBiodMtlxCmd::doIt(const MArgList & args)
 		MGlobal::displayError("RprUsd: primPath is not defined");
 		return MS::kFailure;
 	}
+
+	SdfPath path = SdfPath(primPath.asChar());
+
+	UsdStageRefPtr stage = GetUsdStage();
+
+	if (!stage)
+	{
+		MGlobal::displayError("RprUsd: USD stage does not exist!");
+		return MS::kFailure;
+	}
+
+	UsdPrim prim = stage->GetPrimAtPath(path);
+
+	if (!prim.IsValid())
+	{
+		MGlobal::displayError("RprUsd: Prim is not valid!");
+		return MS::kFailure;
+	}
+
+	const std::string& primTypeName = prim.GetTypeName().GetString();
+	if (primTypeName != "Mesh")
+	{
+		MGlobal::displayError("RprUsd: Selected prim is not a mesh !");
+		return MS::kFailure;
+	}
+
+	UsdReferences primRefs = prim.GetReferences();
+
+	// If ClearAllReferences flag is set
+	if (argData.isFlagSet(kClearAllReferencesFlag))
+	{
+		primRefs.ClearReferences();
+		return MStatus::kSuccess;
+	}
+
+	// otherwise assing new material
 
 	MString mtlxFileName;
 	if (argData.isFlagSet(kMtlxFilePathFlag))
@@ -114,32 +153,6 @@ MStatus RprUsdBiodMtlxCmd::doIt(const MArgList & args)
 
 	SdfReference sdfRef = SdfReference(mtlxFileName.asChar(), SdfPath("/MaterialX"));
 
-	SdfPath path = SdfPath(primPath.asChar());
-
-	UsdStageRefPtr stage = GetUsdStage();
-
-	if (!stage)
-	{
-		MGlobal::displayError("RprUsd: USD stage does not exist!");
-		return MS::kFailure;
-	}
-
-	UsdPrim prim = stage->GetPrimAtPath(path);
-
-	if (!prim.IsValid())
-	{
-		MGlobal::displayError("RprUsd: Prim is not valid!");
-		return MS::kFailure;
-	}
-
-	const std::string& primTypeName = prim.GetTypeName().GetString();
-	if (primTypeName != "Mesh")
-	{
-		MGlobal::displayError("RprUsd: Selected prim is not a mesh !");
-		return MS::kFailure;
-	}
-
-	UsdReferences primRefs = prim.GetReferences();
 	primRefs.AddReference(sdfRef);
 
 	SdfPath materialPath = SdfPath((primPath + "/Materials/" + materialName).asChar());
