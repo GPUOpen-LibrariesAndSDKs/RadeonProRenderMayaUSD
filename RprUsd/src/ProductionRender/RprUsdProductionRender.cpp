@@ -50,6 +50,7 @@ RprUsdProductionRender::RprUsdProductionRender() :
 	, _initialized(false)
 	, _hasDefaultLighting(false)
 	, _isConverged(false)
+	, _isCancelled(false)
 	, _hgi(Hgi::CreatePlatformDefaultHgi())
 	, _hgiDriver{ HgiTokens->renderDriver, VtValue(_hgi.get()) }
 	, _additionalStatsWasOutput(false)
@@ -174,10 +175,11 @@ bool RprUsdProductionRender::RefreshAndCheck()
 	RefreshRenderView();
 
 	HdRenderBuffer* bufferPtr = _taskController->GetRenderOutput(HdAovTokens->color);
-
 	assert(bufferPtr);
 
-	if (bufferPtr->IsConverged() || (_renderProgressBars && _renderProgressBars->isCancelled()))
+	_isCancelled = _renderProgressBars && _renderProgressBars->isCancelled();
+
+	if (bufferPtr->IsConverged() || _isCancelled)
 	{
 		StopRender();
 		return false;
@@ -656,8 +658,8 @@ void RprUsdProductionRender::RegisterRenderer(const std::map<std::string, std::s
 		string $currentRendererName = "hdRPR";
 
 		renderer - rendererUIName $currentRendererName
-			- renderProcedure "rprUsdRenderCmd" 
-            - renderSequenceProcedure "fireRenderSequence" 
+			 - renderProcedure "rprUsdRenderCmd" 
+ 		         - renderSequenceProcedure "rprUsdRenderSequence" 
 			rprUsdRender;
 
 		renderer - edit - addGlobalsNode "RprUsdGlobals" rprUsdRender;
@@ -932,7 +934,7 @@ void RprUsdProductionRender::RegisterRenderer(const std::map<std::string, std::s
 		return `getAttr defaultRenderGlobals.HdRprPlugin_Prod_Static_usdCameraSelected`;
 	} 
 
-	global proc int fireRenderSequence(int $width, int $height, string $camera, string $saveToRenderView)
+	global proc int rprUsdRenderSequence(int $width, int $height, string $camera, string $saveToRenderView)
 	{
 		string $curRenderer = currentRenderer();
 		string $rendererUIName = `renderer -query -rendererUIName $curRenderer`;
@@ -980,7 +982,7 @@ void RprUsdProductionRender::RegisterRenderer(const std::map<std::string, std::s
 			return 1;
 		}
 
-		string $extraOptions = "-wft";
+		string $extraOptions = "-wfi";
 
 		int $numberOfFrames = ceil(($endFrame - $startFrame + 1.0) / $byFrame);
 		int $curFrame = 1;

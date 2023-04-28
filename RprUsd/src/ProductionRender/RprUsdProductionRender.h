@@ -32,6 +32,8 @@ public:
 	MStatus StartRender(unsigned int width, unsigned int height, MString newLayerName, MDagPath cameraPath, bool synchronousRender);
 	void StopRender();
 
+	bool IsCancelled() const { return _isCancelled; }
+
 	static void Initialize();
 	static void Uninitialize();
 
@@ -67,6 +69,7 @@ private:
 	bool _hasDefaultLighting;
 
 	bool _isConverged;
+	bool _isCancelled;
 
 	GfVec4d _viewport;
 	MDagPath _camPath;
