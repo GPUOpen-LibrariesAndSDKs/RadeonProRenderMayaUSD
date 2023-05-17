@@ -190,6 +190,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
     SUFFIX ".mll"
 
     VS_DEBUGGER_COMMAND "$(MAYA_x64_2024)/bin/maya.exe"
+    CXX_STANDARD 17
 )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
@@ -235,6 +236,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
         "${CMAKE_CURRENT_SOURCE_DIR}/src/Maya2024_hdMaya"
     ">"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/ProductionRender"
+    "${CMAKE_CURRENT_SOURCE_DIR}/Resolver/build/InstallDir/include/RenderStudioResolver"
 )
 
 ################################################################################
@@ -247,37 +249,40 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE
         "CMAKE_INTDIR=\"Debug\""
     ">"
     "$<$<CONFIG:Release2023>:"
-        "NDEBUG;"
+        "NDEBUG"
         "MATERIALX_BUILD_SHARED_LIBS"
         "MAYA_VERSION=23"
     ">"
     "$<$<CONFIG:Release2024>:"
-        "NDEBUG;"
+        "NDEBUG"
         "MATERIALX_BUILD_SHARED_LIBS"
         "MAYA_VERSION=24"
     ">"
-    "RPRUSD_EXPORTS;"
-    "_WINDOWS;"
-    "_USRDLL;"
-    "WIN32;"
-    "NOMINMAX;"
-    "_CRT_SECURE_NO_WARNINGS;"
-    "_SCL_SECURE_NO_WARNINGS;"
-    "BOOST_ALL_DYN_LINK;"
-    "BOOST_CONFIG_SUPPRESS_OUTDATED_MESSAGE;"
-    "HAVE_SNPRINTF;"
-    "TBB_SUPPRESS_DEPRECATED_MESSAGES;"
-    "PXR_PLUGINPATH_NAME=PXR_PLUGINPATH_NAME;"
-    "WANT_UFE_BUILD;"
-    "MAYA_ENABLE_NEW_PRIM_DELETE;"
-    "PXR_PYTHON_ENABLED=1;"
-    "REQUIRE_IOSTREAM;"
-    "_BOOL;"
-    "_AFXDLL;"
-    "_MBCS;"
-    "NT_PLUGIN;"
-    "UNICODE;"
+    "RPRUSD_EXPORTS"
+    "_WINDOWS"
+    "_USRDLL"
+    "WIN32"
+    "NOMINMAX"
+    "_CRT_SECURE_NO_WARNINGS"
+    "_SCL_SECURE_NO_WARNINGS"
+    "BOOST_CONFIG_SUPPRESS_OUTDATED_MESSAGE"
+    "HAVE_SNPRINTF"
+    "TBB_SUPPRESS_DEPRECATED_MESSAGES"
+    "PXR_PLUGINPATH_NAME=PXR_PLUGINPATH_NAME"
+    "WANT_UFE_BUILD"
+    "MAYA_ENABLE_NEW_PRIM_DELETE"
+    "PXR_PYTHON_ENABLED=1"
+    "REQUIRE_IOSTREAM"
+    "BOOST_ALL_DYN_LINK"
+    "_BOOL"
+    "_AFXDLL"
+    "_MBCS"
+    "NT_PLUGIN"
+    "UNICODE"
     "_UNICODE"
+    "_SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING"
+    "BOOST_JSON_NO_LIB"
+    "BOOST_CONTAINER_NO_LIB"
 )
 
 ################################################################################
@@ -487,6 +492,8 @@ set(ADDITIONAL_LIBRARY_DEPENDENCIES
     ">"
     "OpenMaya;"
     "Foundation"
+    "RenderStudioResolver"
+
 )
 target_link_libraries(${PROJECT_NAME} PUBLIC "${ADDITIONAL_LIBRARY_DEPENDENCIES}")
 
@@ -500,6 +507,7 @@ target_link_directories(${PROJECT_NAME} PUBLIC
         "$ENV{MAYA_x64_2023}/../MayaUSD/Maya2023/0.20.0/mayausd/USD/lib;"
         "${CMAKE_CURRENT_SOURCE_DIR}/lib/2023;"
         "$ENV{MAYA_SDK_2023}/devkit/ufe/lib"
+        "${CMAKE_CURRENT_SOURCE_DIR}/Resolver/build/InstallDir/plugin/usd"
     ">"
     "$<$<CONFIG:Release2024>:"
         "$ENV{MAYA_SDK_2024}/lib;"
@@ -507,6 +515,7 @@ target_link_directories(${PROJECT_NAME} PUBLIC
         "$ENV{MAYA_x64_2024}/../MayaUSD/Maya2024/0.22.0/mayausd/USD/lib;"
         "${CMAKE_CURRENT_SOURCE_DIR}/lib/2024;"
         "$ENV{MAYA_SDK_2024}/devkit/ufe/lib"
+        "${CMAKE_CURRENT_SOURCE_DIR}/Resolver/build/InstallDir/plugin/usd"
     ">"
 )
 

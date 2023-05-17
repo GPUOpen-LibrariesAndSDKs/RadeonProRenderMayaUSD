@@ -1,5 +1,6 @@
 #include <maya/MFnPlugin.h>
 #include <maya/MGlobal.h>
+#include <maya/MTimerMessage.h>
 
 
 #if MAYA_VERSION >= 24
@@ -10,6 +11,7 @@
 #include "ViewportRender/viewCommand.h"
 #endif
 
+#include "Resolver.h"
 
 #include "version.h"
 
@@ -21,6 +23,10 @@
 using MtohRenderOverridePtr = std::unique_ptr<MtohRenderOverride>;
 static std::vector<MtohRenderOverridePtr> gsRenderOverrides;
 #endif
+
+MCallbackId g_LiveModeTimerCallbackId = 0;
+
+void LiveModeTimerCallbackId(float, float, void* pClientData);
 
 
 PXR_NAMESPACE_USING_DIRECTIVE
@@ -39,8 +45,6 @@ PLUGIN_EXPORT MStatus initializePlugin(MObject obj)
 
     status = plugin.registerCommand(RprUsdBiodMtlxCmd::s_commandName, RprUsdBiodMtlxCmd::creator, RprUsdBiodMtlxCmd::newSyntax);
 	CHECK_MSTATUS(status);
-
-
 
 #if MAYA_VERSION >= 24
     // Initialize Viewport
@@ -83,6 +87,22 @@ PLUGIN_EXPORT MStatus initializePlugin(MObject obj)
         }
     }
 #endif
+
+    RenderStudioResolver::SetRemoteServerAddress("wss://renderstudio.luxoft.com/live/", "");
+    RenderStudioResolver::SetCurrentUserId("Maya");
+
+    //try {
+        RenderStudioResolver::StartLiveMode();
+    //}
+    /*catch (...)
+    {
+        int i = 0;
+        i++;
+    }*/
+
+// Run Usd Resolver Live updates   
+    float REFRESH_RATE = 0.02;
+    g_LiveModeTimerCallbackId = MTimerMessage::addTimerCallback(REFRESH_RATE, LiveModeTimerCallbackId, nullptr, &status);
 
     return status;
 }
@@ -128,5 +148,17 @@ PLUGIN_EXPORT MStatus uninitializePlugin(MObject obj)
     }
 #endif 
 
+    RenderStudioResolver::StopLiveMode();
+
+    if (g_LiveModeTimerCallbackId){ 
+        MTimerMessage::removeCallback(g_LiveModeTimerCallbackId);
+        g_LiveModeTimerCallbackId = 0;
+    }
+
     return status;
+}
+
+void LiveModeTimerCallbackId(float, float, void* pClientData)
+{
+    RenderStudioResolver::ProcessLiveUpdates();
 }
