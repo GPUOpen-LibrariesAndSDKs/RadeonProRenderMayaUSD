@@ -18,6 +18,10 @@
 #define kWidthFlagLong "-width"
 #define kHeightFlag "-h"
 #define kHeightFlagLong "-height"
+
+#define kWaitForIt "-wfi"
+#define kWaitForItLong "-waitForIt"
+
 #define kWaitForItTwoStep "-wft"
 #define kWaitForItTwoStepLong "-waitForItTwo"
 

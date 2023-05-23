@@ -66,6 +66,8 @@ MSyntax RprUsdProductionRenderCmd::newSyntax()
 
 	CHECK_MSTATUS(syntax.addFlag(kWaitForItTwoStep, kWaitForItTwoStepLong, MSyntax::kNoArg));
 
+	CHECK_MSTATUS(syntax.addFlag(kWaitForIt, kWaitForItLong, MSyntax::kNoArg));
+
 	CHECK_MSTATUS(syntax.addFlag(kUSDCameraListRefreshFlag, kUSDCameraListRefreshFlagLong, MSyntax::kNoArg));
 
 	return syntax;
@@ -163,10 +165,12 @@ MStatus RprUsdProductionRenderCmd::doIt(const MArgList & args)
 		s_productionRender = std::make_unique<RprUsdProductionRender>();
 	}
 
+	s_waitForIt = s_waitForIt || argData.isFlagSet(kWaitForIt);
+
 	status = s_productionRender->StartRender(width, height, newLayerName, camPath, s_waitForIt);
 	s_waitForIt = false;
 
-	return status;
+	return !s_productionRender->IsCancelled() ? MS::kSuccess : MS::kFailure;
 }
 
 // Static Methods
