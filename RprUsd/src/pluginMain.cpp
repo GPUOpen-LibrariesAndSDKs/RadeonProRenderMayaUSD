@@ -91,14 +91,7 @@ PLUGIN_EXPORT MStatus initializePlugin(MObject obj)
     RenderStudioResolver::SetRemoteServerAddress("wss://renderstudio.luxoft.com/live/", "");
     RenderStudioResolver::SetCurrentUserId("Maya");
 
-    //try {
-        RenderStudioResolver::StartLiveMode();
-    //}
-    /*catch (...)
-    {
-        int i = 0;
-        i++;
-    }*/
+    RenderStudioResolver::StartLiveMode();
 
 // Run Usd Resolver Live updates   
     float REFRESH_RATE = 0.02;
