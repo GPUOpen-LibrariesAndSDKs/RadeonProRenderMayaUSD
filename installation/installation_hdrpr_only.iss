@@ -42,7 +42,7 @@ var
   resultCode: Integer;
 begin
   if Exec(ExpandConstant('{app}\MayaEnvModifier.exe'), 
-      ExpandConstant(action + ' ' + '"{app}\hdRPR"' + ' ' + maya_version), '', SW_SHOW, ewWaitUntilTerminated, resultCode)
+      ExpandConstant(action + ' ' + '"{app}"' + ' ' + maya_version), '', SW_SHOW, ewWaitUntilTerminated, resultCode)
   then 
   begin
     if not (resultCode = 0) then

@@ -236,7 +236,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
         "${CMAKE_CURRENT_SOURCE_DIR}/src/Maya2024_hdMaya"
     ">"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/ProductionRender"
-    "${CMAKE_CURRENT_SOURCE_DIR}/Resolver/build/InstallDir/include/RenderStudioResolver"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../Build_RPRUsdInstall/usdResolver/include/RenderStudioResolver"
 )
 
 ################################################################################
@@ -507,7 +507,7 @@ target_link_directories(${PROJECT_NAME} PUBLIC
         "$ENV{MAYA_x64_2023}/../MayaUSD/Maya2023/0.20.0/mayausd/USD/lib;"
         "${CMAKE_CURRENT_SOURCE_DIR}/lib/2023;"
         "$ENV{MAYA_SDK_2023}/devkit/ufe/lib"
-        "${CMAKE_CURRENT_SOURCE_DIR}/Resolver/build/InstallDir/plugin/usd"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../Build_RPRUsdInstall/usdResolver/plugin/usd"
     ">"
     "$<$<CONFIG:Release2024>:"
         "$ENV{MAYA_SDK_2024}/lib;"
@@ -515,7 +515,7 @@ target_link_directories(${PROJECT_NAME} PUBLIC
         "$ENV{MAYA_x64_2024}/../MayaUSD/Maya2024/0.22.0/mayausd/USD/lib;"
         "${CMAKE_CURRENT_SOURCE_DIR}/lib/2024;"
         "$ENV{MAYA_SDK_2024}/devkit/ufe/lib"
-        "${CMAKE_CURRENT_SOURCE_DIR}/Resolver/build/InstallDir/plugin/usd"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../Build_RPRUsdInstall/usdResolver/plugin/usd"
     ">"
 )
 
