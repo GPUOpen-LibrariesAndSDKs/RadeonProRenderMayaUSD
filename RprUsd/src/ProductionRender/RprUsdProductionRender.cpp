@@ -50,6 +50,7 @@ RprUsdProductionRender::RprUsdProductionRender() :
 	, _initialized(false)
 	, _hasDefaultLighting(false)
 	, _isConverged(false)
+	, _isCancelled(false)
 	, _hgi(Hgi::CreatePlatformDefaultHgi())
 	, _hgiDriver{ HgiTokens->renderDriver, VtValue(_hgi.get()) }
 	, _additionalStatsWasOutput(false)
@@ -174,10 +175,11 @@ bool RprUsdProductionRender::RefreshAndCheck()
 	RefreshRenderView();
 
 	HdRenderBuffer* bufferPtr = _taskController->GetRenderOutput(HdAovTokens->color);
-
 	assert(bufferPtr);
 
-	if (bufferPtr->IsConverged() || (_renderProgressBars && _renderProgressBars->isCancelled()))
+	_isCancelled = _renderProgressBars && _renderProgressBars->isCancelled();
+
+	if (bufferPtr->IsConverged() || _isCancelled)
 	{
 		StopRender();
 		return false;
@@ -656,7 +658,9 @@ void RprUsdProductionRender::RegisterRenderer(const std::map<std::string, std::s
 		string $currentRendererName = "hdRPR";
 
 		renderer - rendererUIName $currentRendererName
-			- renderProcedure "rprUsdRenderCmd" rprUsdRender;
+			 - renderProcedure "rprUsdRenderCmd" 
+ 		         - renderSequenceProcedure "rprUsdRenderSequence" 
+			rprUsdRender;
 
 		renderer - edit - addGlobalsNode "RprUsdGlobals" rprUsdRender;
 		renderer - edit - addGlobalsNode "defaultRenderGlobals" rprUsdRender;
@@ -929,6 +933,95 @@ void RprUsdProductionRender::RegisterRenderer(const std::map<std::string, std::s
 	{
 		return `getAttr defaultRenderGlobals.HdRprPlugin_Prod_Static_usdCameraSelected`;
 	} 
+
+	global proc int rprUsdRenderSequence(int $width, int $height, string $camera, string $saveToRenderView)
+	{
+		string $curRenderer = currentRenderer();
+		string $rendererUIName = `renderer -query -rendererUIName $curRenderer`;
+
+		string $renderCommand = `renderer -query -renderProcedure $curRenderer`;
+    
+		string $renderViewPanelName;
+		string $allPanels[] = `getPanel -scriptType renderWindowPanel`;
+		if (size($allPanels) > 0) 
+		{
+			$renderViewPanelName = $allPanels[0];
+		} 
+
+		int $animation = `getAttr defaultRenderGlobals.animation`;
+		float $startFrame = `getAttr defaultRenderGlobals.startFrame`;
+		float $endFrame = `getAttr defaultRenderGlobals.endFrame`;
+		float $byFrame = `getAttr defaultRenderGlobals.byFrameStep`;
+		float $currentime = `currentTime -q`;
+		if (!$animation)
+		{
+			$startFrame = $currentime;
+			$endFrame = $currentime;
+			$byFrame = 1;
+		}
+
+		int $padding = `getAttr defaultRenderGlobals.extensionPadding`;
+		int $maxPaddingFrame = pow(10, $padding) - 1;
+
+		string $renderlayer = `editRenderLayerGlobals -q -currentRenderLayer`;
+		string $layerDisplayName = `renderLayerDisplayName $renderlayer`;
+
+		string $cameras[];
+		if ($camera != "") 
+		{
+			$cameras[0] = $camera;
+		} 
+		else 
+		{
+			$cameras = getRenderableCameras();
+		}
+
+		if (size($cameras) == 0) 
+		{
+			error("No cameras found !");
+			return 1;
+		}
+
+		string $extraOptions = "-wfi";
+
+		int $numberOfFrames = ceil(($endFrame - $startFrame + 1.0) / $byFrame);
+		int $curFrame = 1;
+
+		string $outputFormatString = "Frame to render: ^1s (^2s/^3s)  Camera: ^4s  Layer: ^5s\n";
+
+		for ($time = $startFrame; $time <= $endFrame; $time += $byFrame)
+		{
+			currentTime $time;
+
+			for ($cam in $cameras)
+			{
+				// Execute render command
+				string $args = `format -s $width -s $height -s $cam -s $extraOptions "(^1s, ^2s, 1, 1, \"^3s\", \"^4s\")"`;
+				string $cmd = $renderCommand + $args;
+	
+				// print current data
+				print (`format -s $time -s $curFrame -s $numberOfFrames -s $cam -s $layerDisplayName $outputFormatString`);
+
+				float $startTime = `timerX`;
+
+				eval($cmd);
+
+				if ($saveToRenderView == "all" || $saveToRenderView == $cam)
+				{
+					float $renderTime = `timerX -startTime $startTime`;
+					string $windowCaption = renderWindowCaption("", $renderTime);
+					renderWindowEditor -edit -pca $windowCaption $renderViewPanelName;
+
+					renderWindowMenuCommand("keepImageInRenderView", $renderViewPanelName);
+				}
+			}
+
+			$curFrame += 1;
+		}
+
+		return 0;
+	}
+
 
 	registerRprUsdRenderer();
 )mel";
