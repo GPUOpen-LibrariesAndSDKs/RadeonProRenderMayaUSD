@@ -50,7 +50,7 @@ int main(int argc, char* argv[] )
 
 	std::set <std::string> stringsToAddset;
 
-	const std::string pxrPluginPathNameString = "PXR_PLUGINPATH_NAME=%PXR_PLUGINPATH_NAME%;" + installationPath + "\\hdRPR\\plugin;" + installationPath + "\\usdResolver\\plugin;";
+	const std::string pxrPluginPathNameString = "PXR_PLUGINPATH_NAME=%PXR_PLUGINPATH_NAME%;" + installationPath + "\\hdRPR\\plugin;" + installationPath + "\\usdResolver\\plugin\\usd\\RenderStudioResolver\\resources;";
 	stringsToAddset.insert(pxrPluginPathNameString);
 
 	const std::string pathString = "PATH=%PATH%;" + installationPath + "\\hdRPR\\lib;" + installationPath + "\\usdResolver\\lib;" + installationPath + "\\usdResolver\\plugin\\usd;";
