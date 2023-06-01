@@ -37,12 +37,12 @@ cd ../..
 echo Building USD Resolver...
 cd RprUsd
 
-cd Resolver
+cd RenderStudioResolver
 
 rmdir build /Q /S
 mkdir build
 cd build
-cmake -Dpxr_DIR="%usd_build_fullpath%" -DCMAKE_INSTALL_PREFIX="..\..\..\Build_RPRUsdInstall\usdResolver" -DPXR_USD_LOCATION="%usd_build_fullpath%" -DCMAKE_GENERATOR="Visual Studio 16 2019" -DCMAKE_GENERATOR_PLATFORM="x64" ..
+cmake -DMAYA_SUPPORT=1 -Dpxr_DIR="%usd_build_fullpath%" -DCMAKE_INSTALL_PREFIX="..\..\..\Build_RPRUsdInstall\usdResolver" -DPXR_USD_LOCATION="%usd_build_fullpath%" -DCMAKE_GENERATOR="Visual Studio 16 2019" -DCMAKE_GENERATOR_PLATFORM="x64" ..
 IF %ERRORLEVEL% NEQ 0 (Echo An error occured while building Usd Resolver! &Exit /b 1)
 
 cmake --build . --config Release --target install

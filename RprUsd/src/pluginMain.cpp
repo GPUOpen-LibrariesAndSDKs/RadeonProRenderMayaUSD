@@ -91,11 +91,16 @@ PLUGIN_EXPORT MStatus initializePlugin(MObject obj)
     RenderStudioResolver::SetRemoteServerAddress("wss://renderstudio.luxoft.com/live/", "");
     RenderStudioResolver::SetCurrentUserId("Maya");
 
-    RenderStudioResolver::StartLiveMode();
+    try {
+        RenderStudioResolver::StartLiveMode();
 
-// Run Usd Resolver Live updates   
-    float REFRESH_RATE = 0.02;
-    g_LiveModeTimerCallbackId = MTimerMessage::addTimerCallback(REFRESH_RATE, LiveModeTimerCallbackId, nullptr, &status);
+        // Run Usd Resolver Live updates   
+        float REFRESH_RATE = 0.02f;
+        g_LiveModeTimerCallbackId = MTimerMessage::addTimerCallback(REFRESH_RATE, LiveModeTimerCallbackId, nullptr, &status);
+    }
+    catch (const std::runtime_error& e) {
+        MGlobal::displayError((std::string("RprUsd StartLiveMode failed: ") + e.what()).c_str());
+    }
 
     return status;
 }

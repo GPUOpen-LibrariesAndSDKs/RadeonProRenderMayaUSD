@@ -332,8 +332,8 @@ void RprUsdProductionRender::RefreshRenderView()
 	RV_PIXEL* rawBuffer = static_cast<RV_PIXEL*>(bufferPtr->Map());
 
 	// _TODO Remove constants
-	unsigned int width = _viewport.GetArray()[2];
-	unsigned int height = _viewport.GetArray()[3];
+	unsigned int width = (unsigned int) _viewport.GetArray()[2];
+	unsigned int height = (unsigned int) _viewport.GetArray()[3];
 
 	// Update the render view pixels.
 	MRenderView::updatePixels(
