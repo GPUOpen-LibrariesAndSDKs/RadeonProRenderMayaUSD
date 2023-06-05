@@ -9,9 +9,11 @@
 #include "ViewportRender/renderGlobals.h"
 #include "ViewportRender/renderOverride.h"
 #include "ViewportRender/viewCommand.h"
-#endif
 
 #include "Resolver.h"
+#endif
+
+
 
 #include "version.h"
 
@@ -86,7 +88,6 @@ PLUGIN_EXPORT MStatus initializePlugin(MObject obj)
                 mtohRenderer = nullptr;
         }
     }
-#endif
 
     RenderStudioResolver::SetRemoteServerAddress("wss://renderstudio.luxoft.com/live/", "");
     RenderStudioResolver::SetCurrentUserId("Maya");
@@ -101,6 +102,8 @@ PLUGIN_EXPORT MStatus initializePlugin(MObject obj)
     catch (const std::runtime_error& e) {
         MGlobal::displayError((std::string("RprUsd StartLiveMode failed: ") + e.what()).c_str());
     }
+
+#endif
 
     return status;
 }
@@ -144,7 +147,6 @@ PLUGIN_EXPORT MStatus uninitializePlugin(MObject obj)
         status = MS::kFailure;
         status.perror("Error deregistering mtoh command!");
     }
-#endif 
 
     RenderStudioResolver::StopLiveMode();
 
@@ -153,10 +155,14 @@ PLUGIN_EXPORT MStatus uninitializePlugin(MObject obj)
         g_LiveModeTimerCallbackId = 0;
     }
 
+#endif 
+
     return status;
 }
 
 void LiveModeTimerCallbackId(float, float, void* pClientData)
 {
+#if MAYA_VERSION >= 24
     RenderStudioResolver::ProcessLiveUpdates();
+#endif
 }
