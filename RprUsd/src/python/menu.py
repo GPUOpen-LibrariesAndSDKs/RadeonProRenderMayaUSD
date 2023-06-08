@@ -4,6 +4,8 @@ import os
 import maya.mel as mel
 import ufe
 
+import maya.mel as mm
+
 def showRPRMaterialXLibrary(value) :
     import rprMaterialXBrowser
     rprMaterialXBrowser.show()
@@ -40,6 +42,10 @@ def createRprUsdMenu():
         rprUsdMenuCtrl = maya.cmds.menu("rprUsdMenuCtrl", label="RPR USD", p=gMainWindow)
         maya.cmds.menuItem("materialXLibraryCtrl", label="MaterialX Library", p=rprUsdMenuCtrl, c=showRPRMaterialXLibrary)
         maya.cmds.menuItem("bindMaterialXCtrl",label="Bind MaterialX To Selected Mesh", p=rprUsdMenuCtrl, c=BindMaterialXFromFile)
+        maya.cmds.menuItem("loadUsdForSharing",label="Load Usd Stage For Sharing", p=rprUsdMenuCtrl, c=LoadUsdStageForSharing)
+
+def LoadUsdStageForSharing(value):  
+    mm.eval("source loadUsdStageForSharing.mel; CreateStageFromFile();")
 
 def removeRprUsdMenu():
     if maya.cmds.menu("rprUsdMenuCtrl", exists=1):

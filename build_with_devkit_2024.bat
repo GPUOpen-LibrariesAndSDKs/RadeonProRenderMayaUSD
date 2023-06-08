@@ -34,13 +34,27 @@ cmake --build . --config RelWithDebInfo --target install
 IF %ERRORLEVEL% NEQ 0 (Echo An error occured while building hdRPR! &Exit /b 1)
 cd ../..
 
+echo Building USD Resolver...
+cd RprUsd
+
+cd RenderStudioResolver
+
+rmdir build /Q /S
+mkdir build
+cd build
+cmake -DMAYA_SUPPORT=1 -Dpxr_DIR="%usd_build_fullpath%" -DCMAKE_INSTALL_PREFIX="..\..\..\Build_RPRUsdInstall\usdResolver" -DPXR_USD_LOCATION="%usd_build_fullpath%" -DCMAKE_GENERATOR="Visual Studio 16 2019" -DCMAKE_GENERATOR_PLATFORM="x64" ..
+IF %ERRORLEVEL% NEQ 0 (Echo An error occured while building Usd Resolver! &Exit /b 1)
+
+cmake --build . --config Release --target install
+IF %ERRORLEVEL% NEQ 0 (Echo An error occured while building Usd Resolver! &Exit /b 1)
+
+cd ../..
+
+rmdir build /Q /S
+mkdir build
 
 echo Building RPR USD...
 rmdir RprUsd\dist /Q /S
-
-cd RprUsd
-rmdir build /Q /S
-mkdir build
 
 cd build
 

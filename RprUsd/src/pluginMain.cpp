@@ -1,5 +1,6 @@
 #include <maya/MFnPlugin.h>
 #include <maya/MGlobal.h>
+#include <maya/MTimerMessage.h>
 
 
 #if MAYA_VERSION >= 24
@@ -8,7 +9,10 @@
 #include "ViewportRender/renderGlobals.h"
 #include "ViewportRender/renderOverride.h"
 #include "ViewportRender/viewCommand.h"
+
+#include "Resolver.h"
 #endif
+
 
 
 #include "version.h"
@@ -21,6 +25,10 @@
 using MtohRenderOverridePtr = std::unique_ptr<MtohRenderOverride>;
 static std::vector<MtohRenderOverridePtr> gsRenderOverrides;
 #endif
+
+MCallbackId g_LiveModeTimerCallbackId = 0;
+
+void LiveModeTimerCallbackId(float, float, void* pClientData);
 
 
 PXR_NAMESPACE_USING_DIRECTIVE
@@ -39,8 +47,6 @@ PLUGIN_EXPORT MStatus initializePlugin(MObject obj)
 
     status = plugin.registerCommand(RprUsdBiodMtlxCmd::s_commandName, RprUsdBiodMtlxCmd::creator, RprUsdBiodMtlxCmd::newSyntax);
 	CHECK_MSTATUS(status);
-
-
 
 #if MAYA_VERSION >= 24
     // Initialize Viewport
@@ -82,6 +88,21 @@ PLUGIN_EXPORT MStatus initializePlugin(MObject obj)
                 mtohRenderer = nullptr;
         }
     }
+
+    RenderStudioResolver::SetRemoteServerAddress("wss://renderstudio.luxoft.com/live/", "");
+    RenderStudioResolver::SetCurrentUserId("Maya");
+
+    try {
+        RenderStudioResolver::StartLiveMode();
+
+        // Run Usd Resolver Live updates   
+        float REFRESH_RATE = 0.02f;
+        g_LiveModeTimerCallbackId = MTimerMessage::addTimerCallback(REFRESH_RATE, LiveModeTimerCallbackId, nullptr, &status);
+    }
+    catch (const std::runtime_error& e) {
+        MGlobal::displayError((std::string("RprUsd StartLiveMode failed: ") + e.what()).c_str());
+    }
+
 #endif
 
     return status;
@@ -126,7 +147,22 @@ PLUGIN_EXPORT MStatus uninitializePlugin(MObject obj)
         status = MS::kFailure;
         status.perror("Error deregistering mtoh command!");
     }
+
+    RenderStudioResolver::StopLiveMode();
+
+    if (g_LiveModeTimerCallbackId){ 
+        MTimerMessage::removeCallback(g_LiveModeTimerCallbackId);
+        g_LiveModeTimerCallbackId = 0;
+    }
+
 #endif 
 
     return status;
+}
+
+void LiveModeTimerCallbackId(float, float, void* pClientData)
+{
+#if MAYA_VERSION >= 24
+    RenderStudioResolver::ProcessLiveUpdates();
+#endif
 }
