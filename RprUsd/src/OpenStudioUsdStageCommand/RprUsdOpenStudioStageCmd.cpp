@@ -1,10 +1,11 @@
 #include "RprUsdOpenStudioStageCmd.h"
 #include "common.h"
+#include "../RenderStudioResolverHelper.h"
 
 #include <filesystem>
 #include <maya/MGlobal.h>
 
-#include "../RenderStudioResolverHelper.h"
+#include <combaseapi.h>
 
 PXR_NAMESPACE_OPEN_SCOPE
 
@@ -32,6 +33,19 @@ MSyntax RprUsdOpenStudioStageCmd::newSyntax()
 	return syntax;
 }
 
+std::string GenerateGUID()
+{
+	GUID guid;
+	HRESULT hCreateGuid = CoCreateGuid(&guid);
+
+	char szGuid[64] = { 0 };
+
+	sprintf(szGuid, "%08X-%04X-%04X-%02X%02X-%02X%02X%02X%02X%02X%02X", guid.Data1, guid.Data2, guid.Data3, guid.Data4[0], guid.Data4[1], 
+							guid.Data4[2], guid.Data4[3], guid.Data4[4], guid.Data4[5], guid.Data4[6], guid.Data4[7]);
+
+	return szGuid;
+}
+
 // -----------------------------------------------------------------------------
 MStatus RprUsdOpenStudioStageCmd::doIt(const MArgList & args)
 {
@@ -52,7 +66,7 @@ MStatus RprUsdOpenStudioStageCmd::doIt(const MArgList & args)
 		return MS::kFailure;
 	}
 
-	if (RenderStudioResolverHelper::IsRenderStudioPath(filePath)) {
+	if (RenderStudioResolverHelper::IsUnresovableToRenderStudioPath(filePath)) {
 		std::string studioFilePath = RenderStudioResolverHelper::Unresolve(filePath);
 
 		MString cmd = MString("RprUsdDoCreateStage(\"") + studioFilePath.c_str() + "\")";
@@ -62,7 +76,8 @@ MStatus RprUsdOpenStudioStageCmd::doIt(const MArgList & args)
 		LiveModeInfo liveModeInfo;
 		liveModeInfo.liveUrl = "wss://renderstudio.luxoft.com/livecpp";
 		liveModeInfo.channelId = "Maya";
-		liveModeInfo.userId = "MayaUser";
+
+		liveModeInfo.userId = "MayaUser_" + GenerateGUID();
 
 		RenderStudioResolverHelper::StartLiveMode(liveModeInfo);
 	}
