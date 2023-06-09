@@ -124,6 +124,8 @@ set(Source_Files
     "src/defaultLightDelegate.cpp"
     "src/defaultLightDelegate.h"
     "src/version.h"
+    "src/RenderStudioResolverHelper.cpp"
+    "src/RenderStudioResolverHelper.h"
 )
 source_group("Source Files" FILES ${Source_Files})
 
@@ -132,6 +134,12 @@ set(Source_Files__BindMtlxCommand
     "src/BindMtlxCommand/rprUsdBindMtlxCmd.h"
 )
 source_group("Source Files\\BindMtlxCommand" FILES ${Source_Files__BindMtlxCommand})
+
+set(Source_Files__OpenUsdStudioStageCommand
+    "src/OpenStudioUsdStageCommand/RprUsdOpenStudioStageCmd.cpp"
+    "src/OpenStudioUsdStageCommand/RprUsdOpenStudioStageCmd.h"
+)
+source_group("Source Files\\OpenUsdStudioStageCommand" FILES ${Source_Files__OpenUsdStudioStageCommand})
 
 set(Source_Files__ProductioonRender
     "src/ProductionRender/common.cpp"
@@ -173,6 +181,7 @@ set(ALL_FILES
 
     "$<$<CONFIG:Release2024>:"
      ${Source_Files__ViewportRender}
+     ${Source_Files__OpenUsdStudioStageCommand}
     ">"
 )
 
