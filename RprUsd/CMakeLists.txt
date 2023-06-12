@@ -91,29 +91,6 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 set(PROJECT_NAME RprUsd)
 
 ################################################################################
@@ -124,10 +101,15 @@ set(Source_Files
     "src/defaultLightDelegate.cpp"
     "src/defaultLightDelegate.h"
     "src/version.h"
+)
+source_group("Source Files" FILES ${Source_Files})
+
+set(Source_Files_ResolverHelper
     "src/RenderStudioResolverHelper.cpp"
     "src/RenderStudioResolverHelper.h"
 )
-source_group("Source Files" FILES ${Source_Files})
+source_group("Source Files\\ResolverHelper" FILES ${Source_Files_ResolverHelper})
+
 
 set(Source_Files__BindMtlxCommand
     "src/BindMtlxCommand/rprUsdBindMtlxCmd.cpp"
@@ -182,6 +164,7 @@ set(ALL_FILES
     "$<$<CONFIG:Release2024>:"
      ${Source_Files__ViewportRender}
      ${Source_Files__OpenUsdStudioStageCommand}
+     ${Source_Files_ResolverHelper}
     ">"
 )
 
