@@ -24,6 +24,13 @@
 #define kClearAllReferencesFlag "-car"
 #define kClearAllReferencesFlagLong "-clearAllReferences"
 
+// Assing MatX for LiveMode
+#define kLiveModeFlag "-lm"
+#define kLiveModeFlagLong "-liveMode"
+
+#define kGpuOpenMatIdFlag "-id"
+#define kGpuOpenMatIdFlagLong "-materialId"
+
 
 PXR_NAMESPACE_OPEN_SCOPE
 

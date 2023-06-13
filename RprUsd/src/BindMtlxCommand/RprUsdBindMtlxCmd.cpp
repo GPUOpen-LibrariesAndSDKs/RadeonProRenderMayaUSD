@@ -35,7 +35,10 @@ MSyntax RprUsdBiodMtlxCmd::newSyntax()
 	CHECK_MSTATUS(syntax.addFlag(kMaterialNameFlag, kMaterialNameFlagLong, MSyntax::kString));
 
 	CHECK_MSTATUS(syntax.addFlag(kClearAllReferencesFlag, kClearAllReferencesFlagLong, MSyntax::kNoArg));
-	
+
+	// LiveMode
+	CHECK_MSTATUS(syntax.addFlag(kLiveModeFlag, kLiveModeFlagLong, MSyntax::kNoArg));
+	CHECK_MSTATUS(syntax.addFlag(kGpuOpenMatIdFlag, kGpuOpenMatIdFlagLong, MSyntax::kString));
 
 	return syntax;
 }
