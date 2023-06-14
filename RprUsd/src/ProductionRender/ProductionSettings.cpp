@@ -629,7 +629,7 @@ void ProductionSettings::CreateAttributes(std::map<std::string, std::string>* pM
 	_CreateStringAttribute(node, MString(g_attributePrefix.GetText()) + "Static_usdCameraSelected", "", userDefaults);
 
 	// non production mode  attribute
-	_CreateStringAttribute(node, MString(rendererName.c_str()) + "_LiveModeChannelName", "", userDefaults);
+	_CreateStringAttribute(node, MString(rendererName.c_str()) + "_LiveModeChannelName", "Maya", userDefaults);
 
 
 	for (const HdRenderSettingDescriptor& attr : rendererSettingDescriptors) {

@@ -21,6 +21,8 @@ from client import MatlibClient
 import zipfile
 import threading
 
+import ufe
+
 
 # Show the material browser window.
 # -----------------------------------------------------------------------------
@@ -429,7 +431,7 @@ class RPRMaterialBrowser(object) :
         while len(pathList) > 0 :
             selected_path = str(pathList.pop().path())
             selected_path = selected_path[selected_path.find("/"):len(selected_path)]
-            maya.cmds.rprUsdBindMtlx(lm, pp=selected_path, id=self.selectedMaterial["id"])
+            cmds.rprUsdBindMtlx(lm=1, pp=selected_path, id=self.selectedMaterial["id"])
 
     def updateSelectedMaterialPanel(self, fileName, categoryName, materialName, materialType, license) :
 

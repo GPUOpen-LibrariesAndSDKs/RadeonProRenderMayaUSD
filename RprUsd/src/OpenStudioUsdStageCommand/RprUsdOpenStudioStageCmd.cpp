@@ -79,7 +79,10 @@ MStatus RprUsdOpenStudioStageCmd::doIt(const MArgList & args)
 
 		MPlug channelNamePlug = MFnDependencyNode(GetSettingsNode()).findPlug("HdRprPlugin_LiveModeChannelName", false);
 		if (!channelNamePlug.isNull()){
-			liveModeInfo.channelId = channelNamePlug.asString().asChar();
+			MString channelName = channelNamePlug.asString();
+			if (channelName != "") {
+				liveModeInfo.channelId = channelName.asChar();
+			}
 		}
 
 		liveModeInfo.userId = "MayaUser_" + GenerateGUID();
