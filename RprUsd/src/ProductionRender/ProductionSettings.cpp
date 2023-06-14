@@ -14,7 +14,6 @@
 #include <maya/MFnTypedAttribute.h>
 #include <maya/MGlobal.h>
 #include <maya/MPlug.h>
-#include <maya/MSelectionList.h>
 #include <maya/MStatus.h>
 #include <maya/MSceneMessage.h>
 #include <maya/MItDependencyNodes.h>
@@ -484,26 +483,6 @@ bool _IsSupportedAttribute(const VtValue& v)
 		|| v.IsHolding<std::string>() || v.IsHolding<TfEnum>() || v.IsHolding<SdfAssetPath>();
 }
 
-MObject GetSettingsNode()
-{
-	MSelectionList slist;
-	MString nodeName = "defaultRenderGlobals";
-	slist.add(nodeName);
-
-	MObject mayaObject;
-	if (slist.length() == 0 || !slist.getDependNode(0, mayaObject)) {
-		return mayaObject;
-	}
-
-	MStatus           status;
-	MFnDependencyNode node(mayaObject, &status);
-	if (!status) {
-		return MObject();
-	}
-
-	return mayaObject;
-}
-
 void ProductionSettings::AddAttributeToGroupIfExist(GroupDescriptionPtr groupPtr, const std::string& attrSchemaName)
 {
 	auto it = _attributeMap.find(attrSchemaName);
@@ -648,6 +627,10 @@ void ProductionSettings::CreateAttributes(std::map<std::string, std::string>* pM
 	TfTokenVector vec;
 	TfToken token;
 	_CreateStringAttribute(node, MString(g_attributePrefix.GetText()) + "Static_usdCameraSelected", "", userDefaults);
+
+	// non production mode  attribute
+	_CreateStringAttribute(node, MString(rendererName.c_str()) + "_LiveModeChannelName", "", userDefaults);
+
 
 	for (const HdRenderSettingDescriptor& attr : rendererSettingDescriptors) {
 

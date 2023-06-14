@@ -670,6 +670,7 @@ void RprUsdProductionRender::RegisterRenderer(const std::map<std::string, std::s
 		renderer - edit - addGlobalsTab "Config" "createRprUsdRenderConfigTab" "updateRprUsdRenderConfigTab" rprUsdRender;
 		renderer - edit - addGlobalsTab "Quality" "createRprUsdRenderQualityTab" "updateRprUsdRenderQualityTab" rprUsdRender;
 		renderer - edit - addGlobalsTab "Camera" "createRprUsdRenderCameraTab" "updateRprUsdRenderCameraTab" rprUsdRender;
+        renderer - edit - addGlobalsTab "Live Mode" "createRprUsdLiveModeTab" "updateRprUsdLiveModeTab" rprUsdRender;
 		renderer - edit - addGlobalsTab "About" "createRprUsdAboutTab" "updateRprUsdAboutTab" rprUsdRender;
 	}
 
@@ -878,6 +879,24 @@ void RprUsdProductionRender::RegisterRenderer(const std::map<std::string, std::s
 
 		setParent ..;
 	}
+
+    global proc createRprUsdLiveModeTab()
+    {
+		columnLayout
+			-adjustableColumn true
+			-columnAttach "both" 5
+			-columnWidth 250
+			-columnAlign "center"
+			-rowSpacing 5;
+
+             attrControlGrp -label "Channel Name" -attribute defaultRenderGlobals.HdRprPlugin_LiveModeChannelName;
+
+         setParent ..;
+    }
+
+    global proc updateRprUsdLiveModeTab()
+    {
+    }
 
 	global proc updateRprUsdAboutTab()
 	{

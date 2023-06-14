@@ -77,6 +77,11 @@ MStatus RprUsdOpenStudioStageCmd::doIt(const MArgList & args)
 		liveModeInfo.liveUrl = "wss://renderstudio.luxoft.com/livecpp";
 		liveModeInfo.channelId = "Maya";
 
+		MPlug channelNamePlug = MFnDependencyNode(GetSettingsNode()).findPlug("HdRprPlugin_LiveModeChannelName", false);
+		if (!channelNamePlug.isNull()){
+			liveModeInfo.channelId = channelNamePlug.asString().asChar();
+		}
+
 		liveModeInfo.userId = "MayaUser_" + GenerateGUID();
 
 		RenderStudioResolverHelper::StartLiveMode(liveModeInfo);
