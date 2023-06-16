@@ -631,7 +631,6 @@ void ProductionSettings::CreateAttributes(std::map<std::string, std::string>* pM
 	// non production mode  attribute
 	_CreateStringAttribute(node, MString(rendererName.c_str()) + "_LiveModeChannelName", "Maya", userDefaults);
 
-
 	for (const HdRenderSettingDescriptor& attr : rendererSettingDescriptors) {
 
 		// We dont want these attributes in Production Render Mode
