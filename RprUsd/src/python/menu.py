@@ -4,7 +4,8 @@ import os
 import maya.mel as mel
 import ufe
 
-import maya.mel as mm
+import winreg
+import subprocess
 
 def showRPRMaterialXLibrary(value) :
     import rprMaterialXBrowser
@@ -43,10 +44,17 @@ def createRprUsdMenu():
         maya.cmds.menuItem("materialXLibraryCtrl", label="MaterialX Library", p=rprUsdMenuCtrl, c=showRPRMaterialXLibrary)
         maya.cmds.menuItem("bindMaterialXCtrl",label="Bind MaterialX To Selected Mesh", p=rprUsdMenuCtrl, c=BindMaterialXFromFile)
         maya.cmds.menuItem("loadUsdForSharing",label="Load Usd Stage For Sharing", p=rprUsdMenuCtrl, c=LoadUsdStageForSharing)
+        maya.cmds.menuItem("runRenderStudio",label="Run RenderStudio", p=rprUsdMenuCtrl, c=RunRenderStudio)
 
 def LoadUsdStageForSharing(value):  
-    mm.eval("source loadUsdStageForSharing.mel; CreateStageFromFile();")
+    mel.eval("source loadUsdStageForSharing.mel; CreateStageFromFile();")
 
 def removeRprUsdMenu():
     if maya.cmds.menu("rprUsdMenuCtrl", exists=1):
         maya.cmds.deleteUI("rprUsdMenuCtrl")
+
+def RunRenderStudio(value) :
+    key = winreg.OpenKeyEx(winreg.HKEY_LOCAL_MACHINE, "SOFTWARE\\AMD\\RenderStudio")
+    renderStudioExecPath = winreg.QueryValueEx(key, "ExecCmd")[0]
+
+    subprocess.run([renderStudioExecPath, "--scene cube.usd"])
