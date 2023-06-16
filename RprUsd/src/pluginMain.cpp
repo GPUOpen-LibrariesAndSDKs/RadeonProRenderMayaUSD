@@ -1,6 +1,5 @@
 #include <maya/MFnPlugin.h>
 #include <maya/MGlobal.h>
-#include <maya/MTimerMessage.h>
 
 
 #if MAYA_VERSION >= 24
@@ -10,25 +9,21 @@
 #include "ViewportRender/renderOverride.h"
 #include "ViewportRender/viewCommand.h"
 
-#include "Resolver.h"
+#include "RenderStudioResolverHelper.h"
+
 #endif
-
-
 
 #include "version.h"
 
 #include "ProductionRender/RprUsdProductionRenderCmd.h"
 #include "BindMtlxCommand/RprUsdBindMtlxCmd.h"
+#include "OpenStudioUsdStageCommand/RprUsdOpenStudioStageCmd.h"
 
 
 #if MAYA_VERSION >= 24
 using MtohRenderOverridePtr = std::unique_ptr<MtohRenderOverride>;
 static std::vector<MtohRenderOverridePtr> gsRenderOverrides;
 #endif
-
-MCallbackId g_LiveModeTimerCallbackId = 0;
-
-void LiveModeTimerCallbackId(float, float, void* pClientData);
 
 
 PXR_NAMESPACE_USING_DIRECTIVE
@@ -49,6 +44,10 @@ PLUGIN_EXPORT MStatus initializePlugin(MObject obj)
 	CHECK_MSTATUS(status);
 
 #if MAYA_VERSION >= 24
+
+    status = plugin.registerCommand(RprUsdOpenStudioStageCmd::s_commandName, RprUsdOpenStudioStageCmd::creator, RprUsdOpenStudioStageCmd::newSyntax);
+    CHECK_MSTATUS(status);
+
     // Initialize Viewport
 
     MStatus ret = MS::kSuccess;
@@ -88,21 +87,6 @@ PLUGIN_EXPORT MStatus initializePlugin(MObject obj)
                 mtohRenderer = nullptr;
         }
     }
-
-    RenderStudioResolver::SetRemoteServerAddress("wss://renderstudio.luxoft.com/live/", "");
-    RenderStudioResolver::SetCurrentUserId("Maya");
-
-    try {
-        RenderStudioResolver::StartLiveMode();
-
-        // Run Usd Resolver Live updates   
-        float REFRESH_RATE = 0.02f;
-        g_LiveModeTimerCallbackId = MTimerMessage::addTimerCallback(REFRESH_RATE, LiveModeTimerCallbackId, nullptr, &status);
-    }
-    catch (const std::runtime_error& e) {
-        MGlobal::displayError((std::string("RprUsd StartLiveMode failed: ") + e.what()).c_str());
-    }
-
 #endif
 
     return status;
@@ -126,6 +110,10 @@ PLUGIN_EXPORT MStatus uninitializePlugin(MObject obj)
 
 
 #if MAYA_VERSION >= 24
+
+    status = plugin.deregisterCommand(RprUsdOpenStudioStageCmd::s_commandName);
+    CHECK_MSTATUS(status);
+
     // DeinitializeViewport
 
     if (auto* renderer = MHWRender::MRenderer::theRenderer()) {
@@ -148,21 +136,9 @@ PLUGIN_EXPORT MStatus uninitializePlugin(MObject obj)
         status.perror("Error deregistering mtoh command!");
     }
 
-    RenderStudioResolver::StopLiveMode();
-
-    if (g_LiveModeTimerCallbackId){ 
-        MTimerMessage::removeCallback(g_LiveModeTimerCallbackId);
-        g_LiveModeTimerCallbackId = 0;
-    }
+    RenderStudioResolverHelper::StopLiveMode();
 
 #endif 
 
     return status;
-}
-
-void LiveModeTimerCallbackId(float, float, void* pClientData)
-{
-#if MAYA_VERSION >= 24
-    RenderStudioResolver::ProcessLiveUpdates();
-#endif
 }

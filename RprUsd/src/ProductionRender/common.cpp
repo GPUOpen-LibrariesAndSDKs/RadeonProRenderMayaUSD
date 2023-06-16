@@ -3,6 +3,8 @@
 #include <maya/MItDependencyNodes.h>
 #include <mayaUsd/nodes/layerManager.h>
 
+#include <maya/MSelectionList.h>
+
 std::string GetRendererName()
 {
 	return "HdRprPlugin";
@@ -38,4 +40,24 @@ UsdStageRefPtr GetUsdStage()
 	}
 
 	return nullptr;
+}
+
+MObject GetSettingsNode()
+{
+	MSelectionList slist;
+	MString nodeName = "defaultRenderGlobals";
+	slist.add(nodeName);
+
+	MObject mayaObject;
+	if (slist.length() == 0 || !slist.getDependNode(0, mayaObject)) {
+		return mayaObject;
+	}
+
+	MStatus           status;
+	MFnDependencyNode node(mayaObject, &status);
+	if (!status) {
+		return MObject();
+	}
+
+	return mayaObject;
 }

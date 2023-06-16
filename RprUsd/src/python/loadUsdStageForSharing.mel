@@ -47,7 +47,7 @@ proc setOptionVars(int $forceFactorySettings)
     }
 }
 
-proc string doCreateStage(string $fileName)
+global proc string RprUsdDoCreateStage(string $fileName)
 {
     // actually load the file
     string $baseName = basenameEx($fileName);
@@ -96,8 +96,6 @@ global proc CreateStageFromFile()
 
     if (size($result) > 0) {
         setLatestLoadStageFolder( dirname($result[0]) );
-        string $filepath = "studio://" + basename( $result[0], "" );
-	print ("Filepath: " + $filepath + "\n");
-        doCreateStage($filepath);
+        rprUsdOpenStudioStage -f $result[0];
     }
 }

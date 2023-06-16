@@ -16,4 +16,6 @@ std::string GetRendererName();
 MayaUsdProxyShapeBase* GetMayaUsdProxyShapeBase();
 UsdStageRefPtr GetUsdStage();
 
+MObject GetSettingsNode();
+
 #endif
