@@ -54,7 +54,10 @@ def removeRprUsdMenu():
         maya.cmds.deleteUI("rprUsdMenuCtrl")
 
 def RunRenderStudio(value) :
-    key = winreg.OpenKeyEx(winreg.HKEY_LOCAL_MACHINE, "SOFTWARE\\AMD\\RenderStudio")
-    renderStudioExecPath = winreg.QueryValueEx(key, "ExecCmd")[0]
+    try:
+        key = winreg.OpenKeyEx(winreg.HKEY_LOCAL_MACHINE, "SOFTWARE\\AMD\\RenderStudio")
+        renderStudioExecPath = winreg.QueryValueEx(key, "ExecCmd")[0]
 
-    subprocess.run([renderStudioExecPath, "--scene cube.usd"])
+        subprocess.run([renderStudioExecPath, "--scene cube.usd"])
+    except OSError:
+        maya.cmds.confirmDialog(title="Cannot run Render Studio", message="Unable to run Render Studio. Make sure it is installed!", button="OK")
