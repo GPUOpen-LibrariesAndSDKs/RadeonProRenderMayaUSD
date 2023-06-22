@@ -49,6 +49,7 @@ MStatus AssignMatXMaterial(UsdStageRefPtr stage, const MString& primPath, const 
 	UsdPrim prim = stage->GetPrimAtPath(path);
 	UsdReferences primRefs = prim.GetReferences();
 
+	primRefs.ClearReferences();
 	primRefs.AddReference(sdfRef);
 
 	MString materialName = inMaterialName;
