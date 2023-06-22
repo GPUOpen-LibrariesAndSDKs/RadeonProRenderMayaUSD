@@ -35,9 +35,55 @@ MSyntax RprUsdBiodMtlxCmd::newSyntax()
 	CHECK_MSTATUS(syntax.addFlag(kMaterialNameFlag, kMaterialNameFlagLong, MSyntax::kString));
 
 	CHECK_MSTATUS(syntax.addFlag(kClearAllReferencesFlag, kClearAllReferencesFlagLong, MSyntax::kNoArg));
-	
+
+	// LiveMode
+	CHECK_MSTATUS(syntax.addFlag(kLiveModeFlag, kLiveModeFlagLong, MSyntax::kNoArg));
+	CHECK_MSTATUS(syntax.addFlag(kGpuOpenMatIdFlag, kGpuOpenMatIdFlagLong, MSyntax::kString));
 
 	return syntax;
+}
+
+MStatus AssignMatXMaterial(UsdStageRefPtr stage, const MString& primPath, const SdfReference& sdfRef, const MString& inMaterialName)
+{
+	SdfPath path = SdfPath(primPath.asChar());
+	UsdPrim prim = stage->GetPrimAtPath(path);
+	UsdReferences primRefs = prim.GetReferences();
+
+	primRefs.AddReference(sdfRef);
+
+	MString materialName = inMaterialName;
+
+	UsdPrim materialPrim;
+	if (materialName == "") {
+		materialPrim = stage->GetPrimAtPath(path.AppendChild(TfToken{ "Materials" })).GetChildren().front();
+	}
+	else {
+		materialPrim = stage->GetPrimAtPath(SdfPath((primPath + "/Materials/" + materialName).asChar()));
+	}
+
+	SdfPath previousMaterialPath;
+
+	UsdShadeMaterial material(materialPrim);
+	if (material) {
+		UsdShadeMaterialBindingAPI bindingAPI;
+		if (prim.HasAPI<UsdShadeMaterialBindingAPI>()) {
+			bindingAPI = UsdShadeMaterialBindingAPI(prim);
+			previousMaterialPath = bindingAPI.GetDirectBinding().GetMaterialPath();
+		}
+		else {
+			bindingAPI = UsdShadeMaterialBindingAPI::Apply(prim);
+		}
+
+		bindingAPI.Bind(material);
+	}
+	else
+	{
+		MGlobal::displayError(MString("RprUsd: Cannot bind prim ") + primPath + " with material " + materialName.asChar());
+		return MS::kFailure;
+	}
+
+	MGlobal::displayInfo("RprUsd: MaterialX applied to prim!");
+	return MStatus::kSuccess;
 }
 
 // -----------------------------------------------------------------------------
@@ -90,6 +136,20 @@ MStatus RprUsdBiodMtlxCmd::doIt(const MArgList & args)
 	{
 		primRefs.ClearReferences();
 		return MStatus::kSuccess;
+	}
+
+	if (argData.isFlagSet(kLiveModeFlag)) {
+		if (argData.isFlagSet(kGpuOpenMatIdFlag)) {
+			MString id;
+			argData.getFlagArgument(kGpuOpenMatIdFlag, 0, id);
+			SdfReference sdfRef = SdfReference(("gpuopen://" + id).asChar(), SdfPath("/MaterialX"));
+
+			return AssignMatXMaterial(stage, primPath, sdfRef, "");
+		}
+		else {
+			MGlobal::displayError("RprUsd: -id parameter is required for MatX Bind in LiveMode");
+			return MS::kFailure;
+		}
 	}
 
 	// otherwise assing new material
@@ -153,32 +213,7 @@ MStatus RprUsdBiodMtlxCmd::doIt(const MArgList & args)
 
 	SdfReference sdfRef = SdfReference(mtlxFileName.asChar(), SdfPath("/MaterialX"));
 
-	primRefs.AddReference(sdfRef);
-
-	SdfPath materialPath = SdfPath((primPath + "/Materials/" + materialName).asChar());
-	SdfPath previousMaterialPath;
-
-	UsdShadeMaterial material(stage->GetPrimAtPath(materialPath));
-	if ( material) {
-		UsdShadeMaterialBindingAPI bindingAPI;
-		if (prim.HasAPI<UsdShadeMaterialBindingAPI>()) {
-			bindingAPI = UsdShadeMaterialBindingAPI(prim);
-			previousMaterialPath = bindingAPI.GetDirectBinding().GetMaterialPath(); 
-		}
-		else {
-			bindingAPI = UsdShadeMaterialBindingAPI::Apply(prim);
-		}
-
-		bindingAPI.Bind(material);
-	}
-	else
-	{
-		MGlobal::displayError(MString("RprUsd: Cannot bind prim ") + primPath + " with material " + materialPath.GetString().c_str());
-		return MS::kFailure;
-	}
-
-	MGlobal::displayInfo("RprUsd: MaterialX applied to prim!");
-	return MStatus::kSuccess;
+	return AssignMatXMaterial(stage, primPath, sdfRef, materialName);
 }
 
 // Static Methods

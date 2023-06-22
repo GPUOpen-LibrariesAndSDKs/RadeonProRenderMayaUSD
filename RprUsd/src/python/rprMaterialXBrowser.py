@@ -21,6 +21,8 @@ from client import MatlibClient
 import zipfile
 import threading
 
+import ufe
+
 
 # Show the material browser window.
 # -----------------------------------------------------------------------------
@@ -318,6 +320,8 @@ class RPRMaterialBrowser(object) :
         self.downloadPackageDropdown = cmds.optionMenu(parent = self.downloadButtonLayout)
         downloadButton = cmds.button(label="Download", parent = self.downloadButtonLayout, w=100, h=30, command=self.downloadMaterial)
 
+        assignMatXLiveModeButton = cmds.button(label="Assign Material", parent = self.downloadButtonLayout, w=100, h=30, command=self.assignMatXLiveMode)
+
         cmds.setParent('..')
         cmds.setParent('..')
         cmds.setParent('..')
@@ -420,6 +424,14 @@ class RPRMaterialBrowser(object) :
             os.remove(zipFileName)
                                                                                                                
         cmds.progressWindow(endProgress=1)
+
+    def assignMatXLiveMode(self, *args) :
+        gsel = ufe.GlobalSelection.get()
+        pathList = list(gsel)    
+        while len(pathList) > 0 :
+            selected_path = str(pathList.pop().path())
+            selected_path = selected_path[selected_path.find("/"):len(selected_path)]
+            cmds.rprUsdBindMtlx(lm=1, pp=selected_path, id=self.selectedMaterial["id"])
 
     def updateSelectedMaterialPanel(self, fileName, categoryName, materialName, materialType, license) :
 

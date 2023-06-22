@@ -35,7 +35,7 @@ void RenderStudioResolverHelper::StopLiveMode()
         g_LiveModeTimerCallbackId = 0;
     }
 
-    StopLiveMode();
+    RenderStudioResolver::StopLiveMode();
     m_IsLiveModeStarted = false;
 }
 
