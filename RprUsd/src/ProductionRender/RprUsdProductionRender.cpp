@@ -767,13 +767,12 @@ void RprUsdProductionRender::RegisterRenderer(const std::map<std::string, std::s
 
 				columnLayout  -adjustableColumn false -co "left" 140;
 					$g_rprHdrUSDCamerasCtrl = `optionMenu -l "USD Camera: " -changeCommand "OnUsdCameraChanged"`;
-					setParent ..;
 				setParent ..;
 
 				$value = GetCameraSelectedAttribute();
 
 				$valueExist = 0;
-				for ($i = 0; $i < size($usdCamerasArray); $i++) 
+				for ($i = 0; $i < size($usdCamerasArray); $i++)
 				{
 					$cameraName = $usdCamerasArray[$i];
 					menuItem -parent $g_rprHdrUSDCamerasCtrl -label $cameraName;
@@ -882,16 +881,37 @@ void RprUsdProductionRender::RegisterRenderer(const std::map<std::string, std::s
 
     global proc createRprUsdLiveModeTab()
     {
-		columnLayout
-			-adjustableColumn true
-			-columnAttach "both" 5
-			-columnWidth 250
-			-columnAlign "center"
-			-rowSpacing 5;
+		string $parentForm = `setParent -query`;
 
-             attrControlGrp -label "Channel Name" -attribute defaultRenderGlobals.HdRprPlugin_LiveModeChannelName;
+		scrollLayout -w 375 -horizontalScrollBarThickness 0 rprmayausd_live_scrollLayout;
+			columnLayout -adjustableColumn true;
+				frameLayout - label "Live Mode" -cll true -cl false;
 
-         setParent ..;
+					columnLayout  -adjustableColumn false -co "left" 80;
+						optionMenu -label "Channel Name Quick Pick:" 
+							-changeCommand "setAttr -type \"string\" defaultRenderGlobals.HdRprPlugin_LiveModeChannelName \"#1\"";
+
+							menuItem -label "Maya";
+							menuItem -label "RenderStudio";
+							menuItem -label "Blender";
+							menuItem -label "Houdini";
+							menuItem -label "Maya_QA_Team";
+							menuItem -label "Maya_QA_Team2";
+					setParent ..;	
+
+					attrControlGrp -label "Channel Name" -attribute defaultRenderGlobals.HdRprPlugin_LiveModeChannelName;
+
+				setParent ..;
+			setParent ..;
+		setParent ..;
+
+		formLayout
+			-edit
+			-af rprmayausd_live_scrollLayout "top" 0
+			-af rprmayausd_live_scrollLayout "bottom" 0
+			-af rprmayausd_live_scrollLayout "left" 0
+			-af rprmayausd_live_scrollLayout "right" 0
+			$parentForm;
     }
 
     global proc updateRprUsdLiveModeTab()
