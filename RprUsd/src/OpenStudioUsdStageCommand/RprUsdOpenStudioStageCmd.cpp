@@ -69,7 +69,7 @@ MStatus RprUsdOpenStudioStageCmd::doIt(const MArgList & args)
 	if (RenderStudioResolverHelper::IsUnresovableToRenderStudioPath(filePath)) {
 		std::string studioFilePath = RenderStudioResolverHelper::Unresolve(filePath);
 
-		MString cmd = MString("RprUsdDoCreateStage(\"") + studioFilePath.c_str() + "\")";
+		MString cmd = MString("RprUsd_DoCreateStage(\"") + studioFilePath.c_str() + "\")";
 
 		MGlobal::executeCommand(cmd);
 
