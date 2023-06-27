@@ -895,8 +895,6 @@ void RprUsdProductionRender::RegisterRenderer(const std::map<std::string, std::s
 							menuItem -label "RenderStudio";
 							menuItem -label "Blender";
 							menuItem -label "Houdini";
-							menuItem -label "Maya_QA_Team";
-							menuItem -label "Maya_QA_Team2";
 					setParent ..;	
 
 					attrControlGrp -label "Channel Name" -attribute defaultRenderGlobals.HdRprPlugin_LiveModeChannelName;
