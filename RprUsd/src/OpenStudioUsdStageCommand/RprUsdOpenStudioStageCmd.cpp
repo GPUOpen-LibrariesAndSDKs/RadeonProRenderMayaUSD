@@ -10,6 +10,7 @@
 PXR_NAMESPACE_OPEN_SCOPE
 
 MString RprUsdOpenStudioStageCmd::s_commandName = "rprUsdOpenStudioStage";
+MString RprUsdOpenStudioStageCmd::s_LastRencetUsedFilePath = "";
 
 RprUsdOpenStudioStageCmd::RprUsdOpenStudioStageCmd()
 {
@@ -29,6 +30,7 @@ MSyntax RprUsdOpenStudioStageCmd::newSyntax()
 	MSyntax syntax;
 
 	CHECK_MSTATUS(syntax.addFlag(kFilePathFlag, kFilePathFlagLong, MSyntax::kString));
+	CHECK_MSTATUS(syntax.addFlag(kGetRecentFilePathUsedFlag, kGetRecentFilePathUsedFlagLong, MSyntax::kString));
 
 	return syntax;
 }
@@ -51,6 +53,12 @@ MStatus RprUsdOpenStudioStageCmd::doIt(const MArgList & args)
 {
 	// Parse arguments.
 	MArgDatabase argData(syntax(), args);
+
+	if (argData.isFlagSet(kGetRecentFilePathUsedFlag))
+	{
+		setResult(s_LastRencetUsedFilePath);
+		return MStatus::kSuccess;
+	}
 
 	std::string filePath;
 	if (argData.isFlagSet(kFilePathFlag))
@@ -88,6 +96,8 @@ MStatus RprUsdOpenStudioStageCmd::doIt(const MArgList & args)
 		liveModeInfo.userId = "MayaUser_" + GenerateGUID();
 
 		RenderStudioResolverHelper::StartLiveMode(liveModeInfo);
+
+		s_LastRencetUsedFilePath = filePath.c_str();
 	}
 	else {
 		MGlobal::displayError("RprUsd: RprUsdOpenStudioStageCmd: wrong filePath is specified");
