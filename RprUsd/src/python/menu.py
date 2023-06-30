@@ -47,7 +47,7 @@ def createRprUsdMenu():
         maya.cmds.menuItem("runRenderStudio",label="Run RenderStudio", p=rprUsdMenuCtrl, c=RunRenderStudio)
 
 def LoadUsdStageForSharing(value):  
-    mel.eval("source loadUsdStageForSharing.mel; CreateStageFromFile();")
+    mel.eval("source loadUsdStageForSharing.mel; RprUsd_CreateStageFromFile();")
 
 def removeRprUsdMenu():
     if maya.cmds.menu("rprUsdMenuCtrl", exists=1):

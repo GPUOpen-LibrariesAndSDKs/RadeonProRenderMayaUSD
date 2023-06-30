@@ -47,7 +47,7 @@ proc setOptionVars(int $forceFactorySettings)
     }
 }
 
-global proc string RprUsdDoCreateStage(string $fileName)
+global proc string RprUsd_DoCreateStage(string $fileName)
 {
     // actually load the file
     string $baseName = basenameEx($fileName);
@@ -74,7 +74,7 @@ global proc string RprUsdDoCreateStage(string $fileName)
     return $fullPath[0];
 }
 
-global proc CreateStageFromFile()
+global proc RprUsd_CreateStageFromFile()
 {
     setOptionVars(false);
     
