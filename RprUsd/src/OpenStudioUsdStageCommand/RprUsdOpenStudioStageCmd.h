@@ -12,6 +12,8 @@
 #define kFilePathFlag "-f"
 #define kFilePathFlagLong "-filePath"
 
+#define kGetRecentFilePathUsedFlag "-gr"
+#define kGetRecentFilePathUsedFlagLong "-getRecentPath"
 
 PXR_NAMESPACE_OPEN_SCOPE
 
@@ -43,6 +45,9 @@ public:
 
 public:
 	static MString s_commandName;
+
+private:
+	static MString s_LastRencetUsedFilePath;
 };
 
 PXR_NAMESPACE_CLOSE_SCOPE

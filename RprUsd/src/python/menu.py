@@ -57,7 +57,8 @@ def RunRenderStudio(value) :
     try:
         key = winreg.OpenKeyEx(winreg.HKEY_LOCAL_MACHINE, "SOFTWARE\\AMD\\RenderStudio")
         renderStudioExecPath = winreg.QueryValueEx(key, "ExecCmd")[0]
-
-        subprocess.Popen([renderStudioExecPath, "--scene cube.usd"])
+        
+        filePath = maya.cmds.rprUsdOpenStudioStage(gr=1)
+        subprocess.Popen([renderStudioExecPath, "--scene=" + filePath])
     except OSError:
         maya.cmds.confirmDialog(title="Cannot run Render Studio", message="Unable to run Render Studio. Make sure it is installed!", button="OK")
