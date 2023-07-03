@@ -7,6 +7,8 @@ import ufe
 import winreg
 import subprocess
 
+mel.eval("source loadUsdStageForSharing.mel")
+
 def showRPRMaterialXLibrary(value) :
     import rprMaterialXBrowser
     rprMaterialXBrowser.show()
@@ -47,7 +49,7 @@ def createRprUsdMenu():
         maya.cmds.menuItem("runRenderStudio",label="Run RenderStudio", p=rprUsdMenuCtrl, c=RunRenderStudio)
 
 def LoadUsdStageForSharing(value):  
-    mel.eval("source loadUsdStageForSharing.mel; RprUsd_CreateStageFromFile();")
+    mel.eval("RprUsd_CreateStageFromFile();")
 
 def removeRprUsdMenu():
     if maya.cmds.menu("rprUsdMenuCtrl", exists=1):
