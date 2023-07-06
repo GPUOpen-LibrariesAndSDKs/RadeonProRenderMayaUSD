@@ -1,5 +1,5 @@
-#ifndef __RPRUSDBINDMTLXCMD__
-#define __RPRUSDBINDMTLXCMD__
+#ifndef __RPRUSDSETIBLCMD__
+#define __RPRUSDSETIBLCMD__
 
 #include <maya/MPxCommand.h>
 #include <maya/MSyntax.h>
@@ -9,36 +9,16 @@
 
 // Command arguments.
 // required
-#define kPrimPathFlag "-pp"
-#define kPrimPathFlagLong "-primPath"
-
-// required
-#define kMtlxFilePathFlag "-mp"
-#define kMtlxFilePathFlagLong "-mtlxFilePath"
-
-// optional
-#define kMaterialNameFlag "-mn"
-#define kMaterialNameFlagLong "-materialName"
-
-// clearAllReference
-#define kClearAllReferencesFlag "-car"
-#define kClearAllReferencesFlagLong "-clearAllReferences"
-
-// Assing MatX for LiveMode
-#define kLiveModeFlag "-lm"
-#define kLiveModeFlagLong "-liveMode"
-
-#define kGpuOpenMatIdFlag "-id"
-#define kGpuOpenMatIdFlagLong "-materialId"
-
+#define kNameFlag "-n"
+#define kNameFlagLong "-name"
 
 PXR_NAMESPACE_OPEN_SCOPE
 
 /** Perform a single frame */
-class RprUsdBiodMtlxCmd : public MPxCommand
+class RprUsdSetIBLCmd : public MPxCommand
 {
 public:
-	RprUsdBiodMtlxCmd();
+	RprUsdSetIBLCmd();
 	// MPxCommand Implementation
 	// -----------------------------------------------------------------------------
 
@@ -66,4 +46,4 @@ public:
 
 PXR_NAMESPACE_CLOSE_SCOPE
 
-#endif //__RPRUSDBINDMTLXCMD__
+#endif //__RPRUSDSETIBLCMD__

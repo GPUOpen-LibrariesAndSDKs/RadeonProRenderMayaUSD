@@ -17,6 +17,7 @@
 
 #include "ProductionRender/RprUsdProductionRenderCmd.h"
 #include "BindMtlxCommand/RprUsdBindMtlxCmd.h"
+#include "SetIBLCommand/RprUsdSetIBLCmd.h"
 #include "OpenStudioUsdStageCommand/RprUsdOpenStudioStageCmd.h"
 
 
@@ -46,6 +47,9 @@ PLUGIN_EXPORT MStatus initializePlugin(MObject obj)
 #if MAYA_VERSION >= 24
 
     status = plugin.registerCommand(RprUsdOpenStudioStageCmd::s_commandName, RprUsdOpenStudioStageCmd::creator, RprUsdOpenStudioStageCmd::newSyntax);
+    CHECK_MSTATUS(status);
+
+    status = plugin.registerCommand(RprUsdSetIBLCmd::s_commandName, RprUsdSetIBLCmd::creator, RprUsdSetIBLCmd::newSyntax);
     CHECK_MSTATUS(status);
 
     // Initialize Viewport
@@ -112,6 +116,9 @@ PLUGIN_EXPORT MStatus uninitializePlugin(MObject obj)
 #if MAYA_VERSION >= 24
 
     status = plugin.deregisterCommand(RprUsdOpenStudioStageCmd::s_commandName);
+    CHECK_MSTATUS(status);
+
+    status = plugin.deregisterCommand(RprUsdSetIBLCmd::s_commandName);
     CHECK_MSTATUS(status);
 
     // DeinitializeViewport

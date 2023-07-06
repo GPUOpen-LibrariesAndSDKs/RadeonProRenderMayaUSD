@@ -5,6 +5,8 @@ import json
 import urllib.request
 import threading
 
+from functools import partial
+
 
 def show() :
     RPRLightBrowser().show()
@@ -110,14 +112,14 @@ class RPRLightBrowser(object) :
         self.cellHeight = self.iconSize + 30
 
         # Create the new flow layout.
-        cmds.flowLayout("RPRMaterialsFlow", columnSpacing=0, wrap=True, width = 3 * self.cellWidth, height = 3 * self.cellHeight)
+        cmds.flowLayout("RPRMaterialsFlow", columnSpacing=0, wrap=True, width = 3 * self.cellWidth + 5, height = 3 * self.cellHeight + 5)
 
             # Vertical layout for large icons.
         for light in self.lights : 
             fileName = self.getMaterialFileName(light)
             imageFileName = self.getMaterialFullPath(fileName)
 
-            cmd = partial(selectIBL, light["name"])
+            cmd = partial(self.selectIBL, light["name"])
 
             cmds.columnLayout(width=self.cellWidth, height=self.cellHeight)
             cmds.iconTextButton(style='iconOnly', image=imageFileName, width=self.iconSize, height=self.iconSize, command=cmd)
@@ -128,8 +130,5 @@ class RPRLightBrowser(object) :
         cmds.showWindow(self.window)
 
     def selectIBL(self, lightName) :
-
-
-
-
+        cmds.rprUsdSetIBL(name=lightName)
         
