@@ -4,6 +4,7 @@
 
 
 #include <pxr/usd/usd/references.h>
+#include <pxr/usd/usdGeom/xform.h>
 
 
 PXR_NAMESPACE_OPEN_SCOPE
@@ -55,19 +56,21 @@ MStatus RprUsdSetIBLCmd::doIt(const MArgList & args)
 		return MS::kFailure;
 	}
 
-	SdfPath envRootPrimPath = SdfPath("/RenderStudioPrimitives");
+	SdfPath primRootPrimPath = SdfPath("/RenderStudioPrimitives");
 
-	UsdPrim envRootPrim = stage->GetPrimAtPath(envRootPrimPath);
+	UsdPrim primRootPrim = UsdGeomXform::Define(stage, primRootPrimPath).GetPrim();
 	
-	if (!envRootPrim.IsValid()) {
-		envRootPrim = stage->DefinePrim(envRootPrimPath, TfToken("Xform"));
-	}
+	if (primRootPrim.IsValid()) {
+		primRootPrim.SetActive(true);
 
-	if (envRootPrim.IsValid()) {
-		envRootPrim.SetActive(true);
-		UsdReferences references = envRootPrim.GetReferences();
-		references.ClearReferences();
-		references.AddReference(SdfReference(("storage://" + iblName).asChar()));
+		SdfPath childrenPath = primRootPrim.GetPath().AppendChild(TfToken{ TfMakeValidIdentifier("Environment") });
+		UsdPrim envPrim = stage->DefinePrim(childrenPath);
+
+		if (envPrim.IsValid()) {
+			UsdReferences references = envPrim.GetReferences();
+			references.ClearReferences();
+			references.AddReference(SdfReference(("storage://" + iblName).asChar()));
+		}
 	}
 }
 
