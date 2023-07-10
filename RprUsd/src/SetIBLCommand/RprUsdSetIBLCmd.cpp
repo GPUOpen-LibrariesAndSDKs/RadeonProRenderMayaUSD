@@ -72,6 +72,8 @@ MStatus RprUsdSetIBLCmd::doIt(const MArgList & args)
 			references.AddReference(SdfReference(("storage://" + iblName).asChar()));
 		}
 	}
+
+	return MS::kSuccess;
 }
 
 // Static Methods
