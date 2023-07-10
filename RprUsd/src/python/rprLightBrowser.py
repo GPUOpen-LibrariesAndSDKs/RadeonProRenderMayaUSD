@@ -59,8 +59,6 @@ class RPRLightBrowser(object) :
 
         for thread in threads:
             thread.join()
-#            percent = int(100 * threadCount / len(threads))
-#            cmds.progressWindow( edit=True, progress=percent, status=('opening: ' + str(percent) + '%' ) )
 
     def downloadThumbnail(self, light_id: str, fullFilePath: str):
         url = self.baseUrl + light_id + "/thumbnail"
