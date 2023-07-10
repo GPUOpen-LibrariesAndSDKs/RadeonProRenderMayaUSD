@@ -45,7 +45,7 @@ MStatus RprUsdSetIBLCmd::doIt(const MArgList & args)
 	}
 	else {
 		MGlobal::displayWarning("RprUsd: IBL is not set, please provide a name!");
-		return MS::kFailure;
+		return MStatus::kFailure;
 	}
 
 	UsdStageRefPtr stage = GetUsdStage();
@@ -53,7 +53,7 @@ MStatus RprUsdSetIBLCmd::doIt(const MArgList & args)
 	if (!stage)
 	{
 		MGlobal::displayError("RprUsd: USD stage does not exist!");
-		return MS::kFailure;
+		return MStatus::kFailure;
 	}
 
 	SdfPath primRootPrimPath = SdfPath("/RenderStudioPrimitives");
@@ -73,7 +73,7 @@ MStatus RprUsdSetIBLCmd::doIt(const MArgList & args)
 		}
 	}
 
-	return MS::kSuccess;
+	return MStatus::kSuccess;
 }
 
 // Static Methods
