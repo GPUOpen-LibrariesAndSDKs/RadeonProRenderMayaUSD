@@ -131,4 +131,3 @@ class RPRLightBrowser(object) :
 
     def selectIBL(self, lightName) :
         cmds.rprUsdSetIBL(name=lightName)
-        
