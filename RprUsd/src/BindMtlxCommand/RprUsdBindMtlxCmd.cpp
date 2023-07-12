@@ -62,20 +62,18 @@ MStatus AssignMatXMaterial(UsdStageRefPtr stage, const MString& primPath, const 
 		materialPrim = stage->GetPrimAtPath(SdfPath((primPath + "/Materials/" + materialName).asChar()));
 	}
 
-	SdfPath previousMaterialPath;
-
 	UsdShadeMaterial material(materialPrim);
 	if (material) {
 		UsdShadeMaterialBindingAPI bindingAPI;
 		if (prim.HasAPI<UsdShadeMaterialBindingAPI>()) {
 			bindingAPI = UsdShadeMaterialBindingAPI(prim);
-			previousMaterialPath = bindingAPI.GetDirectBinding().GetMaterialPath();
+			bindingAPI.UnbindAllBindings();
 		}
 		else {
 			bindingAPI = UsdShadeMaterialBindingAPI::Apply(prim);
 		}
 
-		bindingAPI.Bind(material);
+		bindingAPI.Bind(material, UsdShadeTokens->strongerThanDescendants);
 	}
 	else
 	{
