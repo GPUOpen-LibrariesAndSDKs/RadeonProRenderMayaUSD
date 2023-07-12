@@ -104,18 +104,25 @@ set(Source_Files
 )
 source_group("Source Files" FILES ${Source_Files})
 
-set(Source_Files_ResolverHelper
+set(Source_Files__ResolverHelper
     "src/RenderStudioResolverHelper.cpp"
     "src/RenderStudioResolverHelper.h"
 )
-source_group("Source Files\\ResolverHelper" FILES ${Source_Files_ResolverHelper})
-
+source_group("Source Files\\ResolverHelper" FILES ${Source_Files__ResolverHelper})
 
 set(Source_Files__BindMtlxCommand
-    "src/BindMtlxCommand/rprUsdBindMtlxCmd.cpp"
-    "src/BindMtlxCommand/rprUsdBindMtlxCmd.h"
+    "src/BindMtlxCommand/RprUsdBindMtlxCmd.cpp"
+    "src/BindMtlxCommand/RprUsdBindMtlxCmd.h"
 )
 source_group("Source Files\\BindMtlxCommand" FILES ${Source_Files__BindMtlxCommand})
+
+
+set(Source_Files__SetIBLCommand
+    "src/SetIBLCommand/RprUsdSetIBLCmd.cpp"
+    "src/SetIBLCommand/RprUsdSetIBLCmd.h"
+)
+source_group("Source Files\\SetIBLCommand" FILES ${Source_Files__SetIBLCommand})
+
 
 set(Source_Files__OpenUsdStudioStageCommand
     "src/OpenStudioUsdStageCommand/RprUsdOpenStudioStageCmd.cpp"
@@ -164,7 +171,8 @@ set(ALL_FILES
     "$<$<CONFIG:Release2024>:"
      ${Source_Files__ViewportRender}
      ${Source_Files__OpenUsdStudioStageCommand}
-     ${Source_Files_ResolverHelper}
+     ${Source_Files__ResolverHelper}
+     ${Source_Files__SetIBLCommand}
     ">"
 )
 

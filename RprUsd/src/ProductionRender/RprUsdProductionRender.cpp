@@ -893,6 +893,7 @@ void RprUsdProductionRender::RegisterRenderer(const std::map<std::string, std::s
 
 							menuItem -label "Maya";
 							menuItem -label "RenderStudio";
+							menuItem -label "RenderStudioMaya";
 							menuItem -label "Blender";
 							menuItem -label "Houdini";
 					setParent ..;	

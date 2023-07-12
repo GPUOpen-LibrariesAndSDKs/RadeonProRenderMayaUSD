@@ -9,9 +9,13 @@ import subprocess
 
 mel.eval("source loadUsdStageForSharing.mel")
 
-def showRPRMaterialXLibrary(value) :
+def ShowRPRMaterialXLibrary(value) :
     import rprMaterialXBrowser
     rprMaterialXBrowser.show()
+
+def ShowLightBrowser(value) :
+    import rprLightBrowser
+    rprLightBrowser.show()
 
 def BindMaterialXFromFile(value) :
 
@@ -43,10 +47,11 @@ def createRprUsdMenu():
     if not maya.cmds.menu("rprUsdMenuCtrl", exists=1):
         gMainWindow = "MayaWindow"
         rprUsdMenuCtrl = maya.cmds.menu("rprUsdMenuCtrl", label="RPR USD", p=gMainWindow)
-        maya.cmds.menuItem("materialXLibraryCtrl", label="MaterialX Library", p=rprUsdMenuCtrl, c=showRPRMaterialXLibrary)
+        maya.cmds.menuItem("materialXLibraryCtrl", label="MaterialX Library", p=rprUsdMenuCtrl, c=ShowRPRMaterialXLibrary)
         maya.cmds.menuItem("bindMaterialXCtrl",label="Bind MaterialX To Selected Mesh", p=rprUsdMenuCtrl, c=BindMaterialXFromFile)
         maya.cmds.menuItem("loadUsdForSharing",label="Load Usd Stage For Sharing", p=rprUsdMenuCtrl, c=LoadUsdStageForSharing)
         maya.cmds.menuItem("runRenderStudio",label="Run RenderStudio", p=rprUsdMenuCtrl, c=RunRenderStudio)
+        maya.cmds.menuItem("lightBrowserCtrl",label="Light Browser", p=rprUsdMenuCtrl, c=ShowLightBrowser)
 
 def LoadUsdStageForSharing(value):  
     mel.eval("RprUsd_CreateStageFromFile();")
