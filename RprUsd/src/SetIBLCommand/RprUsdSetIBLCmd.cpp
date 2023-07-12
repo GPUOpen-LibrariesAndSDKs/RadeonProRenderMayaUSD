@@ -66,6 +66,11 @@ MStatus RprUsdSetIBLCmd::doIt(const MArgList & args)
 		SdfPath childrenPath = primRootPrim.GetPath().AppendChild(TfToken{ TfMakeValidIdentifier("Environment") });
 		UsdPrim envPrim = stage->DefinePrim(childrenPath);
 
+		if (stage->GetPrimAtPath(childrenPath).IsValid()) {
+			stage->RemovePrim(childrenPath);
+			envPrim = stage->DefinePrim(childrenPath);
+		}
+
 		if (envPrim.IsValid()) {
 			UsdReferences references = envPrim.GetReferences();
 			references.ClearReferences();
