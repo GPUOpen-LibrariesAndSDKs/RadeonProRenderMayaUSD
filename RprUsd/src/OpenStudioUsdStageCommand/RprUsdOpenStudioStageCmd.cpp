@@ -2,6 +2,8 @@
 #include "common.h"
 #include "../RenderStudioResolverHelper.h"
 
+#include "pxr/base/arch/env.h"
+
 #include <filesystem>
 #include <maya/MGlobal.h>
 
@@ -83,6 +85,13 @@ MStatus RprUsdOpenStudioStageCmd::doIt(const MArgList & args)
 
 		LiveModeInfo liveModeInfo;
 		liveModeInfo.liveUrl = "wss://renderstudio.luxoft.com/livecpp";
+
+		std::string envLivUrl = ArchGetEnv("RENDER_STUDIO_LIVE_REMOTE_URL");
+
+		if (!envLivUrl.empty()) {
+			liveModeInfo.liveUrl = envLivUrl;
+		}
+
 		liveModeInfo.storageUrl = "https://renderstudio.luxoft.com/storage";
 		liveModeInfo.channelId = "Maya";
 
