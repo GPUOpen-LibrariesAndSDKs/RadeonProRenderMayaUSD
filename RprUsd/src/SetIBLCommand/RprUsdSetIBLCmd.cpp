@@ -5,6 +5,7 @@
 
 #include <pxr/usd/usd/references.h>
 #include <pxr/usd/usdGeom/xform.h>
+#include <pxr/usd/usdLux/domeLight.h>
 
 
 PXR_NAMESPACE_OPEN_SCOPE
@@ -69,6 +70,7 @@ MStatus RprUsdSetIBLCmd::doIt(const MArgList & args)
 		if (stage->GetPrimAtPath(childrenPath).IsValid()) {
 			stage->RemovePrim(childrenPath);
 			envPrim = stage->DefinePrim(childrenPath);
+			UsdLuxDomeLight(envPrim).OrientToStageUpAxis();
 		}
 
 		if (envPrim.IsValid()) {
