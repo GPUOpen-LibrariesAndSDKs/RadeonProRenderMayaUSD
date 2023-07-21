@@ -105,6 +105,7 @@ MStatus RprUsdOpenStudioStageCmd::doIt(const MArgList & args)
 
 		liveModeInfo.userId = "MayaUser_" + GenerateGUID();
 
+		MGlobal::displayInfo(MString("Rpr USD Live Mode Server Url = ") + liveModeInfo.liveUrl.c_str());
 		RenderStudioResolverHelper::StartLiveMode(liveModeInfo);
 
 		s_LastRencetUsedFilePath = filePath.c_str();

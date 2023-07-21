@@ -43,6 +43,30 @@ MSyntax RprUsdBiodMtlxCmd::newSyntax()
 	return syntax;
 }
 
+void AddColorSpaceAttribute(UsdShadeMaterial& material)
+{
+	// Make colorspace hack
+	UsdPrimSubtreeRange range = material.GetPrim().GetDescendants();
+	for (const auto& prim : range)
+	{
+		// Work only with shaders
+		if (!prim.IsA<UsdShadeShader>())
+		{
+			continue;
+		}
+
+		// Find colorspace attribute
+		for (const auto& attribute : prim.GetAttributes())
+		{
+			if (!attribute.HasColorSpace())
+			{
+				continue;
+			}
+			prim.CreateAttribute(TfToken{ "inputs:rs:colorspace" }, SdfValueTypeNames->String).Set(attribute.GetColorSpace().GetString());
+		}
+	}
+}
+
 MStatus AssignMatXMaterial(UsdStageRefPtr stage, const MString& primPath, const SdfReference& sdfRef, const MString& inMaterialName)
 {
 	SdfPath path = SdfPath(primPath.asChar());
@@ -74,6 +98,8 @@ MStatus AssignMatXMaterial(UsdStageRefPtr stage, const MString& primPath, const 
 		}
 
 		bindingAPI.Bind(material, UsdShadeTokens->strongerThanDescendants);
+
+		AddColorSpaceAttribute(material);
 	}
 	else
 	{
