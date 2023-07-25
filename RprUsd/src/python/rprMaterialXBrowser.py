@@ -52,6 +52,8 @@ class RPRMaterialBrowser(object) :
         # Panel background color.
         self.backgroundColor = [0.16862745098039217, 0.16862745098039217, 0.16862745098039217]
 
+        self.uiMayaScaleCoeff = 1.25
+
         # Set the default material icon size.
         self.setMaterialIconSize(self.getDefaultMaterialIconSize())
 
@@ -114,9 +116,9 @@ class RPRMaterialBrowser(object) :
         paneLayout = cmds.paneLayout(configuration='vertical3', staticWidthPane=3,
                                      separatorMovedCommand=self.updateMaterialsLayout)
 
-        cmds.paneLayout(paneLayout, edit=True, paneSize=(1, 20, 100))
-        cmds.paneLayout(paneLayout, edit=True, paneSize=(2, 52, 100))
-        cmds.paneLayout(paneLayout, edit=True, paneSize=(3, 28, 100))
+        cmds.paneLayout(paneLayout, edit=True, paneSize=(1, 15, 100))
+        cmds.paneLayout(paneLayout, edit=True, paneSize=(2, 20, 100))
+        cmds.paneLayout(paneLayout, edit=True, paneSize=(3, 35, 100))
 
         # Create UI sections.
         self.createCategoriesLayout()
@@ -200,6 +202,8 @@ class RPRMaterialBrowser(object) :
         self.materialsForm = cmds.formLayout(numberOfDivisions=100)
 
         # Add the icon size slider.
+        topRow = cmds.rowLayout("RPRWMLTopRow", numberOfColumns=5)
+
         iconSizeRow = cmds.rowLayout("RPRIconSize", numberOfColumns=2, columnWidth=(1, 22))
         cmds.image(image='material_browser/thumbnails.png')
         self.iconSizeSlider = cmds.intSlider(width=120, step=1, minValue=1, maxValue=4,
@@ -208,19 +212,25 @@ class RPRMaterialBrowser(object) :
         cmds.setParent('..')
 
         # Add the search field.
-        searchRow = cmds.rowLayout(numberOfColumns=4)
+        #searchRow = cmds.rowLayout("RprSearchRow", numberOfColumns=4)
 
-        helpText = cmds.text(label="Sort Mode: ")
+        cmds.text(label="Sort Mode: ")
         self.sortDropdown = cmds.optionMenu(cc=self.onSortModeChanged)
         cmds.menuItem(p=self.sortDropdown, l="No Sort")
         cmds.menuItem(p=self.sortDropdown, l="Sort Ascending")
         cmds.menuItem(p=self.sortDropdown, l="Sort Descending")
 
         cmds.image(image='material_browser/search.png')
-        self.searchField = cmds.textField(placeholderText="Search...", width=250, height=22,
+        self.searchField = cmds.textField(placeholderText="Search...", width=150, height=22,
                                           textChangedCommand=self.searchMaterials)
 
-        cmds.setParent('..')
+        #cmds.setParent('..')
+        #print(cmds.setParent(q=True) + "\n")
+        cmds.setParent('..') # toRow
+        #print(cmds.setParent(q=True) + "\n")
+
+        #cmds.rowLayout("RprSearchRow", edit=True, visible=False)
+        #cmds.rowLayout("RPRIconSize", edit=True, visible=False)
 
         # Add help text.
         helpText = cmds.text(label="Select material, choose package you wish and click the Download button.")
@@ -237,20 +247,28 @@ class RPRMaterialBrowser(object) :
         cmds.tabLayout(self.materialsTab, edit=True, tabLabel=((self.materialsForm, 'Materials')))
 
         # Lay out components within the form.
+#        cmds.formLayout(self.materialsForm, edit=True,
+#                        attachForm=[(topRow, 'top', 5), (topRow, 'right', 5),
+#                                    (self.materialsContainer, 'left', 10), (self.materialsContainer, 'bottom', 10),
+#                                    (self.materialsContainer, 'right', 5),
+#                                    (helpText, 'left', 10), (helpText, 'bottom', 8),                                   
+#                                    (bg, 'left', 5), (bg, 'bottom', 5), (bg, 'right', 5)],
+#                        attachNone=[(topRow, 'bottom'), (topRow, 'left'),
+#                                   (helpText, 'right'), (helpText, 'top')],
+#                        attachControl=[(self.materialsContainer, 'top', 10, topRow),
+#                                       (self.materialsContainer, 'bottom', 10, helpText),
+#                                       (bg, 'top', 5, topRow)])
+
         cmds.formLayout(self.materialsForm, edit=True,
-                        attachForm=[(searchRow, 'top', 5), (searchRow, 'right', 5),
-                                    (iconSizeRow, 'top', 10), (iconSizeRow, 'left', 6),
+                        attachForm=[(topRow, 'top', 5), (topRow, 'left', 5),
                                     (self.materialsContainer, 'left', 10), (self.materialsContainer, 'bottom', 10),
                                     (self.materialsContainer, 'right', 5),
-                                    (bg, 'left', 5), (bg, 'bottom', 5), (bg, 'right', 5),
-                                    (helpText, 'left', 10), (helpText, 'bottom', 8)],
-                        attachNone=[(searchRow, 'bottom'), (searchRow, 'left'),
-                                    (iconSizeRow, 'bottom'), (iconSizeRow, 'right'),
-                                    (helpText, 'right'), (helpText, 'top')],
-                        attachControl=[(self.materialsContainer, 'top', 10, searchRow),
-                                       (self.materialsContainer, 'bottom', 10, helpText),
-                                       (bg, 'top', 5, searchRow),
-                                       (bg, 'bottom', 5, helpText)])
+                                    (helpText, 'left', 10), (helpText, 'bottom', 8),                                   
+                                    (bg, 'left', 5), (bg, 'bottom', 5), (bg, 'right', 5)],
+                        attachNone=[(helpText, 'right'), (helpText, 'top')], 
+                        attachControl=[(self.materialsContainer, 'top', 10, topRow),
+                                       (self.materialsContainer, 'bottom', 10, helpText)])
+
 
         cmds.setParent('..')
         cmds.setParent('..')
@@ -483,10 +501,12 @@ class RPRMaterialBrowser(object) :
     # a scrollable flow layout works properly.
     # -----------------------------------------------------------------------------
     def updateMaterialsLayout(self) :
-
+        
         # Determine the width of the material view
         # and the total number of materials to display.
-        width = cmds.scrollLayout(self.materialsContainer, query=True, width=True)
+        scrollWidth = cmds.scrollLayout(self.materialsContainer, query=True, width=True)
+        
+        width = cmds.flowLayout("RPRMaterialsFlow", query=True, width=True)
         count = cmds.flowLayout("RPRMaterialsFlow", query=True, numberOfChildren=True)
 
         if (count <= 0) :
@@ -494,20 +514,21 @@ class RPRMaterialBrowser(object) :
 
         # Calculate the number of materials that can fit on
         # a row and the total required height of the container.
-        perRow = max(1, math.floor((width - 18) / self.cellWidth))
+        perRow = max(1, math.floor((width) / (self.cellWidth * self.uiMayaScaleCoeff)))
         height = math.ceil(count / perRow) * self.cellHeight
 
         cmds.flowLayout("RPRMaterialsFlow", edit=True, height=height)
+        print("perRow: " + str(perRow) + ". ScrollWidth: " + str(scrollWidth) + ". Width: " + str(width) + ". self.cellWidth = " + str(self.cellWidth))
 
         # Adjust the form to be narrower than the tab that
         # contains it. This is required so the form doesn't
         # prevent the tab layout shrinking.
         materialsWidth = cmds.tabLayout(self.materialsTab, query=True, width=True)
-        newMaterialsWidth = max(1, materialsWidth - 10)
-        cmds.formLayout(self.materialsForm, edit=True, width=newMaterialsWidth)
+        newMaterialsWidth = max(1, materialsWidth - 10 * self.uiMayaScaleCoeff)
+        #cmds.formLayout(self.materialsForm, edit=True, width=newMaterialsWidth)
 
         # Hide the icon size slider if there isn't enough room for it.
-        cmds.rowLayout("RPRIconSize", edit=True, visible=(materialsWidth > 440))
+        # cmds.rowLayout("RPRIconSize", edit=True, visible=(materialsWidth > 440))
 
         # Update the preview layout.
         self.updatePreviewLayout()
@@ -518,7 +539,7 @@ class RPRMaterialBrowser(object) :
     # doesn't provide enough control over layout.
     # -----------------------------------------------------------------------------
     def updatePreviewLayout(self) :
-
+        
         # Determine the size of the preview area.
         width = cmds.flowLayout("RPRPreviewArea", query=True, width=True)
         height = cmds.flowLayout("RPRPreviewArea", query=True, height=True)
@@ -626,7 +647,7 @@ class RPRMaterialBrowser(object) :
 
     def populateMaterials(self) :
         self.nonSortedMaterials = self.materials.copy()
-        self.sortMaterials(cmds.optionMenu(self.sortDropdown, q=True, select=True))
+        #self.sortMaterials(cmds.optionMenu(self.sortDropdown, q=True, select=True))
         self.populateMaterialsInternal()
 
     def threadProcDownloadThumbnail(self, render_id, fileName) :
