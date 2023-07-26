@@ -202,7 +202,7 @@ class RPRMaterialBrowser(object) :
         self.materialsForm = cmds.formLayout(numberOfDivisions=100)
 
         # Add the icon size slider.
-        topRow = cmds.rowLayout("RPRWMLTopRow", numberOfColumns=5)
+        topRow = cmds.rowLayout("RPRWMLTopRow", numberOfColumns=6)
 
         iconSizeRow = cmds.rowLayout("RPRIconSize", numberOfColumns=2, columnWidth=(1, 22))
         cmds.image(image='material_browser/thumbnails.png')
@@ -210,6 +210,8 @@ class RPRMaterialBrowser(object) :
                                              value=self.getDefaultMaterialIconSize(),
                                              dragCommand=self.updateMaterialIconSize)
         cmds.setParent('..')
+
+        cmds.separator(width=10,style="none")
 
         # Add the search field.
         #searchRow = cmds.rowLayout("RprSearchRow", numberOfColumns=4)
@@ -261,13 +263,15 @@ class RPRMaterialBrowser(object) :
 
         cmds.formLayout(self.materialsForm, edit=True,
                         attachForm=[(topRow, 'top', 5), (topRow, 'left', 5),
-                                    (self.materialsContainer, 'left', 10), (self.materialsContainer, 'bottom', 10),
+                                    (self.materialsContainer, 'left', 5), 
+                                    (self.materialsContainer, 'bottom', 20),
                                     (self.materialsContainer, 'right', 5),
-                                    (helpText, 'left', 10), (helpText, 'bottom', 8),                                   
-                                    (bg, 'left', 5), (bg, 'bottom', 5), (bg, 'right', 5)],
-                        attachNone=[(helpText, 'right'), (helpText, 'top')], 
+                                    (helpText, 'left', 10), (helpText, 'bottom', 5),                                   
+                                    (bg, 'left', 5), (bg, 'bottom', 20), (bg, 'right', 5)],
+                        #attachNone=[(helpText, 'right'), (helpText, 'top')], 
                         attachControl=[(self.materialsContainer, 'top', 10, topRow),
-                                       (self.materialsContainer, 'bottom', 10, helpText)])
+                                       (bg, 'top', 5, topRow)])
+ #                                      (self.materialsContainer, 'bottom', 5, helpText)])
 
 
         cmds.setParent('..')
@@ -504,9 +508,8 @@ class RPRMaterialBrowser(object) :
         
         # Determine the width of the material view
         # and the total number of materials to display.
-        scrollWidth = cmds.scrollLayout(self.materialsContainer, query=True, width=True)
-        
-        width = cmds.flowLayout("RPRMaterialsFlow", query=True, width=True)
+        width = cmds.scrollLayout(self.materialsContainer, query=True, width=True)      
+        #width = cmds.flowLayout("RPRMaterialsFlow", query=True, width=True)
         count = cmds.flowLayout("RPRMaterialsFlow", query=True, numberOfChildren=True)
 
         if (count <= 0) :
@@ -518,7 +521,6 @@ class RPRMaterialBrowser(object) :
         height = math.ceil(count / perRow) * self.cellHeight
 
         cmds.flowLayout("RPRMaterialsFlow", edit=True, height=height)
-        print("perRow: " + str(perRow) + ". ScrollWidth: " + str(scrollWidth) + ". Width: " + str(width) + ". self.cellWidth = " + str(self.cellWidth))
 
         # Adjust the form to be narrower than the tab that
         # contains it. This is required so the form doesn't
