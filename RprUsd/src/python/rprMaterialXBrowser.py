@@ -52,7 +52,7 @@ class RPRMaterialBrowser(object) :
         # Panel background color.
         self.backgroundColor = [0.16862745098039217, 0.16862745098039217, 0.16862745098039217]
 
-        self.uiMayaScaleCoeff = 1.25
+        self.uiMayaScaleCoeff = cmds.mayaDpiSetting(q=True, rsv=True)
 
         # Set the default material icon size.
         self.setMaterialIconSize(self.getDefaultMaterialIconSize())
@@ -116,8 +116,8 @@ class RPRMaterialBrowser(object) :
         paneLayout = cmds.paneLayout(configuration='vertical3', staticWidthPane=3,
                                      separatorMovedCommand=self.updateMaterialsLayout)
 
-        cmds.paneLayout(paneLayout, edit=True, paneSize=(1, 15, 100))
-        cmds.paneLayout(paneLayout, edit=True, paneSize=(2, 20, 100))
+        cmds.paneLayout(paneLayout, edit=True, paneSize=(1, 20, 100))
+        cmds.paneLayout(paneLayout, edit=True, paneSize=(2, 45, 100))
         cmds.paneLayout(paneLayout, edit=True, paneSize=(3, 35, 100))
 
         # Create UI sections.
@@ -249,18 +249,6 @@ class RPRMaterialBrowser(object) :
         cmds.tabLayout(self.materialsTab, edit=True, tabLabel=((self.materialsForm, 'Materials')))
 
         # Lay out components within the form.
-#        cmds.formLayout(self.materialsForm, edit=True,
-#                        attachForm=[(topRow, 'top', 5), (topRow, 'right', 5),
-#                                    (self.materialsContainer, 'left', 10), (self.materialsContainer, 'bottom', 10),
-#                                    (self.materialsContainer, 'right', 5),
-#                                    (helpText, 'left', 10), (helpText, 'bottom', 8),                                   
-#                                    (bg, 'left', 5), (bg, 'bottom', 5), (bg, 'right', 5)],
-#                        attachNone=[(topRow, 'bottom'), (topRow, 'left'),
-#                                   (helpText, 'right'), (helpText, 'top')],
-#                        attachControl=[(self.materialsContainer, 'top', 10, topRow),
-#                                       (self.materialsContainer, 'bottom', 10, helpText),
-#                                       (bg, 'top', 5, topRow)])
-
         cmds.formLayout(self.materialsForm, edit=True,
                         attachForm=[(topRow, 'top', 5), (topRow, 'left', 5),
                                     (self.materialsContainer, 'left', 5), 
@@ -271,8 +259,6 @@ class RPRMaterialBrowser(object) :
                         #attachNone=[(helpText, 'right'), (helpText, 'top')], 
                         attachControl=[(self.materialsContainer, 'top', 10, topRow),
                                        (bg, 'top', 5, topRow)])
- #                                      (self.materialsContainer, 'bottom', 5, helpText)])
-
 
         cmds.setParent('..')
         cmds.setParent('..')
@@ -323,19 +309,19 @@ class RPRMaterialBrowser(object) :
 
         cmds.text(label="Category:", font="boldLabelFont")
         cmds.text("RPRCategoryText", recomputeSize=False)
-        cmds.canvas(height=10)
+        #cmds.canvas(height=10)
         cmds.text(label="Name:", font="boldLabelFont")
         cmds.text("RPRNameText", recomputeSize=False)
-        cmds.canvas(height=10)
-        cmds.text(label="File name:", font="boldLabelFont")
-        cmds.text("RPRFileNameText", recomputeSize=False)
-        cmds.canvas(height=10)
-        cmds.text(label="Type:", font="boldLabelFont")
-        cmds.text("RPRMaterialType", recomputeSize=False)
-        cmds.canvas(height=10)
+        #cmds.canvas(height=10)
+        #cmds.text(label="File name:", font="boldLabelFont")
+        #cmds.text("RPRFileNameText", recomputeSize=False)
+        #cmds.canvas(height=10)
+        #cmds.text(label="Type:", font="boldLabelFont")
+        #cmds.text("RPRMaterialType", recomputeSize=False)
+        #cmds.canvas(height=10)
         cmds.text(label="License:", font="boldLabelFont")
         cmds.text("RPRMaterialLicense", recomputeSize=False)
-        cmds.canvas(height=10)
+        #cmds.canvas(height=10)
 
         self.downloadButtonLayout = cmds.columnLayout(rowSpacing=5, parent=formLayout)
 
@@ -371,21 +357,16 @@ class RPRMaterialBrowser(object) :
 
         # Add horizontal and vertical flow layouts and
         # spacers to center the image in the preview area.
-        flowLayout = cmds.flowLayout("RPRPreviewArea")
-        cmds.canvas("RPRHSpacer", width=1, height=1)
-
-        cmds.flowLayout("RPRPreviewFlow", vertical=True)
-        cmds.canvas("RPRVSpacer", width=1, height=1)
+        formLayout = cmds.formLayout("RPRPreviewArea")
 
         cmds.iconTextStaticLabel("RPRPreviewImage", style='iconOnly', width=1, height=1)
-        cmds.setParent('..')
 
         cmds.setParent('..')
         cmds.setParent('..')
         cmds.setParent('..')
 
         # Assign the top flow layout to the tab.
-        cmds.tabLayout(tabLayout, edit=True, tabLabel=((flowLayout, 'Preview')))
+        cmds.tabLayout(tabLayout, edit=True, tabLabel=((formLayout, 'Preview')))
 
 
     # Select a material category by index.
@@ -466,8 +447,8 @@ class RPRMaterialBrowser(object) :
         cmds.iconTextStaticLabel("RPRPreviewImage", edit=True, image=imageFileName)
         cmds.text("RPRCategoryText", edit=True, label=categoryName)
         cmds.text("RPRNameText", edit=True, label=materialName)
-        cmds.text("RPRFileNameText", edit=True, label=fileName)
-        cmds.text("RPRMaterialType", edit=True, label=materialType)
+        #cmds.text("RPRFileNameText", edit=True, label=fileName)
+        #cmds.text("RPRMaterialType", edit=True, label=materialType)
         cmds.text("RPRMaterialLicense", edit=True, label=license)
             
         params = dict()
@@ -541,30 +522,29 @@ class RPRMaterialBrowser(object) :
     # doesn't provide enough control over layout.
     # -----------------------------------------------------------------------------
     def updatePreviewLayout(self) :
-        
-        # Determine the size of the preview area.
-        width = cmds.flowLayout("RPRPreviewArea", query=True, width=True)
-        height = cmds.flowLayout("RPRPreviewArea", query=True, height=True)
 
+        # Determine the size of the preview area.
+        width = cmds.formLayout("RPRPreviewArea", query=True, width=True)
+        height = cmds.formLayout("RPRPreviewArea", query=True, height=True)
+
+        print ("width " + str(width) + ". Height " + str(height))
         # Choose the smallest dimension and shrink
         # slightly so the enclosing layouts can shrink.
         size = min(width, height) - 10
 
         # Calculate the horizontal and vertical
         # offsets required to center the preview image.
-        hOffset = max(0, (width - size) / 2.0)
-        vOffset = max(0, (height - size) / 2.0)
+        hOffset = max(0, (width - size) / 2.0 / self.uiMayaScaleCoeff)
+        vOffset = max(0, (height - size) / 2.0 / self.uiMayaScaleCoeff)
 
         # Clamp the size to a minimum of 64.
-        newWidth = max(64, width - 10)
-        newHeight = max(64, height - 10)
-        size = max(64, size)
+        size = max(64, size) / self.uiMayaScaleCoeff;
 
-        # Update the layout and image sizes.
-        cmds.flowLayout("RPRPreviewFlow", edit=True, width=newWidth, height=newHeight)
+        # Update the layout and image size.
         cmds.iconTextStaticLabel("RPRPreviewImage", edit=True, width=size, height=size)
-        cmds.canvas("RPRHSpacer", edit=True, width=hOffset, height=1)
-        cmds.canvas("RPRVSpacer", edit=True, width=1, height=vOffset)
+
+        cmds.formLayout("RPRPreviewArea", edit=True,
+                        attachForm=[("RPRPreviewImage", 'left', hOffset), ("RPRPreviewImage", 'top', vOffset)])
 
         # Update the RPR logo size.
         logoWidth = cmds.iconTextStaticLabel("RPRLogo", query=True, width=True)
