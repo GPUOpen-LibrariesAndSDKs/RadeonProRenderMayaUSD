@@ -116,9 +116,9 @@ class RPRMaterialBrowser(object) :
         paneLayout = cmds.paneLayout(configuration='vertical3', staticWidthPane=3,
                                      separatorMovedCommand=self.updateMaterialsLayout)
 
-        cmds.paneLayout(paneLayout, edit=True, paneSize=(1, 20, 100))
-        cmds.paneLayout(paneLayout, edit=True, paneSize=(2, 45, 100))
-        cmds.paneLayout(paneLayout, edit=True, paneSize=(3, 35, 100))
+        cmds.paneLayout(paneLayout, edit=True, paneSize=(1, 22, 100))
+        cmds.paneLayout(paneLayout, edit=True, paneSize=(2, 48, 100))
+        cmds.paneLayout(paneLayout, edit=True, paneSize=(3, 30, 100))
 
         # Create UI sections.
         self.createCategoriesLayout()
@@ -214,8 +214,6 @@ class RPRMaterialBrowser(object) :
         cmds.separator(width=10,style="none")
 
         # Add the search field.
-        #searchRow = cmds.rowLayout("RprSearchRow", numberOfColumns=4)
-
         cmds.text(label="Sort Mode: ")
         self.sortDropdown = cmds.optionMenu(cc=self.onSortModeChanged)
         cmds.menuItem(p=self.sortDropdown, l="No Sort")
@@ -226,13 +224,7 @@ class RPRMaterialBrowser(object) :
         self.searchField = cmds.textField(placeholderText="Search...", width=150, height=22,
                                           textChangedCommand=self.searchMaterials)
 
-        #cmds.setParent('..')
-        #print(cmds.setParent(q=True) + "\n")
         cmds.setParent('..') # toRow
-        #print(cmds.setParent(q=True) + "\n")
-
-        #cmds.rowLayout("RprSearchRow", edit=True, visible=False)
-        #cmds.rowLayout("RPRIconSize", edit=True, visible=False)
 
         # Add help text.
         helpText = cmds.text(label="Select material, choose package you wish and click the Download button.")
@@ -256,7 +248,6 @@ class RPRMaterialBrowser(object) :
                                     (self.materialsContainer, 'right', 5),
                                     (helpText, 'left', 10), (helpText, 'bottom', 5),                                   
                                     (bg, 'left', 5), (bg, 'bottom', 20), (bg, 'right', 5)],
-                        #attachNone=[(helpText, 'right'), (helpText, 'top')], 
                         attachControl=[(self.materialsContainer, 'top', 10, topRow),
                                        (bg, 'top', 5, topRow)])
 
@@ -304,48 +295,44 @@ class RPRMaterialBrowser(object) :
         logo = cmds.iconTextStaticLabel("RPRLogo", style='iconOnly',
                                         image="RadeonProRenderLogo.png", width=1, height=1)
 
+        scrollLayout = cmds.scrollLayout()  
         # Add material info text.
         columnLayout = cmds.columnLayout(rowSpacing=5)
 
         cmds.text(label="Category:", font="boldLabelFont")
         cmds.text("RPRCategoryText", recomputeSize=False)
-        #cmds.canvas(height=10)
+
         cmds.text(label="Name:", font="boldLabelFont")
         cmds.text("RPRNameText", recomputeSize=False)
-        #cmds.canvas(height=10)
-        #cmds.text(label="File name:", font="boldLabelFont")
-        #cmds.text("RPRFileNameText", recomputeSize=False)
-        #cmds.canvas(height=10)
-        #cmds.text(label="Type:", font="boldLabelFont")
-        #cmds.text("RPRMaterialType", recomputeSize=False)
-        #cmds.canvas(height=10)
+
         cmds.text(label="License:", font="boldLabelFont")
         cmds.text("RPRMaterialLicense", recomputeSize=False)
-        #cmds.canvas(height=10)
 
-        self.downloadButtonLayout = cmds.columnLayout(rowSpacing=5, parent=formLayout)
+        #self.downloadButtonLayout = cmds.columnLayout(rowSpacing=5, parent=formLayout)
 
-        self.downloadPackageDropdown = cmds.optionMenu(parent = self.downloadButtonLayout)
-        downloadButton = cmds.button(label="Download", parent = self.downloadButtonLayout, w=100, h=30, command=self.downloadMaterial)
+        #self.downloadPackageDropdown = cmds.optionMenu(parent = self.downloadButtonLayout)
+        self.downloadPackageDropdown = cmds.optionMenu()
 
-        assignMatXLiveModeButton = cmds.button(label="Assign Material", parent = self.downloadButtonLayout, w=100, h=30, command=self.assignMatXLiveMode)
+        downloadButton = cmds.button(label="Download", w=100, h=30, command=self.downloadMaterial)
+        assignMatXLiveModeButton = cmds.button(label="Assign Material", w=100, h=30, command=self.assignMatXLiveMode)
 
-        cmds.setParent('..')
-        cmds.setParent('..')
-        cmds.setParent('..')
+        cmds.setParent('..') #columnLayout
+
+        cmds.setParent('..') #scrollLayout
+
+        cmds.setParent('..') #formLayout
+
+        cmds.setParent('..') #tabLayout
 
         # Assign the form to the tab.
         cmds.tabLayout(tabLayout, edit=True, tabLabel=((formLayout, 'Info')))
 
         cmds.formLayout(formLayout, edit=True,
-                        attachControl=[(columnLayout, 'top', 10, logo)],
+                        attachControl=[(scrollLayout, 'top', 10, logo)],
                         attachForm=[(logo, 'left', 8), (logo, 'right', 8), (logo, 'top', 8),
                                     (logoBackground, 'left', 8), (logoBackground, 'right', 8),
                                     (logoBackground, 'top', 8), 
-                                    (columnLayout, 'left', 10), (columnLayout, 'right', 10),
-                                    (self.downloadButtonLayout, 'left', 10),
-                                    (self.downloadButtonLayout, 'bottom', 10), 
-                                    (self.downloadButtonLayout, 'right', 10)])
+                                    (scrollLayout, 'left', 5), (scrollLayout, 'right', 5), (scrollLayout, 'bottom', 5)])
 
 
     # Create the preview layout.
@@ -447,8 +434,6 @@ class RPRMaterialBrowser(object) :
         cmds.iconTextStaticLabel("RPRPreviewImage", edit=True, image=imageFileName)
         cmds.text("RPRCategoryText", edit=True, label=categoryName)
         cmds.text("RPRNameText", edit=True, label=materialName)
-        #cmds.text("RPRFileNameText", edit=True, label=fileName)
-        #cmds.text("RPRMaterialType", edit=True, label=materialType)
         cmds.text("RPRMaterialLicense", edit=True, label=license)
             
         params = dict()
@@ -508,10 +493,6 @@ class RPRMaterialBrowser(object) :
         # prevent the tab layout shrinking.
         materialsWidth = cmds.tabLayout(self.materialsTab, query=True, width=True)
         newMaterialsWidth = max(1, materialsWidth - 10 * self.uiMayaScaleCoeff)
-        #cmds.formLayout(self.materialsForm, edit=True, width=newMaterialsWidth)
-
-        # Hide the icon size slider if there isn't enough room for it.
-        # cmds.rowLayout("RPRIconSize", edit=True, visible=(materialsWidth > 440))
 
         # Update the preview layout.
         self.updatePreviewLayout()
@@ -527,7 +508,6 @@ class RPRMaterialBrowser(object) :
         width = cmds.formLayout("RPRPreviewArea", query=True, width=True)
         height = cmds.formLayout("RPRPreviewArea", query=True, height=True)
 
-        print ("width " + str(width) + ". Height " + str(height))
         # Choose the smallest dimension and shrink
         # slightly so the enclosing layouts can shrink.
         size = min(width, height) - 10
