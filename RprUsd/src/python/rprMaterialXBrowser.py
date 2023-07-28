@@ -308,9 +308,6 @@ class RPRMaterialBrowser(object) :
         cmds.text(label="License:", font="boldLabelFont")
         cmds.text("RPRMaterialLicense", recomputeSize=False)
 
-        #self.downloadButtonLayout = cmds.columnLayout(rowSpacing=5, parent=formLayout)
-
-        #self.downloadPackageDropdown = cmds.optionMenu(parent = self.downloadButtonLayout)
         self.downloadPackageDropdown = cmds.optionMenu()
 
         downloadButton = cmds.button(label="Download", w=100, h=30, command=self.downloadMaterial)
@@ -475,7 +472,7 @@ class RPRMaterialBrowser(object) :
         # Determine the width of the material view
         # and the total number of materials to display.
         width = cmds.scrollLayout(self.materialsContainer, query=True, width=True)      
-        #width = cmds.flowLayout("RPRMaterialsFlow", query=True, width=True)
+
         count = cmds.flowLayout("RPRMaterialsFlow", query=True, numberOfChildren=True)
 
         if (count <= 0) :
@@ -609,7 +606,7 @@ class RPRMaterialBrowser(object) :
 
     def populateMaterials(self) :
         self.nonSortedMaterials = self.materials.copy()
-        #self.sortMaterials(cmds.optionMenu(self.sortDropdown, q=True, select=True))
+        self.sortMaterials(cmds.optionMenu(self.sortDropdown, q=True, select=True))
         self.populateMaterialsInternal()
 
     def threadProcDownloadThumbnail(self, render_id, fileName) :
