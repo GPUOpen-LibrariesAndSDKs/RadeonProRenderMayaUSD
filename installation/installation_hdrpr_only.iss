@@ -20,16 +20,8 @@ Source: "..\Build_RPRUsdInstall\*"; DestDir: "{app}"; Flags: recursesubdirs
 Type: filesandordirs; Name: "{app}"
 
 [UninstallDelete]
-//Type: filesandordirs; Name: "{%USERPROFILE}\.usdview"
-
-[Registry]
-//Root: HKCU; Subkey: "Environment"; ValueType:string; ValueName: "HDRPR_CACHE_PATH_OVERRIDE"; \
-//ValueData: "{userappdata}\RPRMayaUSD"; Flags: preservestringtype uninsdeletevalue
-//Root: HKCU; Subkey: "Software\RPR\USDViewer\"; ValueType:string; ValueName: "UsdViewerExec"; \
-//    ValueData: "{app}\RPRViewer.exe"; Flags: preservestringtype uninsdeletekey
-
-[Run]
-//Filename: "{app}\VC_redist.x64.exe"; Parameters: "/quiet /norestart";
+Type: filesandordirs; Name: "{%LOCALAPPDATA}\RadeonProRender\Maya\USD\"
+Type: filesandordirs; Name: "{%USERPROFILE}\Documents\Maya\RprUsd\WebMatlibCache"
 
 [Code]
 procedure InitializeWizard();
