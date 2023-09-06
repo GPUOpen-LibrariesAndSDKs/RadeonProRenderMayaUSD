@@ -1,11 +1,17 @@
 #include "ProductionSettings.h"
 #include "common.h"
 
+#pragma warning(push, 0)
+
 #include "pxr/usd/usdRender/settings.h"
 
 #include <pxr/imaging/hd/rendererPlugin.h>
 #include <pxr/imaging/hd/rendererPluginRegistry.h>
 #include <pxr/pxr.h>
+
+#include <mayaUsd/nodes/layerManager.h>
+
+#pragma warning(pop)
 
 #include <maya/MFnDependencyNode.h>
 #include <maya/MFnEnumAttribute.h>
@@ -17,8 +23,6 @@
 #include <maya/MStatus.h>
 #include <maya/MSceneMessage.h>
 #include <maya/MItDependencyNodes.h>
-
-#include <mayaUsd/nodes/layerManager.h>
 
 #include <functional>
 #include <sstream>
@@ -173,10 +177,10 @@ void _CreateEnumAttribute(
         return;
     }
 
-    for (int i = 0, n = values.size(); i < n; ++i) {
+    for (size_t i = 0, n = values.size(); i < n; ++i) {
         if (mayaPref == values[i]) {
             auto plug = node.findPlug(attrName, false);
-            plug.setValue(i);
+            plug.setValue((int)i);
             return;
         }
     }

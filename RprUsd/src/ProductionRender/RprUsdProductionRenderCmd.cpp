@@ -10,6 +10,8 @@
 #include "maya/MFnTransform.h"
 #include "maya/MRenderView.h"
 
+#pragma warning(push, 0)
+
 #include <pxr/base/gf/matrix4d.h>
 #include <pxr/base/tf/instantiateSingleton.h>
 #include <pxr/base/vt/value.h>
@@ -30,6 +32,8 @@
 #include <hdMaya/utils.h>
 
 #include <pxr/base/tf/debug.h>
+
+#pragma warning(pop)
 
 #include <ShlObj.h>
 

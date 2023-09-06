@@ -1,6 +1,8 @@
 #ifndef __RPRUSDPRODUCTIONRENDER__
 #define __RPRUSDPRODUCTIONRENDER__
 
+#pragma warning(push, 0)
+
 #include <pxr/base/tf/singleton.h>
 #include <pxr/imaging/hd/driver.h>
 #include <pxr/imaging/hd/engine.h>
@@ -9,6 +11,8 @@
 #include <pxr/imaging/hd/rprimCollection.h>
 #include <pxr/imaging/hdSt/renderDelegate.h>
 #include <pxr/imaging/hdx/taskController.h>
+
+#pragma warning(pop)
 
 #include <maya/MMessage.h>
 

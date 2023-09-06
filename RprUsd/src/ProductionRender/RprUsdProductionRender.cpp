@@ -16,6 +16,8 @@
 #include <maya/MCommonRenderSettingsData.h>
 #include <maya/MDistance.h>
 
+#pragma warning(push, 0)
+
 #include <pxr/base/gf/matrix4d.h>
 #include <pxr/base/tf/instantiateSingleton.h>
 #include <pxr/base/vt/value.h>
@@ -38,6 +40,8 @@
 #include <hdMaya/adapters/proxyAdapter.h>
 
 #include <pxr/base/tf/debug.h>
+#pragma warning(pop)
+
 #include <thread>
 
 
@@ -423,7 +427,7 @@ bool RprUsdProductionRender::InitHydraResources()
 					// We are accessing privte variable HdMayaSceneDelegate::_enableMaterials here
 					unsigned int classAlignment = alignof(HdMayaSceneDelegate);
 					char* adr = ((char*)pMayaSceneDelegate) + sizeof(HdMayaSceneDelegate) - sizeof(bool);
-					long offset = (long)adr % classAlignment;
+					unsigned long long offset = (unsigned long long)adr % classAlignment;
 					adr -= offset;
 					*((bool*)adr) = true;
 				}

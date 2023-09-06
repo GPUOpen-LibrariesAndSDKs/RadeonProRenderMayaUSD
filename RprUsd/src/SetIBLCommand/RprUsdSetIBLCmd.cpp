@@ -3,9 +3,11 @@
 #include <maya/MGlobal.h>
 
 
+#pragma warning(push, 0)
 #include <pxr/usd/usd/references.h>
 #include <pxr/usd/usdGeom/xform.h>
 #include <pxr/usd/usdLux/domeLight.h>
+#pragma warning(pop)
 
 
 PXR_NAMESPACE_OPEN_SCOPE

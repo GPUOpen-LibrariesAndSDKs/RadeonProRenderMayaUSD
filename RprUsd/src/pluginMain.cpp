@@ -3,11 +3,19 @@
 
 
 #if MAYA_VERSION >= 24
+
+#pragma warning(push, 0)
+
 #include <hdMaya/adapters/adapter.h>
 #include <mayaUsd/utils/plugRegistryHelper.h>
+
+// this headers were takn from MtoH rpo. Switch warnings off for such files
 #include "ViewportRender/renderGlobals.h"
 #include "ViewportRender/renderOverride.h"
 #include "ViewportRender/viewCommand.h"
+
+#pragma warning(pop)
+
 
 #include "RenderStudioResolverHelper.h"
 
@@ -63,15 +71,6 @@ PLUGIN_EXPORT MStatus initializePlugin(MObject obj)
     if (!ret) {
         return ret;
     }
-
-    // For now this is required for the HdSt backed to use lights.
-    // putenv requires char* and I'm not willing to use const cast!
-    /*constexpr const char* envVarSet = "USDIMAGING_ENABLE_SCENE_LIGHTS=1";
-    const auto            envVarSize = strlen(envVarSet) + 1;
-    std::vector<char>     envVarData;
-    envVarData.resize(envVarSize);
-    snprintf(envVarData.data(), envVarSize, "%s", envVarSet);
-    putenv(envVarData.data());*/
 
     if (!plugin.registerCommand(
         MtohViewCmd::name, MtohViewCmd::creator, MtohViewCmd::createSyntax)) {

@@ -3,8 +3,13 @@
 #include <maya/MGlobal.h>
 
 
+#pragma warning(push, 0)
+
 #include <pxr/usd/usd/references.h>
 #include <pxr/usd/usdShade/materialBindingAPI.h>
+
+#pragma warning(pop)
+
 #include <MaterialXCore/Document.h>
 #include <MaterialXFormat/XmlIo.h>
 
