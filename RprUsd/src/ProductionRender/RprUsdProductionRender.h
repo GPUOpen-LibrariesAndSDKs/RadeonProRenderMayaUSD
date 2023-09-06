@@ -12,11 +12,11 @@
 #include <pxr/imaging/hdSt/renderDelegate.h>
 #include <pxr/imaging/hdx/taskController.h>
 
+#include "../defaultLightDelegate.h"
+
 #pragma warning(pop)
 
 #include <maya/MMessage.h>
-
-#include "../defaultLightDelegate.h"
 
 #include "RenderProgressBars.h"
 
