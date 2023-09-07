@@ -11,10 +11,8 @@
 // limitations under the License.
 //
 
-
 #include <maya/MFnPlugin.h>
 #include <maya/MGlobal.h>
-
 
 #if MAYA_VERSION >= 24
 
@@ -30,24 +28,20 @@
 
 #pragma warning(pop)
 
-
 #include "RenderStudioResolverHelper.h"
 
 #endif
 
-#include "version.h"
-
-#include "ProductionRender/RprUsdProductionRenderCmd.h"
 #include "BindMtlxCommand/RprUsdBindMtlxCmd.h"
-#include "SetIBLCommand/RprUsdSetIBLCmd.h"
 #include "OpenStudioUsdStageCommand/RprUsdOpenStudioStageCmd.h"
-
+#include "ProductionRender/RprUsdProductionRenderCmd.h"
+#include "SetIBLCommand/RprUsdSetIBLCmd.h"
+#include "version.h"
 
 #if MAYA_VERSION >= 24
 using MtohRenderOverridePtr = std::unique_ptr<MtohRenderOverride>;
 static std::vector<MtohRenderOverridePtr> gsRenderOverrides;
 #endif
-
 
 PXR_NAMESPACE_USING_DIRECTIVE
 
@@ -59,19 +53,27 @@ PLUGIN_EXPORT MStatus initializePlugin(MObject obj)
 
     MGlobal::executePythonCommand("import menu\nmenu.createRprUsdMenu()");
 
-	status = plugin.registerCommand(RprUsdProductionRenderCmd::s_commandName, RprUsdProductionRenderCmd::creator, RprUsdProductionRenderCmd::newSyntax);
-	CHECK_MSTATUS(status);
-	RprUsdProductionRenderCmd::Initialize();
+    status = plugin.registerCommand(
+        RprUsdProductionRenderCmd::s_commandName,
+        RprUsdProductionRenderCmd::creator,
+        RprUsdProductionRenderCmd::newSyntax);
+    CHECK_MSTATUS(status);
+    RprUsdProductionRenderCmd::Initialize();
 
-    status = plugin.registerCommand(RprUsdBiodMtlxCmd::s_commandName, RprUsdBiodMtlxCmd::creator, RprUsdBiodMtlxCmd::newSyntax);
-	CHECK_MSTATUS(status);
+    status = plugin.registerCommand(
+        RprUsdBiodMtlxCmd::s_commandName, RprUsdBiodMtlxCmd::creator, RprUsdBiodMtlxCmd::newSyntax);
+    CHECK_MSTATUS(status);
 
 #if MAYA_VERSION >= 24
 
-    status = plugin.registerCommand(RprUsdOpenStudioStageCmd::s_commandName, RprUsdOpenStudioStageCmd::creator, RprUsdOpenStudioStageCmd::newSyntax);
+    status = plugin.registerCommand(
+        RprUsdOpenStudioStageCmd::s_commandName,
+        RprUsdOpenStudioStageCmd::creator,
+        RprUsdOpenStudioStageCmd::newSyntax);
     CHECK_MSTATUS(status);
 
-    status = plugin.registerCommand(RprUsdSetIBLCmd::s_commandName, RprUsdSetIBLCmd::creator, RprUsdSetIBLCmd::newSyntax);
+    status = plugin.registerCommand(
+        RprUsdSetIBLCmd::s_commandName, RprUsdSetIBLCmd::creator, RprUsdSetIBLCmd::newSyntax);
     CHECK_MSTATUS(status);
 
     // Initialize Viewport
@@ -87,7 +89,7 @@ PLUGIN_EXPORT MStatus initializePlugin(MObject obj)
     }
 
     if (!plugin.registerCommand(
-        MtohViewCmd::name, MtohViewCmd::creator, MtohViewCmd::createSyntax)) {
+            MtohViewCmd::name, MtohViewCmd::creator, MtohViewCmd::createSyntax)) {
         ret = MS::kFailure;
         ret.perror("Error registering mtoh command!");
         return ret;
@@ -99,8 +101,7 @@ PLUGIN_EXPORT MStatus initializePlugin(MObject obj)
             MStatus               status = renderer->registerOverride(mtohRenderer.get());
             if (status == MS::kSuccess) {
                 gsRenderOverrides.push_back(std::move(mtohRenderer));
-            }
-            else
+            } else
                 mtohRenderer = nullptr;
         }
     }
@@ -124,7 +125,6 @@ PLUGIN_EXPORT MStatus uninitializePlugin(MObject obj)
     CHECK_MSTATUS(status);
 
     MGlobal::executePythonCommand("import menu\nmenu.removeRprUsdMenu()");
-
 
 #if MAYA_VERSION >= 24
 
@@ -158,7 +158,7 @@ PLUGIN_EXPORT MStatus uninitializePlugin(MObject obj)
 
     RenderStudioResolverHelper::StopLiveMode();
 
-#endif 
+#endif
 
     return status;
 }

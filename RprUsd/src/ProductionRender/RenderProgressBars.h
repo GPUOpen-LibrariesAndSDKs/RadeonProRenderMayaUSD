@@ -13,10 +13,10 @@
 
 #pragma once
 
+#include "RenderProgressBars.h"
+
 #include <ctime>
 #include <string>
-
-#include "RenderProgressBars.h"
 
 /**
  * Manage the display of the render progress window
@@ -26,51 +26,48 @@
 class RenderProgressBars
 {
 public:
+    // Life Cycle
+    // -----------------------------------------------------------------------------
 
-	// Life Cycle
-	// -----------------------------------------------------------------------------
+    RenderProgressBars(bool unlimited);
 
-	RenderProgressBars(bool unlimited);
+    virtual ~RenderProgressBars();
 
-	virtual ~RenderProgressBars();
+    // Public Methods
+    // -----------------------------------------------------------------------------
 
+    /** Update the progress. */
+    void update(int progress);
 
-	// Public Methods
-	// -----------------------------------------------------------------------------
+    /** Close the progress bar window. */
+    void close();
 
-	/** Update the progress. */
-	void update(int progress);
+    /** Return true if the user has canceled the render. */
+    bool isCancelled();
 
-	/** Close the progress bar window. */
-	void close();
+    void ForceUIUpdate();
+    void SetWindowsTitleText(const std::string& title, bool forceUpdate = false);
+    void SetTextAboveProgress(const std::string& title, bool forceUpdate = false);
 
-	/** Return true if the user has canceled the render. */
-	bool isCancelled();
-
-	void ForceUIUpdate();
-	void SetWindowsTitleText(const std::string& title, bool forceUpdate = false);
-	void SetTextAboveProgress(const std::string& title, bool forceUpdate = false);
-
-	void SetPreparingSceneText(bool forceUpdate = false);
-	void SetRenderingText(bool forceUpdate = false);
+    void SetPreparingSceneText(bool forceUpdate = false);
+    void SetRenderingText(bool forceUpdate = false);
 
 private:
+    // Members
+    // -----------------------------------------------------------------------------
 
-	// Members
-	// -----------------------------------------------------------------------------
+    /** True if completion criteria is set to unlimited. */
+    bool m_unlimited;
 
-	/** True if completion criteria is set to unlimited. */
-	bool m_unlimited;
+    /** Progress bar position */
+    int m_progress;
 
-	/** Progress bar position */
-	int m_progress;
+    /** Last check for canceled */
+    clock_t m_lastCanceledCheck;
 
-	/** Last check for canceled */
-	clock_t m_lastCanceledCheck;
+    /** Canceled flag */
+    bool m_canceled;
 
-	/** Canceled flag */
-	bool m_canceled;
-
-	/** Visible flag */
-	bool m_visible;
+    /** Visible flag */
+    bool m_visible;
 };

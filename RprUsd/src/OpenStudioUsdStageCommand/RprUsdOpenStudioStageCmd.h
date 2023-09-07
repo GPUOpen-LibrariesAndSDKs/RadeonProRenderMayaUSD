@@ -11,22 +11,21 @@
 // limitations under the License.
 //
 
-
 #ifndef __RPRUSDOPENSTUDIOSTAGECMD__
 #define __RPRUSDOPENSTUDIOSTAGECMD__
 
+#include <pxr/pxr.h>
+
+#include <maya/MArgDatabase.h>
 #include <maya/MPxCommand.h>
 #include <maya/MSyntax.h>
-#include <maya/MArgDatabase.h>
-
-#include <pxr/pxr.h>
 
 // Command arguments.
 // required
-#define kFilePathFlag "-f"
+#define kFilePathFlag     "-f"
 #define kFilePathFlagLong "-filePath"
 
-#define kGetRecentFilePathUsedFlag "-gr"
+#define kGetRecentFilePathUsedFlag     "-gr"
 #define kGetRecentFilePathUsedFlagLong "-getRecentPath"
 
 PXR_NAMESPACE_OPEN_SCOPE
@@ -35,33 +34,33 @@ PXR_NAMESPACE_OPEN_SCOPE
 class RprUsdOpenStudioStageCmd : public MPxCommand
 {
 public:
-	RprUsdOpenStudioStageCmd();
-	// MPxCommand Implementation
-	// -----------------------------------------------------------------------------
+    RprUsdOpenStudioStageCmd();
+    // MPxCommand Implementation
+    // -----------------------------------------------------------------------------
 
-	MStatus doIt(const MArgList& args) override;
+    MStatus doIt(const MArgList& args) override;
 
-	/** Used by Maya to create the command instance. */
-	static void* creator();
+    /** Used by Maya to create the command instance. */
+    static void* creator();
 
-	/** Return the command syntax object. */
-	static MSyntax newSyntax();
+    /** Return the command syntax object. */
+    static MSyntax newSyntax();
 
-	// Static Methods
-	// -----------------------------------------------------------------------------
+    // Static Methods
+    // -----------------------------------------------------------------------------
 
-	/** Clean up before plug-in shutdown. */
-	static void cleanUp();
+    /** Clean up before plug-in shutdown. */
+    static void cleanUp();
 
-	static void Initialize();
+    static void Initialize();
 
-	static void Uninitialize();
+    static void Uninitialize();
 
 public:
-	static MString s_commandName;
+    static MString s_commandName;
 
 private:
-	static MString s_LastRencetUsedFilePath;
+    static MString s_LastRencetUsedFilePath;
 };
 
 PXR_NAMESPACE_CLOSE_SCOPE
