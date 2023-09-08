@@ -4,9 +4,6 @@
 [submodule "RadeonProRenderUSD"]
 	path = RadeonProRenderUSD
 	url = git@github.com:GPUOpen-LibrariesAndSDKs/RadeonProRenderUSD.git
-[submodule "maya-usd"]
-	path = maya-usd
-	url = https://github.com/Autodesk/maya-usd
 [submodule "RprUsd/RenderStudioResolver"]
 	path = RprUsd/RenderStudioResolver
 	url = git@github.com:Radeon-Pro/RenderStudioResolver.git

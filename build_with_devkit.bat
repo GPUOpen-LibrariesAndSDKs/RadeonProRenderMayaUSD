@@ -1,2 +1,1 @@
-call build_with_devkit_2023.bat
 call build_with_devkit_2024.bat
