@@ -20,8 +20,6 @@ endif()
 # Global configuration types
 ################################################################################
 set(CMAKE_CONFIGURATION_TYPES
-    "Debug2023"
-    "Release2023"
     "Release2024"
     CACHE STRING "" FORCE
 )
@@ -32,8 +30,6 @@ set(CMAKE_CONFIGURATION_TYPES
 if(MSVC)
     # remove default flags provided with CMake for MSVC
     set(CMAKE_CXX_FLAGS "")
-    set(CMAKE_CXX_FLAGS_DEBUG2023 "")
-    set(CMAKE_CXX_FLAGS_RELEASE2023 "")
     set(CMAKE_CXX_FLAGS_RELEASE2024 "")
 endif()
 
@@ -46,14 +42,6 @@ if(MSVC)
     set(CMAKE_MODULE_LINKER_FLAGS "")
     set(CMAKE_SHARED_LINKER_FLAGS "")
     set(CMAKE_STATIC_LINKER_FLAGS "")
-    set(CMAKE_EXE_LINKER_FLAGS_DEBUG2023 "${CMAKE_EXE_LINKER_FLAGS}")
-    set(CMAKE_MODULE_LINKER_FLAGS_DEBUG2023 "${CMAKE_MODULE_LINKER_FLAGS}")
-    set(CMAKE_SHARED_LINKER_FLAGS_DEBUG2023 "${CMAKE_SHARED_LINKER_FLAGS}")
-    set(CMAKE_STATIC_LINKER_FLAGS_DEBUG2023 "${CMAKE_STATIC_LINKER_FLAGS}")
-    set(CMAKE_EXE_LINKER_FLAGS_RELEASE2023 "${CMAKE_EXE_LINKER_FLAGS}")
-    set(CMAKE_MODULE_LINKER_FLAGS_RELEASE2023 "${CMAKE_MODULE_LINKER_FLAGS}")
-    set(CMAKE_SHARED_LINKER_FLAGS_RELEASE2023 "${CMAKE_SHARED_LINKER_FLAGS}")
-    set(CMAKE_STATIC_LINKER_FLAGS_RELEASE2023 "${CMAKE_STATIC_LINKER_FLAGS}")
     set(CMAKE_EXE_LINKER_FLAGS_RELEASE2024 "${CMAKE_EXE_LINKER_FLAGS}")
     set(CMAKE_MODULE_LINKER_FLAGS_RELEASE2024 "${CMAKE_MODULE_LINKER_FLAGS}")
     set(CMAKE_SHARED_LINKER_FLAGS_RELEASE2024 "${CMAKE_SHARED_LINKER_FLAGS}")
@@ -194,44 +182,21 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
-    INTERPROCEDURAL_OPTIMIZATION_RELEASE2023 "TRUE"
     INTERPROCEDURAL_OPTIMIZATION_RELEASE2024 "TRUE"
 )
 ################################################################################
 # Include directories
 ################################################################################
 target_include_directories(${PROJECT_NAME} PUBLIC
-    "$<$<CONFIG:Debug2023>:"
-        "$ENV{MAYA_SDK_2023}/include;"
-        "$ENV{MAYA_x64_2023}/../MayaUSD/Maya2023/0.18.0/mayausd/USD/include/boost-1_70;"
-        "$ENV{MAYA_x64_2023}/../MayaUSD/Maya2023/0.18.0/mayausd/USD/include;"
-        "${CMAKE_CURRENT_SOURCE_DIR}/%MAYA_x64_2023%/include/Python39/Python;"
-        "$ENV{MAYA_SDK_2023}/devkit/ufe/include;"
-        "${CMAKE_CURRENT_SOURCE_DIR}/src/ProductionRender/hdMaya/adapters;"
-        "${CMAKE_CURRENT_SOURCE_DIR}/src/ProductionRender/hdMaya/delegates;"
-        "${CMAKE_CURRENT_SOURCE_DIR}/src/ProductionRender/hdMaya;"
-        "${CMAKE_CURRENT_SOURCE_DIR}/../../../Program Files/Autodesk/Maya2023/include"
-    ">"
-    "$<$<CONFIG:Release2023>:"
-        "$ENV{MAYA_SDK_2023}/include;"
-        "$ENV{MAYA_x64_2023}/../MayaUSD/Maya2023/0.20.0/mayausd/USD/include/boost-1_70;"
-        "$ENV{MAYA_x64_2023}/../MayaUSD/Maya2023/0.20.0/mayausd/USD/include;"
-        "$ENV{MAYA_x64_2023}/include/Python39/Python;"
-        "$ENV{MAYA_SDK_2023}/devkit/ufe/include;"
-        "$ENV{MAYA_x64_2023}/../MayaUSD/Maya2023/0.20.0/mayausd/MayaUSD/include/hdMaya;"
-        "$ENV{MAYA_x64_2023}/../MayaUSD/Maya2023/0.20.0/mayausd/MayaUSD/include;"
-        "$ENV{MAYA_x64_2023}/../MayaUSD/Maya2023/0.20.0/mayausd/MayaUSD/include/hdMaya/adapters;"
-        "${CMAKE_CURRENT_SOURCE_DIR}/.."
-    ">"
     "$<$<CONFIG:Release2024>:"
         "$ENV{MAYA_SDK_2024}/include;"
-        "$ENV{MAYA_x64_2024}/../MayaUSD/Maya2024/0.22.0/mayausd/USD/include/boost-1_76;"
-        "$ENV{MAYA_x64_2024}/../MayaUSD/Maya2024/0.22.0/mayausd/USD/include;"
+        "$ENV{MAYA_x64_2024}/../MayaUSD/Maya2024/0.23.1/mayausd/USD/include/boost-1_76;"
+        "$ENV{MAYA_x64_2024}/../MayaUSD/Maya2024/0.23.1/mayausd/USD/include;"
         "$ENV{MAYA_x64_2024}/include/Python310/Python;"
         "$ENV{MAYA_SDK_2024}/devkit/ufe/include;"
-        "$ENV{MAYA_x64_2024}/../MayaUSD/Maya2024/0.22.0/mayausd/MayaUSD/include/hdMaya;"
-        "$ENV{MAYA_x64_2024}/../MayaUSD/Maya2024/0.22.0/mayausd/MayaUSD/include;"
-        "$ENV{MAYA_x64_2024}/../MayaUSD/Maya2024/0.22.0/mayausd/MayaUSD/include/hdMaya/adapters;"
+        "$ENV{MAYA_x64_2024}/../MayaUSD/Maya2024/0.23.1/mayausd/MayaUSD/include/hdMaya;"
+        "$ENV{MAYA_x64_2024}/../MayaUSD/Maya2024/0.23.1/mayausd/MayaUSD/include;"
+        "$ENV{MAYA_x64_2024}/../MayaUSD/Maya2024/0.23.1/mayausd/MayaUSD/include/hdMaya/adapters;"
         "${CMAKE_CURRENT_SOURCE_DIR}/.."
         "${CMAKE_CURRENT_SOURCE_DIR}/src/Maya2024_hdMaya"
     ">"
@@ -243,16 +208,6 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 # Compile definitions
 ################################################################################
 target_compile_definitions(${PROJECT_NAME} PRIVATE
-    "$<$<CONFIG:Debug2023>:"
-        "_DEBUG;"
-        "MAYAUSD_VERSION=0.18.0;"
-        "CMAKE_INTDIR=\"Debug\""
-    ">"
-    "$<$<CONFIG:Release2023>:"
-        "NDEBUG"
-        "MATERIALX_BUILD_SHARED_LIBS"
-        "MAYA_VERSION=23"
-    ">"
     "$<$<CONFIG:Release2024>:"
         "NDEBUG"
         "MATERIALX_BUILD_SHARED_LIBS"
@@ -290,11 +245,6 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE
 ################################################################################
 if(MSVC)
     target_compile_options(${PROJECT_NAME} PRIVATE
-        $<$<CONFIG:Release2023>:
-            /O2;
-            /Oi;
-            /Gy
-        >
         $<$<CONFIG:Release2024>:
             /O2;
             /Oi;
@@ -308,14 +258,6 @@ if(MSVC)
         /Y-
     )
     target_link_options(${PROJECT_NAME} PRIVATE
-        $<$<CONFIG:Debug2023>:
-            /INCREMENTAL
-        >
-        $<$<CONFIG:Release2023>:
-            /OPT:REF;
-            /OPT:ICF;
-            /INCREMENTAL:NO
-        >
         $<$<CONFIG:Release2024>:
             /OPT:REF;
             /OPT:ICF;
@@ -333,30 +275,6 @@ add_custom_command_if(
     TARGET ${PROJECT_NAME}
     POST_BUILD
     COMMANDS
-    COMMAND   $<CONFIG:Debug2023> echo creating dist folders
-    COMMAND   $<CONFIG:Debug2023> md $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist
-    COMMAND   $<CONFIG:Debug2023> md $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\bin
-    COMMAND   $<CONFIG:Debug2023> md $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\scripts
-    COMMAND   $<CONFIG:Debug2023> md $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\plug-ins
-    COMMAND   $<CONFIG:Debug2023> md $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\plug-ins\\2023
-    COMMAND   $<CONFIG:Debug2023> md $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\icons
-    COMMAND   $<CONFIG:Debug2023> XCOPY /E /Y $<SHELL_PATH:${CMAKE_CURRENT_SOURCE_DIR}/>\\scripts\\* $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\scripts\\
-    COMMAND   $<CONFIG:Debug2023> XCOPY /E /Y $<SHELL_PATH:${CMAKE_CURRENT_SOURCE_DIR}/>\\src\\python $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\scripts\\
-    COMMAND   $<CONFIG:Debug2023> echo copying mll file
-    COMMAND   $<CONFIG:Debug2023> COPY $<SHELL_PATH:$<TARGET_FILE:${PROJECT_NAME}>> $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\plug-ins\\2023\\* /Y
-    COMMAND   $<CONFIG:Debug2023> echo -------------
-    COMMAND   $<CONFIG:Debug2023> XCOPY /E /Y $<SHELL_PATH:${CMAKE_CURRENT_SOURCE_DIR}/>\\icons\\* $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\icons\\
-    COMMAND $<CONFIG:Release2023> echo creating dist folders
-    COMMAND $<CONFIG:Release2023> if not exist $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist md $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist
-    COMMAND $<CONFIG:Release2023> if not exist $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\bin md $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\bin
-    COMMAND $<CONFIG:Release2023> if not exist $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\scripts md $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\scripts
-    COMMAND $<CONFIG:Release2023> if not exist $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\plug-ins md $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\plug-ins
-    COMMAND $<CONFIG:Release2023> if not exist $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\plug-ins\\2023 md $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\plug-ins\\2023
-    COMMAND $<CONFIG:Release2023> if not exist $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\icons md $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\icons
-    COMMAND $<CONFIG:Release2023> XCOPY /E /Y "$<SHELL_PATH:${CMAKE_SOURCE_DIR}/>src\\python" "$<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\scripts\\"
-    COMMAND $<CONFIG:Release2023> XCOPY /E /Y /I "$<SHELL_PATH:${CMAKE_SOURCE_DIR}/>\\..\\Build_RPRUsdInstall\\hdRPR\\lib\\python\\rpr"  "$<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\scripts\\rpr"
-    COMMAND $<CONFIG:Release2023> COPY $<SHELL_PATH:$<TARGET_FILE:${PROJECT_NAME}>> $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\plug-ins\\2023\\* /Y
-    COMMAND $<CONFIG:Release2023> XCOPY /E /Y $<SHELL_PATH:${CMAKE_CURRENT_SOURCE_DIR}/>\\icons\\* $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\icons\\
     COMMAND $<CONFIG:Release2024> echo creating dist folders
     COMMAND $<CONFIG:Release2024> if not exist $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist md $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist
     COMMAND $<CONFIG:Release2024> if not exist $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\bin md $<SHELL_PATH:${CMAKE_SOURCE_DIR}/>dist\\bin
@@ -375,64 +293,6 @@ add_custom_command_if(
 # Dependencies
 ################################################################################
 set(ADDITIONAL_LIBRARY_DEPENDENCIES
-    "$<$<CONFIG:Release2023>:"
-        "hgiInterop;"
-        "hgi;"
-        "usdImaging;"
-        "hd;"
-        "usdVol;"
-        "pxOsd;"
-        "osdCPU;"
-        "osdGPU;"
-        "glf;"
-        "garch;"
-        "opengl32;"
-        "hio;"
-        "hf;"
-        "usdHydra;"
-        "usdShade;"
-        "usdLux;"
-        "usdRender;"
-        "usdRi;"
-        "sdr;"
-        "ndr;"
-        "usdUtils;"
-        "ufe_3;"
-        "OpenMayaFX;"
-        "OpenMayaRender;"
-        "OpenMayaUI;"
-        "OpenMayaAnim;"
-        "Image;"
-        "cg;"
-        "cgGL;"
-        "clew;"
-        "tbb;"
-        "usdGeom;"
-        "usd;"
-        "kind;"
-        "pcp;"
-        "sdf;"
-        "ar;"
-        "plug;"
-        "vt;"
-        "gf;"
-        "work;"
-        "trace;"
-        "js;"
-        "tf;"
-        "Shlwapi;"
-        "arch;"
-        "Ws2_32;"
-        "hdMaya;"
-        "mayaUsd;"
-        "cameraUtil;"
-        "hdx;"
-        "hdSt;"
-        "hgiGL;"
-        "hdMtlx;"
-        "MaterialXFormatMayaUSD;"
-        "MaterialXCoreMayaUSD"
-    ">"
     "$<$<CONFIG:Release2024>:"
         "usd_hgiInterop"
         "usd_hgi"
@@ -497,24 +357,13 @@ set(ADDITIONAL_LIBRARY_DEPENDENCIES
 target_link_libraries(${PROJECT_NAME} PUBLIC "${ADDITIONAL_LIBRARY_DEPENDENCIES}")
 
 target_link_directories(${PROJECT_NAME} PUBLIC
-    "$<$<CONFIG:Debug2023>:"
-        "$ENV{MAYA_SDK_2023}/lib"
-    ">"
-    "$<$<CONFIG:Release2023>:"
-        "$ENV{MAYA_SDK_2023}/lib;"
-        "$ENV{MAYA_x64_2023}/lib;"
-        "$ENV{MAYA_x64_2023}/../MayaUSD/Maya2023/0.20.0/mayausd/USD/lib;"
-        "${CMAKE_CURRENT_SOURCE_DIR}/lib/2023;"
-        "$ENV{MAYA_SDK_2023}/devkit/ufe/lib"
-        "${CMAKE_CURRENT_SOURCE_DIR}/../Build_RPRUsdInstall/usdResolver/plugin/usd"
-    ">"
     "$<$<CONFIG:Release2024>:"
         "$ENV{MAYA_SDK_2024}/lib;"
         "$ENV{MAYA_x64_2024}/lib;"
-        "$ENV{MAYA_x64_2024}/../MayaUSD/Maya2024/0.22.0/mayausd/USD/lib;"
+        "$ENV{MAYA_x64_2024}/../MayaUSD/Maya2024/0.23.1/mayausd/USD/lib;"
+        "$ENV{MAYA_x64_2024}/../MayaUSD/Maya2024/0.23.1/mayausd/MayaUSD/lib;"
         "${CMAKE_CURRENT_SOURCE_DIR}/lib/2024;"
         "$ENV{MAYA_SDK_2024}/devkit/ufe/lib"
         "${CMAKE_CURRENT_SOURCE_DIR}/../Build_RPRUsdInstall/usdResolver/plugin/usd"
     ">"
 )
-
