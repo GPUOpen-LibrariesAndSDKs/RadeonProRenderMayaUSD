@@ -1,7 +1,5 @@
 @echo off
 
-rem Support for Maya 2023 only for now, It's possible to add 2022 support if needed. However USD is pretty old within MAYA 2022
-
 set Maya_x64=%MAYA_x64_2024%
 set Maya_sdk=%MAYA_SDK_2024%
 set Python_ver=3.10
@@ -14,7 +12,7 @@ echo Maya_sdk=%Maya_sdk%
 echo Python_Include_Dir=%Python_Include_Dir%
 echo Python_Library=%Python_Library%
 
-set usd_build_fullpath=%MAYA_x64_2024%\..\MayaUSD\Maya2024\0.22.0\mayausd\USD
+set usd_build_fullpath=%MAYA_x64_2024%\..\MayaUSD\Maya2024\0.23.1\mayausd\USD
 
 echo Building RadeonProRenderUSD (hdRPR) against builtin Maya's USD package...
 
