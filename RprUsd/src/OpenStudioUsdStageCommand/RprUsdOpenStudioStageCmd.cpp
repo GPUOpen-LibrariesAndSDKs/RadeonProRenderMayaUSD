@@ -11,15 +11,15 @@
 // limitations under the License.
 //
 
-
 #include "RprUsdOpenStudioStageCmd.h"
-#include "common.h"
-#include "../RenderStudioResolverHelper.h"
 
+#include "../RenderStudioResolverHelper.h"
+#include "common.h"
 #include "pxr/base/arch/env.h"
 
-#include <filesystem>
 #include <maya/MGlobal.h>
+
+#include <filesystem>
 
 #include <combaseapi.h>
 
@@ -28,125 +28,122 @@ PXR_NAMESPACE_OPEN_SCOPE
 MString RprUsdOpenStudioStageCmd::s_commandName = "rprUsdOpenStudioStage";
 MString RprUsdOpenStudioStageCmd::s_LastRencetUsedFilePath = "";
 
-RprUsdOpenStudioStageCmd::RprUsdOpenStudioStageCmd()
-{
-
-}
+RprUsdOpenStudioStageCmd::RprUsdOpenStudioStageCmd() { }
 
 // MPxCommand Implementation
 // -----------------------------------------------------------------------------
-void* RprUsdOpenStudioStageCmd::creator()
-{
-	return new RprUsdOpenStudioStageCmd;
-}
+void* RprUsdOpenStudioStageCmd::creator() { return new RprUsdOpenStudioStageCmd; }
 
 // -----------------------------------------------------------------------------
 MSyntax RprUsdOpenStudioStageCmd::newSyntax()
 {
-	MSyntax syntax;
+    MSyntax syntax;
 
-	CHECK_MSTATUS(syntax.addFlag(kFilePathFlag, kFilePathFlagLong, MSyntax::kString));
-	CHECK_MSTATUS(syntax.addFlag(kGetRecentFilePathUsedFlag, kGetRecentFilePathUsedFlagLong, MSyntax::kString));
+    CHECK_MSTATUS(syntax.addFlag(kFilePathFlag, kFilePathFlagLong, MSyntax::kString));
+    CHECK_MSTATUS(syntax.addFlag(
+        kGetRecentFilePathUsedFlag, kGetRecentFilePathUsedFlagLong, MSyntax::kString));
 
-	return syntax;
+    return syntax;
 }
 
 std::string GenerateGUID()
 {
-	GUID guid;
-	HRESULT hCreateGuid = CoCreateGuid(&guid);
+    GUID    guid;
+    HRESULT hCreateGuid = CoCreateGuid(&guid);
 
-	char szGuid[64] = { 0 };
+    char szGuid[64] = { 0 };
 
-	sprintf(szGuid, "%08X-%04X-%04X-%02X%02X-%02X%02X%02X%02X%02X%02X", guid.Data1, guid.Data2, guid.Data3, guid.Data4[0], guid.Data4[1], 
-							guid.Data4[2], guid.Data4[3], guid.Data4[4], guid.Data4[5], guid.Data4[6], guid.Data4[7]);
+    sprintf(
+        szGuid,
+        "%08X-%04X-%04X-%02X%02X-%02X%02X%02X%02X%02X%02X",
+        guid.Data1,
+        guid.Data2,
+        guid.Data3,
+        guid.Data4[0],
+        guid.Data4[1],
+        guid.Data4[2],
+        guid.Data4[3],
+        guid.Data4[4],
+        guid.Data4[5],
+        guid.Data4[6],
+        guid.Data4[7]);
 
-	return szGuid;
+    return szGuid;
 }
 
 // -----------------------------------------------------------------------------
-MStatus RprUsdOpenStudioStageCmd::doIt(const MArgList & args)
+MStatus RprUsdOpenStudioStageCmd::doIt(const MArgList& args)
 {
-	// Parse arguments.
-	MArgDatabase argData(syntax(), args);
+    // Parse arguments.
+    MArgDatabase argData(syntax(), args);
 
-	if (argData.isFlagSet(kGetRecentFilePathUsedFlag))
-	{
-		setResult(s_LastRencetUsedFilePath);
-		return MStatus::kSuccess;
-	}
+    if (argData.isFlagSet(kGetRecentFilePathUsedFlag)) {
+        setResult(s_LastRencetUsedFilePath);
+        return MStatus::kSuccess;
+    }
 
-	std::string filePath;
-	if (argData.isFlagSet(kFilePathFlag))
-	{
-		MString path;
-		argData.getFlagArgument(kFilePathFlag, 0, path);
-		filePath = path.asChar();
-	}
-	
-	if (filePath.empty())
-	{
-		MGlobal::displayError("RprUsd: RprUsdOpenStudioStageCmd: filePath is not defined");
-		return MS::kFailure;
-	}
+    std::string filePath;
+    if (argData.isFlagSet(kFilePathFlag)) {
+        MString path;
+        argData.getFlagArgument(kFilePathFlag, 0, path);
+        filePath = path.asChar();
+    }
 
-	if (RenderStudioResolverHelper::IsUnresovableToRenderStudioPath(filePath)) {
-		std::string studioFilePath = RenderStudioResolverHelper::Unresolve(filePath);
+    if (filePath.empty()) {
+        MGlobal::displayError("RprUsd: RprUsdOpenStudioStageCmd: filePath is not defined");
+        return MS::kFailure;
+    }
 
-		MString cmd = MString("RprUsd_DoCreateStage(\"") + studioFilePath.c_str() + "\")";
+    if (RenderStudioResolverHelper::IsUnresovableToRenderStudioPath(filePath)) {
+        std::string studioFilePath = RenderStudioResolverHelper::Unresolve(filePath);
 
-		MGlobal::executeCommand(cmd);
+        MString cmd = MString("RprUsd_DoCreateStage(\"") + studioFilePath.c_str() + "\")";
 
-		LiveModeInfo liveModeInfo;
-		liveModeInfo.liveUrl = "wss://renderstudio.luxoft.com/livecpp";
+        MGlobal::executeCommand(cmd);
 
-		std::string envLivUrl = ArchGetEnv("RENDER_STUDIO_LIVE_REMOTE_URL");
+        LiveModeInfo liveModeInfo;
+        liveModeInfo.liveUrl = "wss://renderstudio.luxoft.com/livecpp";
 
-		if (!envLivUrl.empty()) {
-			liveModeInfo.liveUrl = envLivUrl;
-		}
+        std::string envLivUrl = ArchGetEnv("RENDER_STUDIO_LIVE_REMOTE_URL");
 
-		liveModeInfo.storageUrl = "https://renderstudio.luxoft.com/storage";
-		liveModeInfo.channelId = "Maya";
+        if (!envLivUrl.empty()) {
+            liveModeInfo.liveUrl = envLivUrl;
+        }
 
-		MPlug channelNamePlug = MFnDependencyNode(GetSettingsNode()).findPlug("HdRprPlugin_LiveModeChannelName", false);
-		if (!channelNamePlug.isNull()){
-			MString channelName = channelNamePlug.asString();
-			if (channelName != "") {
-				liveModeInfo.channelId = channelName.asChar();
-			}
-		}
+        liveModeInfo.storageUrl = "https://renderstudio.luxoft.com/storage";
+        liveModeInfo.channelId = "Maya";
 
-		liveModeInfo.userId = "MayaUser_" + GenerateGUID();
+        MPlug channelNamePlug = MFnDependencyNode(GetSettingsNode())
+                                    .findPlug("HdRprPlugin_LiveModeChannelName", false);
+        if (!channelNamePlug.isNull()) {
+            MString channelName = channelNamePlug.asString();
+            if (channelName != "") {
+                liveModeInfo.channelId = channelName.asChar();
+            }
+        }
 
-		MGlobal::displayInfo(MString("Rpr USD Live Mode Server Url = ") + liveModeInfo.liveUrl.c_str());
-		RenderStudioResolverHelper::StartLiveMode(liveModeInfo);
+        liveModeInfo.userId = "MayaUser_" + GenerateGUID();
 
-		s_LastRencetUsedFilePath = filePath.c_str();
-	}
-	else {
-		MGlobal::displayError("RprUsd: RprUsdOpenStudioStageCmd: wrong filePath is specified");
-		return MS::kFailure;
-	}
+        MGlobal::displayInfo(
+            MString("Rpr USD Live Mode Server Url = ") + liveModeInfo.liveUrl.c_str());
+        RenderStudioResolverHelper::StartLiveMode(liveModeInfo);
 
-	MGlobal::displayInfo("RprUsd: usd stage for synchronization is opened");
-	return MStatus::kSuccess;
+        s_LastRencetUsedFilePath = filePath.c_str();
+    } else {
+        MGlobal::displayError("RprUsd: RprUsdOpenStudioStageCmd: wrong filePath is specified");
+        return MS::kFailure;
+    }
+
+    MGlobal::displayInfo("RprUsd: usd stage for synchronization is opened");
+    return MStatus::kSuccess;
 }
 
 // Static Methods
 // -----------------------------------------------------------------------------
-void RprUsdOpenStudioStageCmd::cleanUp()
-{
-}
+void RprUsdOpenStudioStageCmd::cleanUp() { }
 
-void RprUsdOpenStudioStageCmd::Initialize()
-{
+void RprUsdOpenStudioStageCmd::Initialize() { }
 
-}
-
-void RprUsdOpenStudioStageCmd::Uninitialize()
-{
-
-}
+void RprUsdOpenStudioStageCmd::Uninitialize() { }
 
 PXR_NAMESPACE_CLOSE_SCOPE

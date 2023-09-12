@@ -11,15 +11,21 @@
 // limitations under the License.
 //
 
-
 #include "ProductionSettings.h"
+
 #include "common.h"
 
+#pragma warning(push, 0)
+
 #include "pxr/usd/usdRender/settings.h"
+
+#include <mayaUsd/nodes/layerManager.h>
 
 #include <pxr/imaging/hd/rendererPlugin.h>
 #include <pxr/imaging/hd/rendererPluginRegistry.h>
 #include <pxr/pxr.h>
+
+#pragma warning(pop)
 
 #include <maya/MFnDependencyNode.h>
 #include <maya/MFnEnumAttribute.h>
@@ -27,12 +33,10 @@
 #include <maya/MFnStringData.h>
 #include <maya/MFnTypedAttribute.h>
 #include <maya/MGlobal.h>
-#include <maya/MPlug.h>
-#include <maya/MStatus.h>
-#include <maya/MSceneMessage.h>
 #include <maya/MItDependencyNodes.h>
-
-#include <mayaUsd/nodes/layerManager.h>
+#include <maya/MPlug.h>
+#include <maya/MSceneMessage.h>
+#include <maya/MStatus.h>
 
 #include <functional>
 #include <sstream>
@@ -54,52 +58,51 @@ bool ProductionSettings::_usdCameraListRefreshed = true;
 bool ProductionSettings::_isOpeningScene = false;
 
 std::map<std::string, AttributeDescriptionPtr> ProductionSettings::_attributeMap;
-std::vector<TabDescriptionPtr> ProductionSettings::_tabsLogicalStructure;
-
+std::vector<TabDescriptionPtr>                 ProductionSettings::_tabsLogicalStructure;
 
 TfToken _MangleString(
-	const std::string& settingKey,
-	const std::string& token,
-	const std::string& replacement,
-	std::string        str = {})
+    const std::string& settingKey,
+    const std::string& token,
+    const std::string& replacement,
+    std::string        str = {})
 {
-	std::size_t pos = 0;
-	auto        delim = settingKey.find(token);
-	while (delim != std::string::npos) {
-		str += settingKey.substr(pos, delim - pos).c_str();
-		str += replacement;
-		pos = delim + token.size();
-		delim = settingKey.find(token, pos);
-	}
-	str += settingKey.substr(pos, settingKey.size() - pos).c_str();
-	return TfToken(str, TfToken::Immortal);
+    std::size_t pos = 0;
+    auto        delim = settingKey.find(token);
+    while (delim != std::string::npos) {
+        str += settingKey.substr(pos, delim - pos).c_str();
+        str += replacement;
+        pos = delim + token.size();
+        delim = settingKey.find(token, pos);
+    }
+    str += settingKey.substr(pos, settingKey.size() - pos).c_str();
+    return TfToken(str, TfToken::Immortal);
 }
 
 std::string _MangleRenderer(const TfToken& rendererName)
 {
-	return rendererName.IsEmpty() ? "" : (rendererName.GetString() + kMtohRendererPostFix);
+    return rendererName.IsEmpty() ? "" : (rendererName.GetString() + kMtohRendererPostFix);
 }
 
 TfToken _MangleString(const TfToken& settingKey, const TfToken& rendererName)
 {
-	return _MangleString(settingKey.GetString(), ":", kMtohNSToken, _MangleRenderer(rendererName));
+    return _MangleString(settingKey.GetString(), ":", kMtohNSToken, _MangleRenderer(rendererName));
 }
 
 TfToken _DeMangleString(const TfToken& settingKey, const TfToken& rendererName)
 {
-	assert(!rendererName.IsEmpty() && "No condition for this");
-	return _MangleString(
-		settingKey.GetString().substr(rendererName.size() + kMtohRendererPostFix.size()),
-		kMtohNSToken,
-		":");
+    assert(!rendererName.IsEmpty() && "No condition for this");
+    return _MangleString(
+        settingKey.GetString().substr(rendererName.size() + kMtohRendererPostFix.size()),
+        kMtohNSToken,
+        ":");
 }
 
 TfToken _MangleName(const TfToken& settingKey, const TfToken& rendererName = {})
 {
-	assert(
-		rendererName.GetString().find(':') == std::string::npos
-		&& "Unexpected : token in plug-in name");
-	return _MangleString(settingKey, rendererName);
+    assert(
+        rendererName.GetString().find(':') == std::string::npos
+        && "Unexpected : token in plug-in name");
+    return _MangleString(settingKey, rendererName);
 }
 
 static MString _MangleColorAttribute(const MString& attrName, unsigned i)
@@ -110,8 +113,8 @@ static MString _MangleColorAttribute(const MString& attrName, unsigned i)
         return attrName + kMtohCmptToken + kColorComponents[i];
     }
 
-	TF_CODING_ERROR("[rprUsd] Cannot mangle component: %u", i);
-	return attrName + kMtohCmptToken + MString("INVALID");
+    TF_CODING_ERROR("[rprUsd] Cannot mangle component: %u", i);
+    return attrName + kMtohCmptToken + MString("INVALID");
 }
 
 static MString _AlphaAttribute(const MString& attrName)
@@ -187,10 +190,10 @@ void _CreateEnumAttribute(
         return;
     }
 
-    for (int i = 0, n = values.size(); i < n; ++i) {
+    for (size_t i = 0, n = values.size(); i < n; ++i) {
         if (mayaPref == values[i]) {
             auto plug = node.findPlug(attrName, false);
-            plug.setValue(i);
+            plug.setValue((int)i);
             return;
         }
     }
@@ -236,7 +239,7 @@ void _CreateStringAttribute(
         tAttr.setDefault(defObj);
     }
 
-	tAttr.setUsedAsFilename(usedasFilename);
+    tAttr.setUsedAsFilename(usedasFilename);
     node.addAttribute(obj);
 
     if (!existed && useUserOptions) {
@@ -416,7 +419,7 @@ template <> void _GetFromPlug<TfEnum>(const MPlug& plug, TfEnum& out)
 
 template <> void _GetFromPlug<SdfAssetPath>(const MPlug& plug, SdfAssetPath& out)
 {
-	out = SdfAssetPath(std::string(plug.asString().asChar()));
+    out = SdfAssetPath(std::string(plug.asString().asChar()));
 }
 
 template <> void _GetFromPlug<TfToken>(const MPlug& plug, TfToken& out)
@@ -494,596 +497,566 @@ bool _IsSupportedAttribute(const VtValue& v)
 {
     return v.IsHolding<bool>() || v.IsHolding<int>() || v.IsHolding<float>()
         || v.IsHolding<GfVec3f>() || v.IsHolding<GfVec4f>() || v.IsHolding<TfToken>()
-		|| v.IsHolding<std::string>() || v.IsHolding<TfEnum>() || v.IsHolding<SdfAssetPath>();
+        || v.IsHolding<std::string>() || v.IsHolding<TfEnum>() || v.IsHolding<SdfAssetPath>();
 }
 
-void ProductionSettings::AddAttributeToGroupIfExist(GroupDescriptionPtr groupPtr, const std::string& attrSchemaName)
+void ProductionSettings::AddAttributeToGroupIfExist(
+    GroupDescriptionPtr groupPtr,
+    const std::string&  attrSchemaName)
 {
-	auto it = _attributeMap.find(attrSchemaName);
+    auto it = _attributeMap.find(attrSchemaName);
 
-	if (it == _attributeMap.end())
-	{
-		TF_WARN("[rprUsd] Requested attbiture does not exist: %s", attrSchemaName);
-		return;
-	}
+    if (it == _attributeMap.end()) {
+        TF_WARN("[rprUsd] Requested attbiture does not exist: %s", attrSchemaName);
+        return;
+    }
 
-	groupPtr->attributeVector.push_back(it->second);
+    groupPtr->attributeVector.push_back(it->second);
 }
 
 void ProductionSettings::MakeAttributeLogicalStructure()
 {
-	// QUALITY TAB
-	TabDescriptionPtr qualityTabDescPtr (new TabDescription("Quality"));
-	_tabsLogicalStructure.push_back(qualityTabDescPtr);
+    // QUALITY TAB
+    TabDescriptionPtr qualityTabDescPtr(new TabDescription("Quality"));
+    _tabsLogicalStructure.push_back(qualityTabDescPtr);
 
-	GroupDescriptionPtr engineGroupPtr(new GroupDescription("Engine Group"));
-	AddAttributeToGroupIfExist(engineGroupPtr, "rpr:core:renderQuality");
-	AddAttributeToGroupIfExist(engineGroupPtr, "rpr:core:renderMode");
+    GroupDescriptionPtr engineGroupPtr(new GroupDescription("Engine Group"));
+    AddAttributeToGroupIfExist(engineGroupPtr, "rpr:core:renderQuality");
+    AddAttributeToGroupIfExist(engineGroupPtr, "rpr:core:renderMode");
 
-	GroupDescriptionPtr contourGroupPtr(new GroupDescription("Contour"));
-	AddAttributeToGroupIfExist(contourGroupPtr, "rpr:contour:antialiasing");
-	AddAttributeToGroupIfExist(contourGroupPtr, "rpr:contour:useNormal");
-	AddAttributeToGroupIfExist(contourGroupPtr, "rpr:contour:linewidthNormal");
-	AddAttributeToGroupIfExist(contourGroupPtr, "rpr:contour:normalThreshold");
-	AddAttributeToGroupIfExist(contourGroupPtr, "rpr:contour:usePrimId");
-	AddAttributeToGroupIfExist(contourGroupPtr, "rpr:contour:linewidthPrimId");
-	AddAttributeToGroupIfExist(contourGroupPtr, "rpr:contour:useMaterialId");
-	AddAttributeToGroupIfExist(contourGroupPtr, "rpr:contour:linewidthMaterialId");
-	AddAttributeToGroupIfExist(contourGroupPtr, "rpr:contour:useUv");
-	AddAttributeToGroupIfExist(contourGroupPtr, "rpr:contour:linewidthUv");
-	AddAttributeToGroupIfExist(contourGroupPtr, "rpr:contour:uvThreshold");
-	AddAttributeToGroupIfExist(contourGroupPtr, "rpr:contour:debug");
+    GroupDescriptionPtr contourGroupPtr(new GroupDescription("Contour"));
+    AddAttributeToGroupIfExist(contourGroupPtr, "rpr:contour:antialiasing");
+    AddAttributeToGroupIfExist(contourGroupPtr, "rpr:contour:useNormal");
+    AddAttributeToGroupIfExist(contourGroupPtr, "rpr:contour:linewidthNormal");
+    AddAttributeToGroupIfExist(contourGroupPtr, "rpr:contour:normalThreshold");
+    AddAttributeToGroupIfExist(contourGroupPtr, "rpr:contour:usePrimId");
+    AddAttributeToGroupIfExist(contourGroupPtr, "rpr:contour:linewidthPrimId");
+    AddAttributeToGroupIfExist(contourGroupPtr, "rpr:contour:useMaterialId");
+    AddAttributeToGroupIfExist(contourGroupPtr, "rpr:contour:linewidthMaterialId");
+    AddAttributeToGroupIfExist(contourGroupPtr, "rpr:contour:useUv");
+    AddAttributeToGroupIfExist(contourGroupPtr, "rpr:contour:linewidthUv");
+    AddAttributeToGroupIfExist(contourGroupPtr, "rpr:contour:uvThreshold");
+    AddAttributeToGroupIfExist(contourGroupPtr, "rpr:contour:debug");
 
-	GroupDescriptionPtr renderingGroupPtr(new GroupDescription("Rendering Samples"));
-	AddAttributeToGroupIfExist(renderingGroupPtr, "rpr:maxSamples");
-	AddAttributeToGroupIfExist(renderingGroupPtr, "rpr:adaptiveSampling:minSamples");
-	AddAttributeToGroupIfExist(renderingGroupPtr, "rpr:adaptiveSampling:noiseTreshold");
+    GroupDescriptionPtr renderingGroupPtr(new GroupDescription("Rendering Samples"));
+    AddAttributeToGroupIfExist(renderingGroupPtr, "rpr:maxSamples");
+    AddAttributeToGroupIfExist(renderingGroupPtr, "rpr:adaptiveSampling:minSamples");
+    AddAttributeToGroupIfExist(renderingGroupPtr, "rpr:adaptiveSampling:noiseTreshold");
 
-	GroupDescriptionPtr raydepthGroupPtr(new GroupDescription("Ray Depth"));
-	AddAttributeToGroupIfExist(raydepthGroupPtr, "rpr:quality:rayDepth");
-	AddAttributeToGroupIfExist(raydepthGroupPtr, "rpr:quality:rayDepthDiffuse");
-	AddAttributeToGroupIfExist(raydepthGroupPtr, "rpr:quality:rayDepthGlossy");
-	AddAttributeToGroupIfExist(raydepthGroupPtr, "rpr:quality:rayDepthRefraction");
-	AddAttributeToGroupIfExist(raydepthGroupPtr, "rpr:quality:rayDepthGlossyRefraction");
-	AddAttributeToGroupIfExist(raydepthGroupPtr, "rpr:quality:rayDepthShadow");
+    GroupDescriptionPtr raydepthGroupPtr(new GroupDescription("Ray Depth"));
+    AddAttributeToGroupIfExist(raydepthGroupPtr, "rpr:quality:rayDepth");
+    AddAttributeToGroupIfExist(raydepthGroupPtr, "rpr:quality:rayDepthDiffuse");
+    AddAttributeToGroupIfExist(raydepthGroupPtr, "rpr:quality:rayDepthGlossy");
+    AddAttributeToGroupIfExist(raydepthGroupPtr, "rpr:quality:rayDepthRefraction");
+    AddAttributeToGroupIfExist(raydepthGroupPtr, "rpr:quality:rayDepthGlossyRefraction");
+    AddAttributeToGroupIfExist(raydepthGroupPtr, "rpr:quality:rayDepthShadow");
 
-	GroupDescriptionPtr denoisingGroupPtr(new GroupDescription("Denoising"));
-	AddAttributeToGroupIfExist(denoisingGroupPtr, "rpr:denoising:enable");
-	AddAttributeToGroupIfExist(denoisingGroupPtr, "rpr:denoising:minIter");
-	AddAttributeToGroupIfExist(denoisingGroupPtr, "rpr:denoising:iterStep");
+    GroupDescriptionPtr denoisingGroupPtr(new GroupDescription("Denoising"));
+    AddAttributeToGroupIfExist(denoisingGroupPtr, "rpr:denoising:enable");
+    AddAttributeToGroupIfExist(denoisingGroupPtr, "rpr:denoising:minIter");
+    AddAttributeToGroupIfExist(denoisingGroupPtr, "rpr:denoising:iterStep");
 
-	GroupDescriptionPtr miscGroupPtr(new GroupDescription("Miscellaneous"));
-	AddAttributeToGroupIfExist(miscGroupPtr, "rpr:ambientOcclusion:radius");
-	AddAttributeToGroupIfExist(miscGroupPtr, "rpr:quality:raycastEpsilon");
-	AddAttributeToGroupIfExist(miscGroupPtr, "rpr:quality:radianceClamping");
-	AddAttributeToGroupIfExist(miscGroupPtr, "rpr:quality:imageFilterRadius");
-	// we don't want this setting in Production Render Mode
-	//AddAttributeToGroupIfExist(miscGroupPtr, "rpr:quality:interactive:rayDepth");
+    GroupDescriptionPtr miscGroupPtr(new GroupDescription("Miscellaneous"));
+    AddAttributeToGroupIfExist(miscGroupPtr, "rpr:ambientOcclusion:radius");
+    AddAttributeToGroupIfExist(miscGroupPtr, "rpr:quality:raycastEpsilon");
+    AddAttributeToGroupIfExist(miscGroupPtr, "rpr:quality:radianceClamping");
+    AddAttributeToGroupIfExist(miscGroupPtr, "rpr:quality:imageFilterRadius");
+    // we don't want this setting in Production Render Mode
+    // AddAttributeToGroupIfExist(miscGroupPtr, "rpr:quality:interactive:rayDepth");
 
-	qualityTabDescPtr->groupVector.push_back(engineGroupPtr);
-	qualityTabDescPtr->groupVector.push_back(contourGroupPtr);
-	qualityTabDescPtr->groupVector.push_back(renderingGroupPtr);
-	qualityTabDescPtr->groupVector.push_back(raydepthGroupPtr);
-	qualityTabDescPtr->groupVector.push_back(denoisingGroupPtr);
-	qualityTabDescPtr->groupVector.push_back(miscGroupPtr);
+    qualityTabDescPtr->groupVector.push_back(engineGroupPtr);
+    qualityTabDescPtr->groupVector.push_back(contourGroupPtr);
+    qualityTabDescPtr->groupVector.push_back(renderingGroupPtr);
+    qualityTabDescPtr->groupVector.push_back(raydepthGroupPtr);
+    qualityTabDescPtr->groupVector.push_back(denoisingGroupPtr);
+    qualityTabDescPtr->groupVector.push_back(miscGroupPtr);
 
+    // CAMERA TAB
+    TabDescriptionPtr cameraTabDescPtr(new TabDescription("Camera"));
+    _tabsLogicalStructure.push_back(cameraTabDescPtr);
 
-	// CAMERA TAB
-	TabDescriptionPtr cameraTabDescPtr(new TabDescription("Camera"));
-	_tabsLogicalStructure.push_back(cameraTabDescPtr);
+    GroupDescriptionPtr cameraModeGroupPtr(new GroupDescription("Camera Mode"));
+    AddAttributeToGroupIfExist(cameraModeGroupPtr, "rpr:core:cameraMode");
 
-	GroupDescriptionPtr cameraModeGroupPtr(new GroupDescription("Camera Mode"));
-	AddAttributeToGroupIfExist(cameraModeGroupPtr, "rpr:core:cameraMode");
+    GroupDescriptionPtr postEffectsModeGroupPtr(new GroupDescription("Post Effects"));
+    AddAttributeToGroupIfExist(postEffectsModeGroupPtr, "rpr:gamma:enable");
+    AddAttributeToGroupIfExist(postEffectsModeGroupPtr, "rpr:gamma:value");
+    AddAttributeToGroupIfExist(postEffectsModeGroupPtr, "rpr:tonemapping:enable");
+    AddAttributeToGroupIfExist(postEffectsModeGroupPtr, "rpr:tonemapping:exposureTime");
+    AddAttributeToGroupIfExist(postEffectsModeGroupPtr, "rpr:tonemapping:sensitivity");
+    AddAttributeToGroupIfExist(postEffectsModeGroupPtr, "rpr:tonemapping:fstop");
+    AddAttributeToGroupIfExist(postEffectsModeGroupPtr, "rpr:tonemapping:gamma");
+    AddAttributeToGroupIfExist(postEffectsModeGroupPtr, "rpr:alpha:enable");
+    AddAttributeToGroupIfExist(postEffectsModeGroupPtr, "rpr:beautyMotionBlur:enable");
 
-	GroupDescriptionPtr postEffectsModeGroupPtr(new GroupDescription("Post Effects"));
-	AddAttributeToGroupIfExist(postEffectsModeGroupPtr, "rpr:gamma:enable");
-	AddAttributeToGroupIfExist(postEffectsModeGroupPtr, "rpr:gamma:value");
-	AddAttributeToGroupIfExist(postEffectsModeGroupPtr, "rpr:tonemapping:enable");
-	AddAttributeToGroupIfExist(postEffectsModeGroupPtr, "rpr:tonemapping:exposureTime");
-	AddAttributeToGroupIfExist(postEffectsModeGroupPtr, "rpr:tonemapping:sensitivity");
-	AddAttributeToGroupIfExist(postEffectsModeGroupPtr, "rpr:tonemapping:fstop");
-	AddAttributeToGroupIfExist(postEffectsModeGroupPtr, "rpr:tonemapping:gamma");
-	AddAttributeToGroupIfExist(postEffectsModeGroupPtr, "rpr:alpha:enable");
-	AddAttributeToGroupIfExist(postEffectsModeGroupPtr, "rpr:beautyMotionBlur:enable");
+    GroupDescriptionPtr cameraMiscModeGroupPtr(new GroupDescription("Miscellaneous"));
+    AddAttributeToGroupIfExist(cameraMiscModeGroupPtr, "rpr:ocio:configPath");
+    AddAttributeToGroupIfExist(cameraMiscModeGroupPtr, "rpr:ocio:renderingColorSpace");
+    AddAttributeToGroupIfExist(cameraMiscModeGroupPtr, "rpr:uniformSeed");
+    AddAttributeToGroupIfExist(cameraMiscModeGroupPtr, "rpr:cryptomatte:outputPath");
+    AddAttributeToGroupIfExist(cameraMiscModeGroupPtr, "rpr:cryptomatte:outputMode");
+    AddAttributeToGroupIfExist(cameraMiscModeGroupPtr, "rpr:cryptomatte:previewLayer");
 
-	GroupDescriptionPtr cameraMiscModeGroupPtr(new GroupDescription("Miscellaneous"));
-	AddAttributeToGroupIfExist(cameraMiscModeGroupPtr, "rpr:ocio:configPath");
-	AddAttributeToGroupIfExist(cameraMiscModeGroupPtr, "rpr:ocio:renderingColorSpace");
-	AddAttributeToGroupIfExist(cameraMiscModeGroupPtr, "rpr:uniformSeed");
-	AddAttributeToGroupIfExist(cameraMiscModeGroupPtr, "rpr:cryptomatte:outputPath");
-	AddAttributeToGroupIfExist(cameraMiscModeGroupPtr, "rpr:cryptomatte:outputMode");
-	AddAttributeToGroupIfExist(cameraMiscModeGroupPtr, "rpr:cryptomatte:previewLayer");
-
-	cameraTabDescPtr->groupVector.push_back(cameraModeGroupPtr);
-	cameraTabDescPtr->groupVector.push_back(postEffectsModeGroupPtr);
-	cameraTabDescPtr->groupVector.push_back(cameraMiscModeGroupPtr);
+    cameraTabDescPtr->groupVector.push_back(cameraModeGroupPtr);
+    cameraTabDescPtr->groupVector.push_back(postEffectsModeGroupPtr);
+    cameraTabDescPtr->groupVector.push_back(cameraMiscModeGroupPtr);
 }
 
-void ProductionSettings::CreateAttributes(std::map<std::string, std::string>* pMapCtrlCreationForTabs)
+void ProductionSettings::CreateAttributes(
+    std::map<std::string, std::string>* pMapCtrlCreationForTabs)
 {
-	std::string rendererName = GetRendererName();
-	HdRendererPlugin* rendererPlugin = HdRendererPluginRegistry::GetInstance().GetRendererPlugin(TfToken(rendererName));
-	if (!rendererPlugin)
-		return;
+    std::string       rendererName = GetRendererName();
+    HdRendererPlugin* rendererPlugin
+        = HdRendererPluginRegistry::GetInstance().GetRendererPlugin(TfToken(rendererName));
+    if (!rendererPlugin)
+        return;
 
-	HdRenderDelegate* renderDelegate = rendererPlugin->CreateRenderDelegate();
-	if (!renderDelegate)
-		return;
+    HdRenderDelegate* renderDelegate = rendererPlugin->CreateRenderDelegate();
+    if (!renderDelegate)
+        return;
 
-	MObject nodeObj = GetSettingsNode();
-	if (nodeObj.isNull())
-	{
-		return;
-	}
+    MObject nodeObj = GetSettingsNode();
+    if (nodeObj.isNull()) {
+        return;
+    }
 
-	MFnDependencyNode node(nodeObj);
-	const bool        userDefaults = false;
-	std::string controlsCreationCalls;
+    MFnDependencyNode node(nodeObj);
+    const bool        userDefaults = false;
+    std::string       controlsCreationCalls;
 
-	HdRenderSettingDescriptorList rendererSettingDescriptors = renderDelegate->GetRenderSettingDescriptors();
+    HdRenderSettingDescriptorList rendererSettingDescriptors
+        = renderDelegate->GetRenderSettingDescriptors();
 
-	// We only needed the delegate for the settings, so release
-	rendererPlugin->DeleteRenderDelegate(renderDelegate);
-	// Null it out to make any possible usage later obv, wrong!
-	renderDelegate = nullptr;
+    // We only needed the delegate for the settings, so release
+    rendererPlugin->DeleteRenderDelegate(renderDelegate);
+    // Null it out to make any possible usage later obv, wrong!
+    renderDelegate = nullptr;
 
-	if (g_attributePrefix.GetString().empty())
-	{
-		g_attributePrefix = TfToken(rendererName + "_Prod_");
-	}
+    if (g_attributePrefix.GetString().empty()) {
+        g_attributePrefix = TfToken(rendererName + "_Prod_");
+    }
 
-	std::string controlCreationCmdTemplate = "attrControlGrp -label \"%s\" -attribute \"%s.%s\";";
+    std::string controlCreationCmdTemplate = "attrControlGrp -label \"%s\" -attribute \"%s.%s\";";
 
-	// Create attrbiutes for usd camera
+    // Create attrbiutes for usd camera
 
-	_CreateBoolAttribute(node, MString(g_attributePrefix.GetText()) + "Static_useUSDCamera", false, userDefaults);
+    _CreateBoolAttribute(
+        node, MString(g_attributePrefix.GetText()) + "Static_useUSDCamera", false, userDefaults);
 
-	TfTokenVector vec;
-	TfToken token;
-	_CreateStringAttribute(node, MString(g_attributePrefix.GetText()) + "Static_usdCameraSelected", "", userDefaults);
+    TfTokenVector vec;
+    TfToken       token;
+    _CreateStringAttribute(
+        node, MString(g_attributePrefix.GetText()) + "Static_usdCameraSelected", "", userDefaults);
 
-	// non production mode  attribute
-	_CreateStringAttribute(node, MString(rendererName.c_str()) + "_LiveModeChannelName", "RenderStudioMaya_23", userDefaults);
+    // non production mode  attribute
+    _CreateStringAttribute(
+        node,
+        MString(rendererName.c_str()) + "_LiveModeChannelName",
+        "RenderStudioMaya_23",
+        userDefaults);
 
-	for (const HdRenderSettingDescriptor& attr : rendererSettingDescriptors) {
+    for (const HdRenderSettingDescriptor& attr : rendererSettingDescriptors) {
 
-		// We dont want these attributes in Production Render Mode
-		if ((attr.key == "rpr:quality:interactive:downscale:resolution") ||
-			(attr.key == "rpr:quality:interactive:downscale:enable") || 
-			(attr.key == "rpr:quality:interactive:rayDepth")) {
-			
-			continue;
-		}
+        // We dont want these attributes in Production Render Mode
+        if ((attr.key == "rpr:quality:interactive:downscale:resolution")
+            || (attr.key == "rpr:quality:interactive:downscale:enable")
+            || (attr.key == "rpr:quality:interactive:rayDepth")) {
 
-		_attributeMap[attr.key] = AttributeDescriptionPtr(new HdRenderSettingDescriptor(attr));
-	}
+            continue;
+        }
 
-	MakeAttributeLogicalStructure();
+        _attributeMap[attr.key] = AttributeDescriptionPtr(new HdRenderSettingDescriptor(attr));
+    }
 
-	for (TabDescriptionPtr tabPtr : _tabsLogicalStructure) {
-		std::string tabCtrlCreationCommands;
+    MakeAttributeLogicalStructure();
 
-		for (GroupDescriptionPtr groupPtr : tabPtr->groupVector) {
-			tabCtrlCreationCommands += "frameLayout - label \"" + groupPtr->name + "\" - cll true - cl false;\n";
+    for (TabDescriptionPtr tabPtr : _tabsLogicalStructure) {
+        std::string tabCtrlCreationCommands;
 
-			for (AttributeDescriptionPtr attrPtr : groupPtr->attributeVector) {
-				HdRenderSettingDescriptor& attr = *attrPtr;
-				MString attrName = _MangleName(attr.key, g_attributePrefix).GetText();
+        for (GroupDescriptionPtr groupPtr : tabPtr->groupVector) {
+            tabCtrlCreationCommands
+                += "frameLayout - label \"" + groupPtr->name + "\" - cll true - cl false;\n";
 
-				std::string controlCreationCmd = TfStringPrintf(controlCreationCmdTemplate.c_str(), attr.name.c_str(), node.name().asChar(), attrName.asChar());
+            for (AttributeDescriptionPtr attrPtr : groupPtr->attributeVector) {
+                HdRenderSettingDescriptor& attr = *attrPtr;
+                MString attrName = _MangleName(attr.key, g_attributePrefix).GetText();
 
-				bool addControlCreatioCmd = true;
+                std::string controlCreationCmd = TfStringPrintf(
+                    controlCreationCmdTemplate.c_str(),
+                    attr.name.c_str(),
+                    node.name().asChar(),
+                    attrName.asChar());
 
-				if (attr.defaultValue.IsHolding<bool>()) {
-					_CreateBoolAttribute(
-						node,
-						attrName,
-						attr.defaultValue.UncheckedGet<bool>(),
-						userDefaults);
-				}
-				else if (attr.defaultValue.IsHolding<int>()) {
-					_CreateIntAttribute(
-						node, attrName, attr.defaultValue.UncheckedGet<int>(), userDefaults);
-				}
-				else if (attr.defaultValue.IsHolding<float>()) {
-					_CreateFloatAttribute(
-						node,
-						attrName,
-						attr.defaultValue.UncheckedGet<float>(),
-						userDefaults);
-				}
-				else if (attr.defaultValue.IsHolding<GfVec3f>()) {
-					_CreateColorAttribute(
-						node,
-						attrName,
-						attr.defaultValue.UncheckedGet<GfVec3f>(),
-						userDefaults);
-				}
-				else if (attr.defaultValue.IsHolding<GfVec4f>()) {
-					_CreateColorAttribute(
-						node,
-						attrName,
-						attr.defaultValue.UncheckedGet<GfVec4f>(),
-						userDefaults);
-				}
-				else if (attr.defaultValue.IsHolding<TfToken>()) {
-					// If this attribute type has AllowedTokens set, we treat it as an enum instead, so
-					// that only valid values are available.```
-					bool createdAsEnum = false;
-					if (auto primDef = UsdRenderSettings().GetSchemaClassPrimDefinition()) {
-						VtTokenArray allowedTokens;
+                bool addControlCreatioCmd = true;
 
-						if (primDef->GetPropertyMetadata(
-							TfToken(attr.key), SdfFieldKeys->AllowedTokens, &allowedTokens)) {
-							// Generate dropdown from allowedTokens
-							TfTokenVector tokens(allowedTokens.begin(), allowedTokens.end());
-							_CreateEnumAttribute(
-								node,
-								attrName,
-								tokens,
-								attr.defaultValue.UncheckedGet<TfToken>(),
-								userDefaults);
-							createdAsEnum = true;
-						}
-					}
+                if (attr.defaultValue.IsHolding<bool>()) {
+                    _CreateBoolAttribute(
+                        node, attrName, attr.defaultValue.UncheckedGet<bool>(), userDefaults);
+                } else if (attr.defaultValue.IsHolding<int>()) {
+                    _CreateIntAttribute(
+                        node, attrName, attr.defaultValue.UncheckedGet<int>(), userDefaults);
+                } else if (attr.defaultValue.IsHolding<float>()) {
+                    _CreateFloatAttribute(
+                        node, attrName, attr.defaultValue.UncheckedGet<float>(), userDefaults);
+                } else if (attr.defaultValue.IsHolding<GfVec3f>()) {
+                    _CreateColorAttribute(
+                        node, attrName, attr.defaultValue.UncheckedGet<GfVec3f>(), userDefaults);
+                } else if (attr.defaultValue.IsHolding<GfVec4f>()) {
+                    _CreateColorAttribute(
+                        node, attrName, attr.defaultValue.UncheckedGet<GfVec4f>(), userDefaults);
+                } else if (attr.defaultValue.IsHolding<TfToken>()) {
+                    // If this attribute type has AllowedTokens set, we treat it as an enum instead,
+                    // so that only valid values are available.```
+                    bool createdAsEnum = false;
+                    if (auto primDef = UsdRenderSettings().GetSchemaClassPrimDefinition()) {
+                        VtTokenArray allowedTokens;
 
-					if (!createdAsEnum) {
-						_CreateStringAttribute(
-							node,
-							attrName,
-							attr.defaultValue.UncheckedGet<TfToken>().GetString(),
-							userDefaults);
-					}
-				}
-				else if (attr.defaultValue.IsHolding<std::string>()) {
-					_CreateStringAttribute(
-						node,
-						attrName,
-						attr.defaultValue.UncheckedGet<std::string>(),
-						userDefaults);
-				}
-				else if (attr.defaultValue.IsHolding<SdfAssetPath>()) {
-					_CreateStringAttribute(
-						node,
-						attrName,
-						attr.defaultValue.UncheckedGet<SdfAssetPath>().GetAssetPath(),
-						userDefaults,
-						true);
-				}
-				else if (attr.defaultValue.IsHolding<TfEnum>()) {
-					_CreateEnumAttribute(
-						node,
-						attrName,
-						attr.defaultValue.UncheckedGet<TfEnum>(),
-						userDefaults);
-				}
-				else {
-					assert(
-						!_IsSupportedAttribute(attr.defaultValue)
-						&& "_IsSupportedAttribute out of synch");
+                        if (primDef->GetPropertyMetadata(
+                                TfToken(attr.key), SdfFieldKeys->AllowedTokens, &allowedTokens)) {
+                            // Generate dropdown from allowedTokens
+                            TfTokenVector tokens(allowedTokens.begin(), allowedTokens.end());
+                            _CreateEnumAttribute(
+                                node,
+                                attrName,
+                                tokens,
+                                attr.defaultValue.UncheckedGet<TfToken>(),
+                                userDefaults);
+                            createdAsEnum = true;
+                        }
+                    }
 
-					TF_WARN(
-						"[rprUsd] Ignoring setting: '%s' for %s",
-						attr.key.GetText(),
-						rendererName.c_str());
+                    if (!createdAsEnum) {
+                        _CreateStringAttribute(
+                            node,
+                            attrName,
+                            attr.defaultValue.UncheckedGet<TfToken>().GetString(),
+                            userDefaults);
+                    }
+                } else if (attr.defaultValue.IsHolding<std::string>()) {
+                    _CreateStringAttribute(
+                        node,
+                        attrName,
+                        attr.defaultValue.UncheckedGet<std::string>(),
+                        userDefaults);
+                } else if (attr.defaultValue.IsHolding<SdfAssetPath>()) {
+                    _CreateStringAttribute(
+                        node,
+                        attrName,
+                        attr.defaultValue.UncheckedGet<SdfAssetPath>().GetAssetPath(),
+                        userDefaults,
+                        true);
+                } else if (attr.defaultValue.IsHolding<TfEnum>()) {
+                    _CreateEnumAttribute(
+                        node, attrName, attr.defaultValue.UncheckedGet<TfEnum>(), userDefaults);
+                } else {
+                    assert(
+                        !_IsSupportedAttribute(attr.defaultValue)
+                        && "_IsSupportedAttribute out of synch");
 
-					addControlCreatioCmd = false;
-				}
+                    TF_WARN(
+                        "[rprUsd] Ignoring setting: '%s' for %s",
+                        attr.key.GetText(),
+                        rendererName.c_str());
 
-				if (addControlCreatioCmd)
-				{
-					tabCtrlCreationCommands += controlCreationCmd + "\n";
-				}
-			}
+                    addControlCreatioCmd = false;
+                }
 
-			tabCtrlCreationCommands += "setParent ..;\n";
-		}
+                if (addControlCreatioCmd) {
+                    tabCtrlCreationCommands += controlCreationCmd + "\n";
+                }
+            }
 
-		if (pMapCtrlCreationForTabs) {
-			(*pMapCtrlCreationForTabs)[tabPtr->name] = tabCtrlCreationCommands; 
-		}
-	}
+            tabCtrlCreationCommands += "setParent ..;\n";
+        }
+
+        if (pMapCtrlCreationForTabs) {
+            (*pMapCtrlCreationForTabs)[tabPtr->name] = tabCtrlCreationCommands;
+        }
+    }
 }
 
 void ProductionSettings::ApplySettings(HdRenderDelegate* renderDelegate)
 {
-	HdRenderSettingDescriptorList rendererSettingDescriptors = renderDelegate->GetRenderSettingDescriptors();
+    HdRenderSettingDescriptorList rendererSettingDescriptors
+        = renderDelegate->GetRenderSettingDescriptors();
 
-	MObject nodeObj = GetSettingsNode();
-	if (nodeObj.isNull())
-	{
-		TF_WARN("hdRPR: production render settings node was not found");
-		return;
-	}
+    MObject nodeObj = GetSettingsNode();
+    if (nodeObj.isNull()) {
+        TF_WARN("hdRPR: production render settings node was not found");
+        return;
+    }
 
-	MFnDependencyNode node(nodeObj);
+    MFnDependencyNode node(nodeObj);
 
-	bool storeUserSetting = false;
+    bool storeUserSetting = false;
 
-	for (TabDescriptionPtr tabPtr : _tabsLogicalStructure) {
-		for (GroupDescriptionPtr groupPtr : tabPtr->groupVector) {
-			for (AttributeDescriptionPtr attrPtr : groupPtr->attributeVector) {
-				HdRenderSettingDescriptor& attr = *attrPtr;
-				MString attrName = _MangleName(attr.key, g_attributePrefix).GetText();
+    for (TabDescriptionPtr tabPtr : _tabsLogicalStructure) {
+        for (GroupDescriptionPtr groupPtr : tabPtr->groupVector) {
+            for (AttributeDescriptionPtr attrPtr : groupPtr->attributeVector) {
+                HdRenderSettingDescriptor& attr = *attrPtr;
+                MString attrName = _MangleName(attr.key, g_attributePrefix).GetText();
 
-				bool valueGot = true;
+                bool valueGot = true;
 
-				VtValue vtValue;
-				if (attr.defaultValue.IsHolding<bool>()) {
-					auto v = attr.defaultValue.UncheckedGet<bool>();
-					_GetAttribute(node, attrName, v, storeUserSetting);
-					vtValue = v;
-				}
-				else if (attr.defaultValue.IsHolding<int>()) {
-					auto v = attr.defaultValue.UncheckedGet<int>();
-					_GetAttribute(node, attrName, v, storeUserSetting);
-					vtValue = v;
-				}
-				else if (attr.defaultValue.IsHolding<float>()) {
-					auto v = attr.defaultValue.UncheckedGet<float>();
-					_GetAttribute(node, attrName, v, storeUserSetting);
-					vtValue = v;
-				}
-				else if (attr.defaultValue.IsHolding<GfVec3f>()) {
-					auto v = attr.defaultValue.UncheckedGet<GfVec3f>();
-					_GetAttribute(node, attrName, v, storeUserSetting);
-					vtValue = v;
-				}
-				else if (attr.defaultValue.IsHolding<GfVec4f>()) {
-					auto v = attr.defaultValue.UncheckedGet<GfVec4f>();
-					_GetAttribute(node, attrName, v, storeUserSetting);
-					vtValue = v;
-				}
-				else if (attr.defaultValue.IsHolding<TfToken>()) {
-					auto v = attr.defaultValue.UncheckedGet<TfToken>();
-					_GetAttribute(node, attrName, v, storeUserSetting);
-					vtValue = v;
-				}
-				else if (attr.defaultValue.IsHolding<SdfAssetPath>()) {
-					auto v = attr.defaultValue.UncheckedGet<SdfAssetPath>();
-					_GetAttribute(node, attrName, v, storeUserSetting);
-					vtValue = v;
-				}
-				else if (attr.defaultValue.IsHolding<std::string>()) {
-					auto v = attr.defaultValue.UncheckedGet<std::string>();
-					_GetAttribute(node, attrName, v, storeUserSetting);
-					vtValue = v;
-				}
-				else if (attr.defaultValue.IsHolding<TfEnum>()) {
-					auto v = attr.defaultValue.UncheckedGet<TfEnum>();
-					_GetAttribute(node, attrName, v, storeUserSetting);
-					vtValue = v;
-				}
-				else {
-					assert(
-						!_IsSupportedAttribute(attr.defaultValue)
-						&& "_IsSupportedAttribute out of synch");
+                VtValue vtValue;
+                if (attr.defaultValue.IsHolding<bool>()) {
+                    auto v = attr.defaultValue.UncheckedGet<bool>();
+                    _GetAttribute(node, attrName, v, storeUserSetting);
+                    vtValue = v;
+                } else if (attr.defaultValue.IsHolding<int>()) {
+                    auto v = attr.defaultValue.UncheckedGet<int>();
+                    _GetAttribute(node, attrName, v, storeUserSetting);
+                    vtValue = v;
+                } else if (attr.defaultValue.IsHolding<float>()) {
+                    auto v = attr.defaultValue.UncheckedGet<float>();
+                    _GetAttribute(node, attrName, v, storeUserSetting);
+                    vtValue = v;
+                } else if (attr.defaultValue.IsHolding<GfVec3f>()) {
+                    auto v = attr.defaultValue.UncheckedGet<GfVec3f>();
+                    _GetAttribute(node, attrName, v, storeUserSetting);
+                    vtValue = v;
+                } else if (attr.defaultValue.IsHolding<GfVec4f>()) {
+                    auto v = attr.defaultValue.UncheckedGet<GfVec4f>();
+                    _GetAttribute(node, attrName, v, storeUserSetting);
+                    vtValue = v;
+                } else if (attr.defaultValue.IsHolding<TfToken>()) {
+                    auto v = attr.defaultValue.UncheckedGet<TfToken>();
+                    _GetAttribute(node, attrName, v, storeUserSetting);
+                    vtValue = v;
+                } else if (attr.defaultValue.IsHolding<SdfAssetPath>()) {
+                    auto v = attr.defaultValue.UncheckedGet<SdfAssetPath>();
+                    _GetAttribute(node, attrName, v, storeUserSetting);
+                    vtValue = v;
+                } else if (attr.defaultValue.IsHolding<std::string>()) {
+                    auto v = attr.defaultValue.UncheckedGet<std::string>();
+                    _GetAttribute(node, attrName, v, storeUserSetting);
+                    vtValue = v;
+                } else if (attr.defaultValue.IsHolding<TfEnum>()) {
+                    auto v = attr.defaultValue.UncheckedGet<TfEnum>();
+                    _GetAttribute(node, attrName, v, storeUserSetting);
+                    vtValue = v;
+                } else {
+                    assert(
+                        !_IsSupportedAttribute(attr.defaultValue)
+                        && "_IsSupportedAttribute out of synch");
 
-					TF_WARN(
-						"hdRPR: Can't get setting: '%s' for %s",
-						attr.key.GetText(),
-						"HdRprPlugin");
+                    TF_WARN(
+                        "hdRPR: Can't get setting: '%s' for %s", attr.key.GetText(), "HdRprPlugin");
 
-					valueGot = false;
-				}
+                    valueGot = false;
+                }
 
-				if (valueGot)
-				{
-					renderDelegate->SetRenderSetting(attr.key, vtValue);
-					// check if attribute is supported or not and display a warning if not
-					CheckUnsupportedAttributeAndDisplayWarning(attr.key.GetText(), vtValue, nodeObj);
-				}
-			}
-		}
-	}
+                if (valueGot) {
+                    renderDelegate->SetRenderSetting(attr.key, vtValue);
+                    // check if attribute is supported or not and display a warning if not
+                    CheckUnsupportedAttributeAndDisplayWarning(
+                        attr.key.GetText(), vtValue, nodeObj);
+                }
+            }
+        }
+    }
 }
 
-void ProductionSettings::CheckUnsupportedAttributeAndDisplayWarning(const std::string& attrName, const VtValue& vtValue, const MFnDependencyNode& depNode)
+void ProductionSettings::CheckUnsupportedAttributeAndDisplayWarning(
+    const std::string&       attrName,
+    const VtValue&           vtValue,
+    const MFnDependencyNode& depNode)
 {
-	// Ambient Occulsion is not supprted in both engines
-	if (attrName == "rpr:core:renderMode") {
-		TfToken tfToken;
-		if ( (vtValue.IsHolding<TfToken>())) {
-			tfToken = vtValue.UncheckedGet<TfToken>();
-		}
+    // Ambient Occulsion is not supprted in both engines
+    if (attrName == "rpr:core:renderMode") {
+        TfToken tfToken;
+        if ((vtValue.IsHolding<TfToken>())) {
+            tfToken = vtValue.UncheckedGet<TfToken>();
+        }
 
-		std::string mode = tfToken.GetString();
-		if (mode == "Ambient Occlusion") {
-			TF_WARN("hdRPR: Ambient Occlusion mode is not currently supported!");
-		}
-	}
+        std::string mode = tfToken.GetString();
+        if (mode == "Ambient Occlusion") {
+            TF_WARN("hdRPR: Ambient Occlusion mode is not currently supported!");
+        }
+    }
 
-	if (attrName == "rpr:ocio:configPath") {
-		SdfAssetPath assetPath;
-		if ((vtValue.IsHolding<SdfAssetPath>())) {
-			assetPath = vtValue.UncheckedGet<SdfAssetPath>();
-		}
+    if (attrName == "rpr:ocio:configPath") {
+        SdfAssetPath assetPath;
+        if ((vtValue.IsHolding<SdfAssetPath>())) {
+            assetPath = vtValue.UncheckedGet<SdfAssetPath>();
+        }
 
-		std::string configPath = assetPath.GetAssetPath();
-		if (!configPath.empty()) {
-			TF_WARN("hdRPR: OCIO is not currently supported in hdRPR!");
-		}
-	}
+        std::string configPath = assetPath.GetAssetPath();
+        if (!configPath.empty()) {
+            TF_WARN("hdRPR: OCIO is not currently supported in hdRPR!");
+        }
+    }
 
-	if (attrName == "rpr:cryptomatte:outputPath") {
-		SdfAssetPath assetPath;
-		if ((vtValue.IsHolding<SdfAssetPath>())) {
-			assetPath = vtValue.UncheckedGet<SdfAssetPath>();
+    if (attrName == "rpr:cryptomatte:outputPath") {
+        SdfAssetPath assetPath;
+        if ((vtValue.IsHolding<SdfAssetPath>())) {
+            assetPath = vtValue.UncheckedGet<SdfAssetPath>();
 
-			std::string outputPath = assetPath.GetAssetPath();
-			if (!outputPath.empty()) {
+            std::string outputPath = assetPath.GetAssetPath();
+            if (!outputPath.empty()) {
 
-				// get engine
-				MString attrMangledName = _MangleName(TfToken("rpr:core:renderQuality"), g_attributePrefix).GetText();
+                // get engine
+                MString attrMangledName
+                    = _MangleName(TfToken("rpr:core:renderQuality"), g_attributePrefix).GetText();
 
-				TfToken tfTokenEngine;
-				_GetAttribute(depNode, attrMangledName, tfTokenEngine, false);
+                TfToken tfTokenEngine;
+                _GetAttribute(depNode, attrMangledName, tfTokenEngine, false);
 
-				if (tfTokenEngine.GetString() != "Northstar") {
-					TF_WARN("hdRPR: cryptomatte is currently supported only in NorthStar moed!");
-				}
-			}
-		}
-	}
+                if (tfTokenEngine.GetString() != "Northstar") {
+                    TF_WARN("hdRPR: cryptomatte is currently supported only in NorthStar moed!");
+                }
+            }
+        }
+    }
 }
 
-void ProductionSettings::CheckRenderGlobals()
-{
-	CreateAttributes();
-}
+void ProductionSettings::CheckRenderGlobals() { CreateAttributes(); }
 
 void ProductionSettings::ClearUsdCameraAttributes()
 {
-	MGlobal::executeCommand("HdRpr_clearUSDCameras();"); 
+    MGlobal::executeCommand("HdRpr_clearUSDCameras();");
 }
-
 
 void ProductionSettings::UsdCameraListRefresh()
 {
-	ClearUsdCameraAttributes();
+    ClearUsdCameraAttributes();
 
-	UsdStageRefPtr usdStageRefPtr = GetUsdStage();
+    UsdStageRefPtr usdStageRefPtr = GetUsdStage();
 
-	if (usdStageRefPtr == nullptr)
-	{
- 		return;
-	}
+    if (usdStageRefPtr == nullptr) {
+        return;
+    }
 
-	UsdPrimRange allPrims = usdStageRefPtr->TraverseAll();
+    UsdPrimRange allPrims = usdStageRefPtr->TraverseAll();
 
-	UsdPrimRange::const_iterator it;
+    UsdPrimRange::const_iterator it;
 
-	for (it = allPrims.begin(); it != allPrims.end(); ++it)
-	{
-		if (it->GetTypeName() != "Camera")
-		{
-			continue;
-		}
+    for (it = allPrims.begin(); it != allPrims.end(); ++it) {
+        if (it->GetTypeName() != "Camera") {
+            continue;
+        }
 
-		std::string usdPath = it->GetPrimPath().GetAsString();
+        std::string usdPath = it->GetPrimPath().GetAsString();
 
-		MString cmd;
-		cmd.format("HdRpr_AddUsdCamera(\"^1s\")", MString(usdPath.c_str()));
-		MGlobal::executeCommand(cmd);
-	}
+        MString cmd;
+        cmd.format("HdRpr_AddUsdCamera(\"^1s\")", MString(usdPath.c_str()));
+        MGlobal::executeCommand(cmd);
+    }
 }
 
 void ProductionSettings::OnSceneCallback(void* pbCallCheckRenderGlobals)
 {
-	if (_isOpeningScene)
-	{
-		_isOpeningScene = false;
-	}
+    if (_isOpeningScene) {
+        _isOpeningScene = false;
+    }
 
-	if (pbCallCheckRenderGlobals)
-	{
-		CheckRenderGlobals();
-	}
+    if (pbCallCheckRenderGlobals) {
+        CheckRenderGlobals();
+    }
 
-	UsdCameraListRefresh();
+    UsdCameraListRefresh();
 }
 
 bool ProductionSettings::IsUSDCameraToUse()
 {
-	MObject nodeObj = GetSettingsNode();
-	if (nodeObj.isNull())
-	{
-		TF_WARN("[hdRPR production] render settings node was not found");
-		return false;
-	}
+    MObject nodeObj = GetSettingsNode();
+    if (nodeObj.isNull()) {
+        TF_WARN("[hdRPR production] render settings node was not found");
+        return false;
+    }
 
-	MFnDependencyNode node(nodeObj);
-	return node.findPlug("HdRprPlugin_Prod_Static_useUSDCamera", false).asBool();
+    MFnDependencyNode node(nodeObj);
+    return node.findPlug("HdRprPlugin_Prod_Static_useUSDCamera", false).asBool();
 }
-
 
 UsdPrim ProductionSettings::GetUsdCameraPrim()
 {
-	UsdStageRefPtr usdStage = GetUsdStage();
+    UsdStageRefPtr usdStage = GetUsdStage();
 
-	if (usdStage == nullptr)
-	{
-		return UsdPrim();
-	}
+    if (usdStage == nullptr) {
+        return UsdPrim();
+    }
 
-	MString path = MGlobal::executeCommandStringResult("GetCurrentUsdCamera();");
-	SdfPath sdfpath(path.asChar());
+    MString path = MGlobal::executeCommandStringResult("GetCurrentUsdCamera();");
+    SdfPath sdfpath(path.asChar());
 
-	return usdStage->GetPrimAtPath(sdfpath);
+    return usdStage->GetPrimAtPath(sdfpath);
 }
 
-void ProductionSettings::attributeChangedCallback(MNodeMessage::AttributeMessage msg, MPlug & plug, MPlug & otherPlug, void* clientData)
+void ProductionSettings::attributeChangedCallback(
+    MNodeMessage::AttributeMessage msg,
+    MPlug&                         plug,
+    MPlug&                         otherPlug,
+    void*                          clientData)
 {
-	if (_isOpeningScene)
-	{
-		return;
-	}
+    if (_isOpeningScene) {
+        return;
+    }
 
-	std::string plugName = plug.name().asChar();
+    std::string plugName = plug.name().asChar();
 
-	if ((plugName.find(".outTime") != std::string::npos) && (!_usdCameraListRefreshed) && (msg & MNodeMessage::AttributeMessage::kIncomingDirection))
-	{
-		_usdCameraListRefreshed = true;
-		UsdCameraListRefresh();	
-	}
+    if ((plugName.find(".outTime") != std::string::npos) && (!_usdCameraListRefreshed)
+        && (msg & MNodeMessage::AttributeMessage::kIncomingDirection)) {
+        _usdCameraListRefreshed = true;
+        UsdCameraListRefresh();
+    }
 }
 
 void ProductionSettings::nodeAddedCallback(MObject& node, void* pData)
 {
-	if (_isOpeningScene)
-	{
-		return;
-	}
+    if (_isOpeningScene) {
+        return;
+    }
 
-	MFnDependencyNode depNode(node);
+    MFnDependencyNode depNode(node);
 
-	if (MayaUsd::LayerManager::supportedNodeType(depNode.typeId()))
-	{
- 		MNodeMessage::addAttributeChangedCallback(node, attributeChangedCallback);
-		_usdCameraListRefreshed = false;
-	}
+    if (MayaUsd::LayerManager::supportedNodeType(depNode.typeId())) {
+        MNodeMessage::addAttributeChangedCallback(node, attributeChangedCallback);
+        _usdCameraListRefreshed = false;
+    }
 }
 
-void ProductionSettings::OnBeforeOpenCallback(void* pData)
-{
-	_isOpeningScene = true;
-}
+void ProductionSettings::OnBeforeOpenCallback(void* pData) { _isOpeningScene = true; }
 
 void ProductionSettings::RegisterCallbacks()
 {
-	MStatus status;
+    MStatus status;
 
-	_newSceneCallback = MSceneMessage::addCallback(MSceneMessage::kAfterNew, OnSceneCallback, (void*) true, &status);
-	CHECK_MSTATUS(status);
+    _newSceneCallback = MSceneMessage::addCallback(
+        MSceneMessage::kAfterNew, OnSceneCallback, (void*)true, &status);
+    CHECK_MSTATUS(status);
 
-	_openSceneCallback = MSceneMessage::addCallback(MSceneMessage::kAfterOpen, OnSceneCallback, (void*) true, &status);
-	CHECK_MSTATUS(status);
+    _openSceneCallback = MSceneMessage::addCallback(
+        MSceneMessage::kAfterOpen, OnSceneCallback, (void*)true, &status);
+    CHECK_MSTATUS(status);
 
-	_importSceneCallback = MSceneMessage::addCallback(MSceneMessage::kAfterImport, OnSceneCallback, NULL, &status);
-	CHECK_MSTATUS(status);
+    _importSceneCallback
+        = MSceneMessage::addCallback(MSceneMessage::kAfterImport, OnSceneCallback, NULL, &status);
+    CHECK_MSTATUS(status);
 
-	_beforeOpenSceneCallback = MSceneMessage::addCallback(MSceneMessage::kBeforeOpen, OnBeforeOpenCallback, NULL, &status);
-	CHECK_MSTATUS(status);
+    _beforeOpenSceneCallback = MSceneMessage::addCallback(
+        MSceneMessage::kBeforeOpen, OnBeforeOpenCallback, NULL, &status);
+    CHECK_MSTATUS(status);
 
-	_nodeAddedCallback = MDGMessage::addNodeAddedCallback(nodeAddedCallback);
-	CHECK_MSTATUS(status);
+    _nodeAddedCallback = MDGMessage::addNodeAddedCallback(nodeAddedCallback);
+    CHECK_MSTATUS(status);
 }
 
 void ProductionSettings::UnregisterCallbacks()
 {
-	if (0 != _newSceneCallback) {
-		MSceneMessage::removeCallback(_newSceneCallback);
-		MSceneMessage::removeCallback(_openSceneCallback);
-		MSceneMessage::removeCallback(_importSceneCallback);
-		MSceneMessage::removeCallback(_beforeOpenSceneCallback);
-		MSceneMessage::removeCallback(_nodeAddedCallback);
+    if (0 != _newSceneCallback) {
+        MSceneMessage::removeCallback(_newSceneCallback);
+        MSceneMessage::removeCallback(_openSceneCallback);
+        MSceneMessage::removeCallback(_importSceneCallback);
+        MSceneMessage::removeCallback(_beforeOpenSceneCallback);
+        MSceneMessage::removeCallback(_nodeAddedCallback);
 
-		_newSceneCallback = 0;
-		_openSceneCallback = 0;
-		_importSceneCallback = 0;
-		_beforeOpenSceneCallback = 0;
-		_nodeAddedCallback = 0;
-	}
+        _newSceneCallback = 0;
+        _openSceneCallback = 0;
+        _importSceneCallback = 0;
+        _beforeOpenSceneCallback = 0;
+        _nodeAddedCallback = 0;
+    }
 }
 
 PXR_NAMESPACE_CLOSE_SCOPE

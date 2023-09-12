@@ -14,36 +14,35 @@
 #ifndef __RPRUSDBINDMTLXCMD__
 #define __RPRUSDBINDMTLXCMD__
 
+#include <pxr/pxr.h>
+
+#include <maya/MArgDatabase.h>
 #include <maya/MPxCommand.h>
 #include <maya/MSyntax.h>
-#include <maya/MArgDatabase.h>
-
-#include <pxr/pxr.h>
 
 // Command arguments.
 // required
-#define kPrimPathFlag "-pp"
+#define kPrimPathFlag     "-pp"
 #define kPrimPathFlagLong "-primPath"
 
 // required
-#define kMtlxFilePathFlag "-mp"
+#define kMtlxFilePathFlag     "-mp"
 #define kMtlxFilePathFlagLong "-mtlxFilePath"
 
 // optional
-#define kMaterialNameFlag "-mn"
+#define kMaterialNameFlag     "-mn"
 #define kMaterialNameFlagLong "-materialName"
 
 // clearAllReference
-#define kClearAllReferencesFlag "-car"
+#define kClearAllReferencesFlag     "-car"
 #define kClearAllReferencesFlagLong "-clearAllReferences"
 
 // Assing MatX for LiveMode
-#define kLiveModeFlag "-lm"
+#define kLiveModeFlag     "-lm"
 #define kLiveModeFlagLong "-liveMode"
 
-#define kGpuOpenMatIdFlag "-id"
+#define kGpuOpenMatIdFlag     "-id"
 #define kGpuOpenMatIdFlagLong "-materialId"
-
 
 PXR_NAMESPACE_OPEN_SCOPE
 
@@ -51,30 +50,30 @@ PXR_NAMESPACE_OPEN_SCOPE
 class RprUsdBiodMtlxCmd : public MPxCommand
 {
 public:
-	RprUsdBiodMtlxCmd();
-	// MPxCommand Implementation
-	// -----------------------------------------------------------------------------
+    RprUsdBiodMtlxCmd();
+    // MPxCommand Implementation
+    // -----------------------------------------------------------------------------
 
-	MStatus doIt(const MArgList& args) override;
+    MStatus doIt(const MArgList& args) override;
 
-	/** Used by Maya to create the command instance. */
-	static void* creator();
+    /** Used by Maya to create the command instance. */
+    static void* creator();
 
-	/** Return the command syntax object. */
-	static MSyntax newSyntax();
+    /** Return the command syntax object. */
+    static MSyntax newSyntax();
 
-	// Static Methods
-	// -----------------------------------------------------------------------------
+    // Static Methods
+    // -----------------------------------------------------------------------------
 
-	/** Clean up before plug-in shutdown. */
-	static void cleanUp();
+    /** Clean up before plug-in shutdown. */
+    static void cleanUp();
 
-	static void Initialize();
+    static void Initialize();
 
-	static void Uninitialize();
+    static void Uninitialize();
 
 public:
-	static MString s_commandName;
+    static MString s_commandName;
 };
 
 PXR_NAMESPACE_CLOSE_SCOPE

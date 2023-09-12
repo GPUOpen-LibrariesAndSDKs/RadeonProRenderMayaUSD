@@ -12,262 +12,237 @@
 //
 
 #include "RprUsdBindMtlxCmd.h"
+
 #include "common.h"
+
 #include <maya/MGlobal.h>
 
+#pragma warning(push, 0)
 
 #include <pxr/usd/usd/references.h>
 #include <pxr/usd/usdShade/materialBindingAPI.h>
+
+#pragma warning(pop)
+
 #include <MaterialXCore/Document.h>
 #include <MaterialXFormat/XmlIo.h>
-
 
 PXR_NAMESPACE_OPEN_SCOPE
 
 MString RprUsdBiodMtlxCmd::s_commandName = "rprUsdBindMtlx";
 
-RprUsdBiodMtlxCmd::RprUsdBiodMtlxCmd()
-{
-
-}
+RprUsdBiodMtlxCmd::RprUsdBiodMtlxCmd() { }
 
 // MPxCommand Implementation
 // -----------------------------------------------------------------------------
-void* RprUsdBiodMtlxCmd::creator()
-{
-	return new RprUsdBiodMtlxCmd;
-}
+void* RprUsdBiodMtlxCmd::creator() { return new RprUsdBiodMtlxCmd; }
 
 // -----------------------------------------------------------------------------
 MSyntax RprUsdBiodMtlxCmd::newSyntax()
 {
-	MSyntax syntax;
+    MSyntax syntax;
 
-	CHECK_MSTATUS(syntax.addFlag(kPrimPathFlag, kPrimPathFlagLong, MSyntax::kString));
-	CHECK_MSTATUS(syntax.addFlag(kMtlxFilePathFlag, kMtlxFilePathFlagLong, MSyntax::kString));
-	CHECK_MSTATUS(syntax.addFlag(kMaterialNameFlag, kMaterialNameFlagLong, MSyntax::kString));
+    CHECK_MSTATUS(syntax.addFlag(kPrimPathFlag, kPrimPathFlagLong, MSyntax::kString));
+    CHECK_MSTATUS(syntax.addFlag(kMtlxFilePathFlag, kMtlxFilePathFlagLong, MSyntax::kString));
+    CHECK_MSTATUS(syntax.addFlag(kMaterialNameFlag, kMaterialNameFlagLong, MSyntax::kString));
 
-	CHECK_MSTATUS(syntax.addFlag(kClearAllReferencesFlag, kClearAllReferencesFlagLong, MSyntax::kNoArg));
+    CHECK_MSTATUS(
+        syntax.addFlag(kClearAllReferencesFlag, kClearAllReferencesFlagLong, MSyntax::kNoArg));
 
-	// LiveMode
-	CHECK_MSTATUS(syntax.addFlag(kLiveModeFlag, kLiveModeFlagLong, MSyntax::kNoArg));
-	CHECK_MSTATUS(syntax.addFlag(kGpuOpenMatIdFlag, kGpuOpenMatIdFlagLong, MSyntax::kString));
+    // LiveMode
+    CHECK_MSTATUS(syntax.addFlag(kLiveModeFlag, kLiveModeFlagLong, MSyntax::kNoArg));
+    CHECK_MSTATUS(syntax.addFlag(kGpuOpenMatIdFlag, kGpuOpenMatIdFlagLong, MSyntax::kString));
 
-	return syntax;
+    return syntax;
 }
 
 void AddColorSpaceAttribute(UsdShadeMaterial& material)
 {
-	// Make colorspace hack
-	UsdPrimSubtreeRange range = material.GetPrim().GetDescendants();
-	for (const auto& prim : range)
-	{
-		// Work only with shaders
-		if (!prim.IsA<UsdShadeShader>())
-		{
-			continue;
-		}
+    // Make colorspace hack
+    UsdPrimSubtreeRange range = material.GetPrim().GetDescendants();
+    for (const auto& prim : range) {
+        // Work only with shaders
+        if (!prim.IsA<UsdShadeShader>()) {
+            continue;
+        }
 
-		// Find colorspace attribute
-		for (const auto& attribute : prim.GetAttributes())
-		{
-			if (!attribute.HasColorSpace())
-			{
-				continue;
-			}
-			prim.CreateAttribute(TfToken{ "inputs:rs:colorspace" }, SdfValueTypeNames->String).Set(attribute.GetColorSpace().GetString());
-		}
-	}
+        // Find colorspace attribute
+        for (const auto& attribute : prim.GetAttributes()) {
+            if (!attribute.HasColorSpace()) {
+                continue;
+            }
+            prim.CreateAttribute(TfToken { "inputs:rs:colorspace" }, SdfValueTypeNames->String)
+                .Set(attribute.GetColorSpace().GetString());
+        }
+    }
 }
 
-MStatus AssignMatXMaterial(UsdStageRefPtr stage, const MString& primPath, const SdfReference& sdfRef, const MString& inMaterialName)
+MStatus AssignMatXMaterial(
+    UsdStageRefPtr      stage,
+    const MString&      primPath,
+    const SdfReference& sdfRef,
+    const MString&      inMaterialName)
 {
-	SdfPath path = SdfPath(primPath.asChar());
-	UsdPrim prim = stage->GetPrimAtPath(path);
-	UsdReferences primRefs = prim.GetReferences();
+    SdfPath       path = SdfPath(primPath.asChar());
+    UsdPrim       prim = stage->GetPrimAtPath(path);
+    UsdReferences primRefs = prim.GetReferences();
 
-	primRefs.ClearReferences();
-	primRefs.AddReference(sdfRef);
+    primRefs.ClearReferences();
+    primRefs.AddReference(sdfRef);
 
-	MString materialName = inMaterialName;
+    MString materialName = inMaterialName;
 
-	UsdPrim materialPrim;
-	if (materialName == "") {
-		materialPrim = stage->GetPrimAtPath(path.AppendChild(TfToken{ "Materials" })).GetChildren().front();
-	}
-	else {
-		materialPrim = stage->GetPrimAtPath(SdfPath((primPath + "/Materials/" + materialName).asChar()));
-	}
+    UsdPrim materialPrim;
+    if (materialName == "") {
+        materialPrim
+            = stage->GetPrimAtPath(path.AppendChild(TfToken { "Materials" })).GetChildren().front();
+    } else {
+        materialPrim
+            = stage->GetPrimAtPath(SdfPath((primPath + "/Materials/" + materialName).asChar()));
+    }
 
-	UsdShadeMaterial material(materialPrim);
-	if (material) {
-		UsdShadeMaterialBindingAPI bindingAPI;
-		if (prim.HasAPI<UsdShadeMaterialBindingAPI>()) {
-			bindingAPI = UsdShadeMaterialBindingAPI(prim);
-			bindingAPI.UnbindAllBindings();
-		}
-		else {
-			bindingAPI = UsdShadeMaterialBindingAPI::Apply(prim);
-		}
+    UsdShadeMaterial material(materialPrim);
+    if (material) {
+        UsdShadeMaterialBindingAPI bindingAPI;
+        if (prim.HasAPI<UsdShadeMaterialBindingAPI>()) {
+            bindingAPI = UsdShadeMaterialBindingAPI(prim);
+            bindingAPI.UnbindAllBindings();
+        } else {
+            bindingAPI = UsdShadeMaterialBindingAPI::Apply(prim);
+        }
 
-		bindingAPI.Bind(material, UsdShadeTokens->strongerThanDescendants);
+        bindingAPI.Bind(material, UsdShadeTokens->strongerThanDescendants);
 
-		AddColorSpaceAttribute(material);
-	}
-	else
-	{
-		MGlobal::displayError(MString("RprUsd: Cannot bind prim ") + primPath + " with material " + materialName.asChar());
-		return MS::kFailure;
-	}
+        AddColorSpaceAttribute(material);
+    } else {
+        MGlobal::displayError(
+            MString("RprUsd: Cannot bind prim ") + primPath + " with material "
+            + materialName.asChar());
+        return MS::kFailure;
+    }
 
-	MGlobal::displayInfo("RprUsd: MaterialX applied to prim!");
-	return MStatus::kSuccess;
+    MGlobal::displayInfo("RprUsd: MaterialX applied to prim!");
+    return MStatus::kSuccess;
 }
 
 // -----------------------------------------------------------------------------
-MStatus RprUsdBiodMtlxCmd::doIt(const MArgList & args)
+MStatus RprUsdBiodMtlxCmd::doIt(const MArgList& args)
 {
-	// Parse arguments.
-	MArgDatabase argData(syntax(), args);
+    // Parse arguments.
+    MArgDatabase argData(syntax(), args);
 
-	MString primPath;
-	if (argData.isFlagSet(kPrimPathFlag))
-	{
-		argData.getFlagArgument(kPrimPathFlag, 0, primPath);
-	}
-	
-	if (primPath.isEmpty())
-	{
-		MGlobal::displayError("RprUsd: primPath is not defined");
-		return MS::kFailure;
-	}
+    MString primPath;
+    if (argData.isFlagSet(kPrimPathFlag)) {
+        argData.getFlagArgument(kPrimPathFlag, 0, primPath);
+    }
 
-	SdfPath path = SdfPath(primPath.asChar());
+    if (primPath.isEmpty()) {
+        MGlobal::displayError("RprUsd: primPath is not defined");
+        return MS::kFailure;
+    }
 
-	UsdStageRefPtr stage = GetUsdStage();
+    SdfPath path = SdfPath(primPath.asChar());
 
-	if (!stage)
-	{
-		MGlobal::displayError("RprUsd: USD stage does not exist!");
-		return MS::kFailure;
-	}
+    UsdStageRefPtr stage = GetUsdStage();
 
-	UsdPrim prim = stage->GetPrimAtPath(path);
+    if (!stage) {
+        MGlobal::displayError("RprUsd: USD stage does not exist!");
+        return MS::kFailure;
+    }
 
-	if (!prim.IsValid())
-	{
-		MGlobal::displayError("RprUsd: Prim is not valid!");
-		return MS::kFailure;
-	}
+    UsdPrim prim = stage->GetPrimAtPath(path);
 
-	const std::string& primTypeName = prim.GetTypeName().GetString();
-	if (primTypeName != "Mesh")
-	{
-		MGlobal::displayError("RprUsd: Selected prim is not a mesh !");
-		return MS::kFailure;
-	}
+    if (!prim.IsValid()) {
+        MGlobal::displayError("RprUsd: Prim is not valid!");
+        return MS::kFailure;
+    }
 
-	UsdReferences primRefs = prim.GetReferences();
+    const std::string& primTypeName = prim.GetTypeName().GetString();
+    if (primTypeName != "Mesh") {
+        MGlobal::displayError("RprUsd: Selected prim is not a mesh !");
+        return MS::kFailure;
+    }
 
-	// If ClearAllReferences flag is set
-	if (argData.isFlagSet(kClearAllReferencesFlag))
-	{
-		primRefs.ClearReferences();
-		return MStatus::kSuccess;
-	}
+    UsdReferences primRefs = prim.GetReferences();
 
-	if (argData.isFlagSet(kLiveModeFlag)) {
-		if (argData.isFlagSet(kGpuOpenMatIdFlag)) {
-			MString id;
-			argData.getFlagArgument(kGpuOpenMatIdFlag, 0, id);
-			SdfReference sdfRef = SdfReference(("gpuopen://" + id).asChar(), SdfPath("/MaterialX"));
+    // If ClearAllReferences flag is set
+    if (argData.isFlagSet(kClearAllReferencesFlag)) {
+        primRefs.ClearReferences();
+        return MStatus::kSuccess;
+    }
 
-			return AssignMatXMaterial(stage, primPath, sdfRef, "");
-		}
-		else {
-			MGlobal::displayError("RprUsd: -id parameter is required for MatX Bind in LiveMode");
-			return MS::kFailure;
-		}
-	}
+    if (argData.isFlagSet(kLiveModeFlag)) {
+        if (argData.isFlagSet(kGpuOpenMatIdFlag)) {
+            MString id;
+            argData.getFlagArgument(kGpuOpenMatIdFlag, 0, id);
+            SdfReference sdfRef = SdfReference(("gpuopen://" + id).asChar(), SdfPath("/MaterialX"));
 
-	// otherwise assing new material
+            return AssignMatXMaterial(stage, primPath, sdfRef, "");
+        } else {
+            MGlobal::displayError("RprUsd: -id parameter is required for MatX Bind in LiveMode");
+            return MS::kFailure;
+        }
+    }
 
-	MString mtlxFileName;
-	if (argData.isFlagSet(kMtlxFilePathFlag))
-	{
-		argData.getFlagArgument(kMtlxFilePathFlag, 0, mtlxFileName);
-	}
-	
-	if (mtlxFileName.isEmpty())
-	{
-		MGlobal::displayError("RprUsd: mtlxFileName is not defined");
-		return MS::kFailure;
-	}
+    // otherwise assing new material
 
-	MString materialName;
+    MString mtlxFileName;
+    if (argData.isFlagSet(kMtlxFilePathFlag)) {
+        argData.getFlagArgument(kMtlxFilePathFlag, 0, mtlxFileName);
+    }
 
-	if (argData.isFlagSet(kMaterialNameFlag))
-	{
-		argData.getFlagArgument(kMaterialNameFlag, 0, materialName);
-	}
+    if (mtlxFileName.isEmpty()) {
+        MGlobal::displayError("RprUsd: mtlxFileName is not defined");
+        return MS::kFailure;
+    }
 
-	if (materialName.isEmpty())
-	{
-		MaterialX::DocumentPtr mtlxDocumentPtr = MaterialX::createDocument();
+    MString materialName;
 
-		try
-		{
-			MaterialX::readFromXmlFile(mtlxDocumentPtr, mtlxFileName.asChar());
-		}
-		catch (const MaterialX::ExceptionParseError& )
-		{
-			MGlobal::displayError("RprUsd: mtlxFileName cannot be parsed");
-			return MS::kFailure;
-		}
-		catch (const MaterialX::ExceptionFileMissing& )
-		{
-			MGlobal::displayError("RprUsd: mtlxFileName does not exist");
-			return MS::kFailure;
-		}
+    if (argData.isFlagSet(kMaterialNameFlag)) {
+        argData.getFlagArgument(kMaterialNameFlag, 0, materialName);
+    }
 
-		std::vector<MaterialX::NodePtr> materialVector = mtlxDocumentPtr->getMaterialNodes();
+    if (materialName.isEmpty()) {
+        MaterialX::DocumentPtr mtlxDocumentPtr = MaterialX::createDocument();
 
-		if (materialVector.empty())
-		{
-			MGlobal::displayError("RprUsd: mtlxFileName does not contain amy materials");
-			return MS::kFailure;
-		}
+        try {
+            MaterialX::readFromXmlFile(mtlxDocumentPtr, mtlxFileName.asChar());
+        } catch (const MaterialX::ExceptionParseError&) {
+            MGlobal::displayError("RprUsd: mtlxFileName cannot be parsed");
+            return MS::kFailure;
+        } catch (const MaterialX::ExceptionFileMissing&) {
+            MGlobal::displayError("RprUsd: mtlxFileName does not exist");
+            return MS::kFailure;
+        }
 
-		MaterialX::NodePtr output = materialVector[0];
+        std::vector<MaterialX::NodePtr> materialVector = mtlxDocumentPtr->getMaterialNodes();
 
-		materialName = output->getName().c_str();
-	}
+        if (materialVector.empty()) {
+            MGlobal::displayError("RprUsd: mtlxFileName does not contain amy materials");
+            return MS::kFailure;
+        }
 
-	if (materialName.isEmpty())
-	{
-		MGlobal::displayError("RprUsd: materialName is not defined");
-		return MS::kFailure;
-	}
+        MaterialX::NodePtr output = materialVector[0];
 
-	SdfReference sdfRef = SdfReference(mtlxFileName.asChar(), SdfPath("/MaterialX"));
+        materialName = output->getName().c_str();
+    }
 
-	return AssignMatXMaterial(stage, primPath, sdfRef, materialName);
+    if (materialName.isEmpty()) {
+        MGlobal::displayError("RprUsd: materialName is not defined");
+        return MS::kFailure;
+    }
+
+    SdfReference sdfRef = SdfReference(mtlxFileName.asChar(), SdfPath("/MaterialX"));
+
+    return AssignMatXMaterial(stage, primPath, sdfRef, materialName);
 }
 
 // Static Methods
 // -----------------------------------------------------------------------------
-void RprUsdBiodMtlxCmd::cleanUp()
-{
-}
+void RprUsdBiodMtlxCmd::cleanUp() { }
 
-void RprUsdBiodMtlxCmd::Initialize()
-{
+void RprUsdBiodMtlxCmd::Initialize() { }
 
-}
-
-void RprUsdBiodMtlxCmd::Uninitialize()
-{
-
-}
+void RprUsdBiodMtlxCmd::Uninitialize() { }
 
 PXR_NAMESPACE_CLOSE_SCOPE

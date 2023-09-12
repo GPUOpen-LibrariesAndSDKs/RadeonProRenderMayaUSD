@@ -164,6 +164,17 @@ set(ALL_FILES
     ">"
 )
 
+# Turn off warnings for all MToH files
+set_source_files_properties("src/defaultLightDelegate.cpp" PROPERTIES COMPILE_FLAGS /W0)
+
+set_source_files_properties("src/ViewportRender/pluginDebugCodes.cpp" PROPERTIES COMPILE_FLAGS /W0)
+set_source_files_properties("src/ViewportRender/renderGlobals.cpp" PROPERTIES COMPILE_FLAGS /W0)
+set_source_files_properties("src/ViewportRender/renderOverride.cpp" PROPERTIES COMPILE_FLAGS /W0)
+set_source_files_properties("src/ViewportRender/tokens.cpp" PROPERTIES COMPILE_FLAGS /W0)
+set_source_files_properties("src/ViewportRender/utils.cpp" PROPERTIES COMPILE_FLAGS /W0)
+set_source_files_properties("src/ViewportRender/viewCommand.cpp" PROPERTIES COMPILE_FLAGS /W0)
+set_source_files_properties("src/ViewportRender/shadingModeExporter.cpp" PROPERTIES COMPILE_FLAGS /W0)
+
 ################################################################################
 # Target
 ################################################################################
