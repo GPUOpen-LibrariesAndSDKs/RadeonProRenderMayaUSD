@@ -502,13 +502,18 @@ bool _IsSupportedAttribute(const VtValue& v)
 
 void ProductionSettings::AddAttributeToGroupIfExist(
     GroupDescriptionPtr groupPtr,
-    const std::string&  attrSchemaName)
+    const std::string&  attrSchemaName,
+    const std::string& patchedDispplayName)
 {
     auto it = _attributeMap.find(attrSchemaName);
 
     if (it == _attributeMap.end()) {
         TF_WARN("[rprUsd] Requested attbiture does not exist: %s", attrSchemaName);
         return;
+    }
+
+    if (!patchedDispplayName.empty()) {
+        it->second->name = patchedDispplayName;
     }
 
     groupPtr->attributeVector.push_back(it->second);
@@ -556,19 +561,33 @@ void ProductionSettings::MakeAttributeLogicalStructure()
     AddAttributeToGroupIfExist(denoisingGroupPtr, "rpr:denoising:minIter");
     AddAttributeToGroupIfExist(denoisingGroupPtr, "rpr:denoising:iterStep");
 
+//    GroupDescriptionPtr hybridGmonGroupPtr(new GroupDescription("GMON"));   
+
+    GroupDescriptionPtr hybridAdvancedGroupPtr(new GroupDescription("HybridPro Advanced Params"));
+    AddAttributeToGroupIfExist(hybridAdvancedGroupPtr, "rpr:core:useGmon");
+    AddAttributeToGroupIfExist(hybridAdvancedGroupPtr, "rpr:quality:reservoirSampling");
+    AddAttributeToGroupIfExist(hybridAdvancedGroupPtr, "rpr:hybrid:denoising"); 
+    // memory params hybrid
+    AddAttributeToGroupIfExist(hybridAdvancedGroupPtr, "rpr:hybrid:accelerationMemorySizeMb", "Acc. Struct. Memory Size (MB)");
+    AddAttributeToGroupIfExist(hybridAdvancedGroupPtr, "rpr:hybrid:meshMemorySizeMb", "Mesh Memory Size(MB)");
+    AddAttributeToGroupIfExist(hybridAdvancedGroupPtr, "rpr:hybrid:stagingMemorySizeMb", "Staging Memory Size (MB)");
+    AddAttributeToGroupIfExist(hybridAdvancedGroupPtr, "rpr:hybrid:scratchMemorySizeMb", "Scratch Memory Size (MB)");
+
+
     GroupDescriptionPtr miscGroupPtr(new GroupDescription("Miscellaneous"));
     AddAttributeToGroupIfExist(miscGroupPtr, "rpr:ambientOcclusion:radius");
     AddAttributeToGroupIfExist(miscGroupPtr, "rpr:quality:raycastEpsilon");
     AddAttributeToGroupIfExist(miscGroupPtr, "rpr:quality:radianceClamping");
     AddAttributeToGroupIfExist(miscGroupPtr, "rpr:quality:imageFilterRadius");
-    // we don't want this setting in Production Render Mode
-    // AddAttributeToGroupIfExist(miscGroupPtr, "rpr:quality:interactive:rayDepth");
 
     qualityTabDescPtr->groupVector.push_back(engineGroupPtr);
     qualityTabDescPtr->groupVector.push_back(contourGroupPtr);
     qualityTabDescPtr->groupVector.push_back(renderingGroupPtr);
     qualityTabDescPtr->groupVector.push_back(raydepthGroupPtr);
     qualityTabDescPtr->groupVector.push_back(denoisingGroupPtr);
+
+    qualityTabDescPtr->groupVector.push_back(hybridAdvancedGroupPtr);
+
     qualityTabDescPtr->groupVector.push_back(miscGroupPtr);
 
     // CAMERA TAB
@@ -636,7 +655,7 @@ void ProductionSettings::CreateAttributes(
         g_attributePrefix = TfToken(rendererName + "_Prod_");
     }
 
-    std::string controlCreationCmdTemplate = "attrControlGrp -label \"%s\" -attribute \"%s.%s\";";
+    std::string controlCreationCmdTemplate = "attrControlGrp -hideMapButton true -label \"%s\" -attribute \"%s.%s\";";
 
     // Create attrbiutes for usd camera
 
@@ -652,10 +671,10 @@ void ProductionSettings::CreateAttributes(
     _CreateStringAttribute(
         node,
         MString(rendererName.c_str()) + "_LiveModeChannelName",
-        "RenderStudioMaya_23",
+        "RenderStudioMaya",
         userDefaults);
 
-    for (const HdRenderSettingDescriptor& attr : rendererSettingDescriptors) {
+    for (HdRenderSettingDescriptor& attr : rendererSettingDescriptors) {
 
         // We dont want these attributes in Production Render Mode
         if ((attr.key == "rpr:quality:interactive:downscale:resolution")

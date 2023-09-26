@@ -106,7 +106,7 @@ private:
 
     static void MakeAttributeLogicalStructure();
     static void
-    AddAttributeToGroupIfExist(GroupDescriptionPtr groupPtr, const std::string& attrSchemaName);
+    AddAttributeToGroupIfExist(GroupDescriptionPtr groupPtr, const std::string& attrSchemaName, const std::string& patchedDispplayName = "");
 
 private:
     static MCallbackId _newSceneCallback;

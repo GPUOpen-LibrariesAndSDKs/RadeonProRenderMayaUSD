@@ -893,8 +893,7 @@ void RprUsdProductionRender::RegisterRenderer(
 
 							menuItem -label "Maya";
 							menuItem -label "RenderStudio";
-							//menuItem -label "RenderStudioMaya";
-							menuItem -label "RenderStudioMaya_23";
+							menuItem -label "RenderStudioMaya";
 							menuItem -label "Blender";
 							menuItem -label "Houdini";
 					setParent ..;	
