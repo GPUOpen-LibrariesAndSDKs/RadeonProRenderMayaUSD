@@ -744,13 +744,20 @@ void ProductionSettings::CreateAttributes(
 
                         if (primDef->GetPropertyMetadata(
                                 TfToken(attr.key), SdfFieldKeys->AllowedTokens, &allowedTokens)) {
+
+                            TfToken defaultValue;
+
+                            if (!primDef->GetPropertyMetadata( TfToken(attr.key), SdfFieldKeys->Default, &defaultValue)) {
+                                defaultValue = attr.defaultValue.UncheckedGet<TfToken>();
+                            }
+                            
                             // Generate dropdown from allowedTokens
                             TfTokenVector tokens(allowedTokens.begin(), allowedTokens.end());
                             _CreateEnumAttribute(
                                 node,
                                 attrName,
                                 tokens,
-                                attr.defaultValue.UncheckedGet<TfToken>(),
+                                defaultValue,                              
                                 userDefaults);
                             createdAsEnum = true;
                         }
@@ -853,7 +860,11 @@ void ProductionSettings::ApplySettings(HdRenderDelegate* renderDelegate)
                 } else if (attr.defaultValue.IsHolding<TfToken>()) {
                     auto v = attr.defaultValue.UncheckedGet<TfToken>();
                     _GetAttribute(node, attrName, v, storeUserSetting);
-                    vtValue = v;
+
+                    // schema tokens contain spaces but tokens which get automatically generated does not have space inside. So remove spaces to properly apply a setting
+                    std::string val = v.GetString();
+                    val.erase(std::remove_if(val.begin(), val.end(), isspace), val.end());
+                    vtValue = TfToken(val);
                 } else if (attr.defaultValue.IsHolding<SdfAssetPath>()) {
                     auto v = attr.defaultValue.UncheckedGet<SdfAssetPath>();
                     _GetAttribute(node, attrName, v, storeUserSetting);
