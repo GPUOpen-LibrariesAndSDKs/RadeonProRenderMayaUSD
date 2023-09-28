@@ -57,7 +57,7 @@ MCallbackId ProductionSettings::_nodeAddedCallback = 0;
 bool ProductionSettings::_usdCameraListRefreshed = true;
 bool ProductionSettings::_isOpeningScene = false;
 
-std::map<std::string, AttributeDescriptionPtr> ProductionSettings::_attributeMap;
+std::map<std::string, HdRenderSettingDescriptorPtr> ProductionSettings::_attributeMap;
 std::vector<TabDescriptionPtr>                 ProductionSettings::_tabsLogicalStructure;
 
 TfToken _MangleString(
@@ -503,6 +503,7 @@ bool _IsSupportedAttribute(const VtValue& v)
 void ProductionSettings::AddAttributeToGroupIfExist(
     GroupDescriptionPtr groupPtr,
     const std::string&  attrSchemaName,
+    bool visibleAsCtrl,
     const std::string& patchedDispplayName)
 {
     auto it = _attributeMap.find(attrSchemaName);
@@ -516,7 +517,7 @@ void ProductionSettings::AddAttributeToGroupIfExist(
         it->second->name = patchedDispplayName;
     }
 
-    groupPtr->attributeVector.push_back(it->second);
+    groupPtr->attributeVector.push_back(AttributeDescriptionPtr(new AttributeDescription(it->second, visibleAsCtrl)));
 }
 
 void ProductionSettings::MakeAttributeLogicalStructure()
@@ -567,11 +568,15 @@ void ProductionSettings::MakeAttributeLogicalStructure()
     AddAttributeToGroupIfExist(hybridAdvancedGroupPtr, "rpr:core:useGmon");
     AddAttributeToGroupIfExist(hybridAdvancedGroupPtr, "rpr:quality:reservoirSampling");
     AddAttributeToGroupIfExist(hybridAdvancedGroupPtr, "rpr:hybrid:denoising"); 
+
+    AddAttributeToGroupIfExist(hybridAdvancedGroupPtr, "rpr:viewportUpscaling", false);
+    AddAttributeToGroupIfExist(hybridAdvancedGroupPtr, "rpr:viewportUpscalingQuality", true, "FSR");
+
     // memory params hybrid
-    AddAttributeToGroupIfExist(hybridAdvancedGroupPtr, "rpr:hybrid:accelerationMemorySizeMb", "Acc. Struct. Memory Size (MB)");
-    AddAttributeToGroupIfExist(hybridAdvancedGroupPtr, "rpr:hybrid:meshMemorySizeMb", "Mesh Memory Size(MB)");
-    AddAttributeToGroupIfExist(hybridAdvancedGroupPtr, "rpr:hybrid:stagingMemorySizeMb", "Staging Memory Size (MB)");
-    AddAttributeToGroupIfExist(hybridAdvancedGroupPtr, "rpr:hybrid:scratchMemorySizeMb", "Scratch Memory Size (MB)");
+    AddAttributeToGroupIfExist(hybridAdvancedGroupPtr, "rpr:hybrid:accelerationMemorySizeMb", true, "Acc. Struct. Memory Size (MB)");
+    AddAttributeToGroupIfExist(hybridAdvancedGroupPtr, "rpr:hybrid:meshMemorySizeMb", true, "Mesh Memory Size(MB)");
+    AddAttributeToGroupIfExist(hybridAdvancedGroupPtr, "rpr:hybrid:stagingMemorySizeMb", true, "Staging Memory Size (MB)");
+    AddAttributeToGroupIfExist(hybridAdvancedGroupPtr, "rpr:hybrid:scratchMemorySizeMb", true, "Scratch Memory Size (MB)");
 
 
     GroupDescriptionPtr miscGroupPtr(new GroupDescription("Miscellaneous"));
@@ -655,7 +660,10 @@ void ProductionSettings::CreateAttributes(
         g_attributePrefix = TfToken(rendererName + "_Prod_");
     }
 
-    std::string controlCreationCmdTemplate = "attrControlGrp -hideMapButton true -label \"%s\" -attribute \"%s.%s\";";
+    constexpr auto controlCreationCmdTemplateR =
+    R"mel(attrControlGrp -label "%s" -attribute "%s.%s" -changeCommand ("OnProdRenderAttributeChanged(\\\"%s\\\",\\\"%s\\\", \\\"%s\\\")") %s;)mel";
+    
+    std::string controlCreationCmdTemplate = controlCreationCmdTemplateR;
 
     // Create attrbiutes for usd camera
 
@@ -684,7 +692,7 @@ void ProductionSettings::CreateAttributes(
             continue;
         }
 
-        _attributeMap[attr.key] = AttributeDescriptionPtr(new HdRenderSettingDescriptor(attr));
+        _attributeMap[attr.key] = HdRenderSettingDescriptorPtr(new HdRenderSettingDescriptor(attr));
     }
 
     MakeAttributeLogicalStructure();
@@ -697,14 +705,18 @@ void ProductionSettings::CreateAttributes(
                 += "frameLayout - label \"" + groupPtr->name + "\" - cll true - cl false;\n";
 
             for (AttributeDescriptionPtr attrPtr : groupPtr->attributeVector) {
-                HdRenderSettingDescriptor& attr = *attrPtr;
+                HdRenderSettingDescriptor& attr = *attrPtr->hdRenderSettingDescriptorPtr;
                 MString attrName = _MangleName(attr.key, g_attributePrefix).GetText();
 
                 std::string controlCreationCmd = TfStringPrintf(
                     controlCreationCmdTemplate.c_str(),
                     attr.name.c_str(),
                     node.name().asChar(),
-                    attrName.asChar());
+                    attrName.asChar(),
+                    node.name().asChar(),
+                    attrName.asChar(),
+                    attr.key.GetString().c_str(),
+                    ("attrCtrlGrp_" + attrName).asChar());
 
                 bool addControlCreatioCmd = true;
 
@@ -780,7 +792,7 @@ void ProductionSettings::CreateAttributes(
                     addControlCreatioCmd = false;
                 }
 
-                if (addControlCreatioCmd) {
+                if (addControlCreatioCmd && attrPtr->visibleAsCtrl) {
                     tabCtrlCreationCommands += controlCreationCmd + "\n";
                 }
             }
@@ -812,7 +824,7 @@ void ProductionSettings::ApplySettings(HdRenderDelegate* renderDelegate)
     for (TabDescriptionPtr tabPtr : _tabsLogicalStructure) {
         for (GroupDescriptionPtr groupPtr : tabPtr->groupVector) {
             for (AttributeDescriptionPtr attrPtr : groupPtr->attributeVector) {
-                HdRenderSettingDescriptor& attr = *attrPtr;
+                HdRenderSettingDescriptor& attr = *attrPtr->hdRenderSettingDescriptorPtr;
                 MString attrName = _MangleName(attr.key, g_attributePrefix).GetText();
 
                 bool valueGot = true;
