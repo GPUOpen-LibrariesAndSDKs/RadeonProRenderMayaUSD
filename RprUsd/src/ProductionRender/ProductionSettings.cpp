@@ -562,8 +562,6 @@ void ProductionSettings::MakeAttributeLogicalStructure()
     AddAttributeToGroupIfExist(denoisingGroupPtr, "rpr:denoising:minIter");
     AddAttributeToGroupIfExist(denoisingGroupPtr, "rpr:denoising:iterStep");
 
-//    GroupDescriptionPtr hybridGmonGroupPtr(new GroupDescription("GMON"));   
-
     GroupDescriptionPtr hybridAdvancedGroupPtr(new GroupDescription("HybridPro Advanced Params"));
     AddAttributeToGroupIfExist(hybridAdvancedGroupPtr, "rpr:core:useGmon");
     AddAttributeToGroupIfExist(hybridAdvancedGroupPtr, "rpr:quality:reservoirSampling");
@@ -660,7 +658,7 @@ void ProductionSettings::CreateAttributes(
         g_attributePrefix = TfToken(rendererName + "_Prod_");
     }
 
-    constexpr auto controlCreationCmdTemplateR =
+    const std::string controlCreationCmdTemplateR =
     R"mel(attrControlGrp -label "%s" -attribute "%s.%s" -changeCommand ("OnProdRenderAttributeChanged(\\\"%s\\\",\\\"%s\\\", \\\"%s\\\")") %s;)mel";
     
     std::string controlCreationCmdTemplate = controlCreationCmdTemplateR;
