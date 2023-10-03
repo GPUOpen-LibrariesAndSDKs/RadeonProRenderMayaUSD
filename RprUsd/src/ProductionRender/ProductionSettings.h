@@ -39,7 +39,22 @@ PXR_NAMESPACE_OPEN_SCOPE
 
 // Logical structure of attributes - Tabs and Groups
 
-typedef std::shared_ptr<HdRenderSettingDescriptor> AttributeDescriptionPtr;
+typedef std::shared_ptr<HdRenderSettingDescriptor> HdRenderSettingDescriptorPtr;
+
+struct AttributeDescription
+{
+    AttributeDescription(HdRenderSettingDescriptorPtr ptr, bool visible)
+    {
+        hdRenderSettingDescriptorPtr = ptr;
+        visibleAsCtrl = visible;
+    }
+
+    HdRenderSettingDescriptorPtr hdRenderSettingDescriptorPtr;
+    bool visibleAsCtrl = true;
+};
+
+typedef std::shared_ptr<AttributeDescription> AttributeDescriptionPtr;
+
 
 struct GroupDescription
 {
@@ -106,7 +121,7 @@ private:
 
     static void MakeAttributeLogicalStructure();
     static void
-    AddAttributeToGroupIfExist(GroupDescriptionPtr groupPtr, const std::string& attrSchemaName);
+    AddAttributeToGroupIfExist(GroupDescriptionPtr groupPtr, const std::string& attrSchemaName, bool visibleAsCtrl = true, const std::string& patchedDispplayName = "");
 
 private:
     static MCallbackId _newSceneCallback;
@@ -119,7 +134,7 @@ private:
     static bool _usdCameraListRefreshed;
     static bool _isOpeningScene;
 
-    static std::map<std::string, AttributeDescriptionPtr> _attributeMap;
+    static std::map<std::string, HdRenderSettingDescriptorPtr> _attributeMap;
     static std::vector<TabDescriptionPtr>                 _tabsLogicalStructure;
 };
 

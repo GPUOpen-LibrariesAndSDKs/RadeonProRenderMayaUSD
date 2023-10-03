@@ -735,6 +735,8 @@ void RprUsdProductionRender::RegisterRenderer(
 			-af rprmayausd_scrollLayout "left" 0
 			-af rprmayausd_scrollLayout "right" 0
 			$parentForm;
+
+        UpdateHybridDenoisersCtrls();
 	}
 
 	global proc updateRprUsdRenderQualityTab()
@@ -893,8 +895,7 @@ void RprUsdProductionRender::RegisterRenderer(
 
 							menuItem -label "Maya";
 							menuItem -label "RenderStudio";
-							//menuItem -label "RenderStudioMaya";
-							menuItem -label "RenderStudioMaya_23";
+							menuItem -label "RenderStudioMaya";
 							menuItem -label "Blender";
 							menuItem -label "Houdini";
 					setParent ..;	
@@ -1061,6 +1062,33 @@ void RprUsdProductionRender::RegisterRenderer(
 		return 0;
 	}
 
+    global proc OnProdRenderAttributeChanged(string $nodeName, string $attrName, string $attrKey)
+    {
+        if ($attrKey != "rpr:hybrid:denoising")
+        {
+            return;
+        }
+
+        UpdateHybridDenoisersCtrls();
+    }
+
+    global proc UpdateHybridDenoisersCtrls()
+    {
+        $nodeName = "defaultRenderGlobals.";
+        $attrName = "HdRprPlugin_Prod___rpr_mtohns_hybrid_mtohns_denoising";
+
+        string $fullAttrName = $nodeName + $attrName;
+
+        $value = `getAttr -as $fullAttrName`;
+
+        $enableFSR = $value != "None";
+
+        $attrNameUpscaling = $nodeName + "HdRprPlugin_Prod___rpr_mtohns_viewportUpscaling";
+        setAttr $attrNameUpscaling $enableFSR;
+
+        $ctrlNameUpscalingQuality = "attrCtrlGrp_" + "HdRprPlugin_Prod___rpr_mtohns_viewportUpscalingQuality";
+        attrControlGrp -e -enable $enableFSR $ctrlNameUpscalingQuality;
+    }
 
 	registerRprUsdRenderer();
 )mel";

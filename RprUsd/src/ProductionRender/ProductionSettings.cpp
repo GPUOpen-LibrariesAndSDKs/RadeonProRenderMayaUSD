@@ -57,7 +57,7 @@ MCallbackId ProductionSettings::_nodeAddedCallback = 0;
 bool ProductionSettings::_usdCameraListRefreshed = true;
 bool ProductionSettings::_isOpeningScene = false;
 
-std::map<std::string, AttributeDescriptionPtr> ProductionSettings::_attributeMap;
+std::map<std::string, HdRenderSettingDescriptorPtr> ProductionSettings::_attributeMap;
 std::vector<TabDescriptionPtr>                 ProductionSettings::_tabsLogicalStructure;
 
 TfToken _MangleString(
@@ -502,7 +502,9 @@ bool _IsSupportedAttribute(const VtValue& v)
 
 void ProductionSettings::AddAttributeToGroupIfExist(
     GroupDescriptionPtr groupPtr,
-    const std::string&  attrSchemaName)
+    const std::string&  attrSchemaName,
+    bool visibleAsCtrl,
+    const std::string& patchedDispplayName)
 {
     auto it = _attributeMap.find(attrSchemaName);
 
@@ -511,7 +513,11 @@ void ProductionSettings::AddAttributeToGroupIfExist(
         return;
     }
 
-    groupPtr->attributeVector.push_back(it->second);
+    if (!patchedDispplayName.empty()) {
+        it->second->name = patchedDispplayName;
+    }
+
+    groupPtr->attributeVector.push_back(AttributeDescriptionPtr(new AttributeDescription(it->second, visibleAsCtrl)));
 }
 
 void ProductionSettings::MakeAttributeLogicalStructure()
@@ -556,19 +562,35 @@ void ProductionSettings::MakeAttributeLogicalStructure()
     AddAttributeToGroupIfExist(denoisingGroupPtr, "rpr:denoising:minIter");
     AddAttributeToGroupIfExist(denoisingGroupPtr, "rpr:denoising:iterStep");
 
+    GroupDescriptionPtr hybridAdvancedGroupPtr(new GroupDescription("HybridPro Advanced Params"));
+    AddAttributeToGroupIfExist(hybridAdvancedGroupPtr, "rpr:core:useGmon");
+    AddAttributeToGroupIfExist(hybridAdvancedGroupPtr, "rpr:quality:reservoirSampling");
+    AddAttributeToGroupIfExist(hybridAdvancedGroupPtr, "rpr:hybrid:denoising"); 
+
+    AddAttributeToGroupIfExist(hybridAdvancedGroupPtr, "rpr:viewportUpscaling", false);
+    AddAttributeToGroupIfExist(hybridAdvancedGroupPtr, "rpr:viewportUpscalingQuality", true, "FSR");
+
+    // memory params hybrid
+    AddAttributeToGroupIfExist(hybridAdvancedGroupPtr, "rpr:hybrid:accelerationMemorySizeMb", true, "Acc. Struct. Memory Size (MB)");
+    AddAttributeToGroupIfExist(hybridAdvancedGroupPtr, "rpr:hybrid:meshMemorySizeMb", true, "Mesh Memory Size(MB)");
+    AddAttributeToGroupIfExist(hybridAdvancedGroupPtr, "rpr:hybrid:stagingMemorySizeMb", true, "Staging Memory Size (MB)");
+    AddAttributeToGroupIfExist(hybridAdvancedGroupPtr, "rpr:hybrid:scratchMemorySizeMb", true, "Scratch Memory Size (MB)");
+
+
     GroupDescriptionPtr miscGroupPtr(new GroupDescription("Miscellaneous"));
     AddAttributeToGroupIfExist(miscGroupPtr, "rpr:ambientOcclusion:radius");
     AddAttributeToGroupIfExist(miscGroupPtr, "rpr:quality:raycastEpsilon");
     AddAttributeToGroupIfExist(miscGroupPtr, "rpr:quality:radianceClamping");
     AddAttributeToGroupIfExist(miscGroupPtr, "rpr:quality:imageFilterRadius");
-    // we don't want this setting in Production Render Mode
-    // AddAttributeToGroupIfExist(miscGroupPtr, "rpr:quality:interactive:rayDepth");
 
     qualityTabDescPtr->groupVector.push_back(engineGroupPtr);
     qualityTabDescPtr->groupVector.push_back(contourGroupPtr);
     qualityTabDescPtr->groupVector.push_back(renderingGroupPtr);
     qualityTabDescPtr->groupVector.push_back(raydepthGroupPtr);
     qualityTabDescPtr->groupVector.push_back(denoisingGroupPtr);
+
+    qualityTabDescPtr->groupVector.push_back(hybridAdvancedGroupPtr);
+
     qualityTabDescPtr->groupVector.push_back(miscGroupPtr);
 
     // CAMERA TAB
@@ -636,7 +658,10 @@ void ProductionSettings::CreateAttributes(
         g_attributePrefix = TfToken(rendererName + "_Prod_");
     }
 
-    std::string controlCreationCmdTemplate = "attrControlGrp -label \"%s\" -attribute \"%s.%s\";";
+    const std::string controlCreationCmdTemplateR =
+    R"mel(attrControlGrp -label "%s" -attribute "%s.%s" -changeCommand ("OnProdRenderAttributeChanged(\\\"%s\\\",\\\"%s\\\", \\\"%s\\\")") %s;)mel";
+    
+    std::string controlCreationCmdTemplate = controlCreationCmdTemplateR;
 
     // Create attrbiutes for usd camera
 
@@ -652,10 +677,10 @@ void ProductionSettings::CreateAttributes(
     _CreateStringAttribute(
         node,
         MString(rendererName.c_str()) + "_LiveModeChannelName",
-        "RenderStudioMaya_23",
+        "RenderStudioMaya",
         userDefaults);
 
-    for (const HdRenderSettingDescriptor& attr : rendererSettingDescriptors) {
+    for (HdRenderSettingDescriptor& attr : rendererSettingDescriptors) {
 
         // We dont want these attributes in Production Render Mode
         if ((attr.key == "rpr:quality:interactive:downscale:resolution")
@@ -665,7 +690,7 @@ void ProductionSettings::CreateAttributes(
             continue;
         }
 
-        _attributeMap[attr.key] = AttributeDescriptionPtr(new HdRenderSettingDescriptor(attr));
+        _attributeMap[attr.key] = HdRenderSettingDescriptorPtr(new HdRenderSettingDescriptor(attr));
     }
 
     MakeAttributeLogicalStructure();
@@ -678,14 +703,18 @@ void ProductionSettings::CreateAttributes(
                 += "frameLayout - label \"" + groupPtr->name + "\" - cll true - cl false;\n";
 
             for (AttributeDescriptionPtr attrPtr : groupPtr->attributeVector) {
-                HdRenderSettingDescriptor& attr = *attrPtr;
+                HdRenderSettingDescriptor& attr = *attrPtr->hdRenderSettingDescriptorPtr;
                 MString attrName = _MangleName(attr.key, g_attributePrefix).GetText();
 
                 std::string controlCreationCmd = TfStringPrintf(
                     controlCreationCmdTemplate.c_str(),
                     attr.name.c_str(),
                     node.name().asChar(),
-                    attrName.asChar());
+                    attrName.asChar(),
+                    node.name().asChar(),
+                    attrName.asChar(),
+                    attr.key.GetString().c_str(),
+                    ("attrCtrlGrp_" + attrName).asChar());
 
                 bool addControlCreatioCmd = true;
 
@@ -713,13 +742,20 @@ void ProductionSettings::CreateAttributes(
 
                         if (primDef->GetPropertyMetadata(
                                 TfToken(attr.key), SdfFieldKeys->AllowedTokens, &allowedTokens)) {
+
+                            TfToken defaultValue;
+
+                            if (!primDef->GetPropertyMetadata( TfToken(attr.key), SdfFieldKeys->Default, &defaultValue)) {
+                                defaultValue = attr.defaultValue.UncheckedGet<TfToken>();
+                            }
+                            
                             // Generate dropdown from allowedTokens
                             TfTokenVector tokens(allowedTokens.begin(), allowedTokens.end());
                             _CreateEnumAttribute(
                                 node,
                                 attrName,
                                 tokens,
-                                attr.defaultValue.UncheckedGet<TfToken>(),
+                                defaultValue,                              
                                 userDefaults);
                             createdAsEnum = true;
                         }
@@ -761,7 +797,7 @@ void ProductionSettings::CreateAttributes(
                     addControlCreatioCmd = false;
                 }
 
-                if (addControlCreatioCmd) {
+                if (addControlCreatioCmd && attrPtr->visibleAsCtrl) {
                     tabCtrlCreationCommands += controlCreationCmd + "\n";
                 }
             }
@@ -793,7 +829,7 @@ void ProductionSettings::ApplySettings(HdRenderDelegate* renderDelegate)
     for (TabDescriptionPtr tabPtr : _tabsLogicalStructure) {
         for (GroupDescriptionPtr groupPtr : tabPtr->groupVector) {
             for (AttributeDescriptionPtr attrPtr : groupPtr->attributeVector) {
-                HdRenderSettingDescriptor& attr = *attrPtr;
+                HdRenderSettingDescriptor& attr = *attrPtr->hdRenderSettingDescriptorPtr;
                 MString attrName = _MangleName(attr.key, g_attributePrefix).GetText();
 
                 bool valueGot = true;
@@ -822,7 +858,11 @@ void ProductionSettings::ApplySettings(HdRenderDelegate* renderDelegate)
                 } else if (attr.defaultValue.IsHolding<TfToken>()) {
                     auto v = attr.defaultValue.UncheckedGet<TfToken>();
                     _GetAttribute(node, attrName, v, storeUserSetting);
-                    vtValue = v;
+
+                    // schema tokens contain spaces but tokens which get automatically generated does not have space inside. So remove spaces to properly apply a setting
+                    std::string val = v.GetString();
+                    val.erase(std::remove_if(val.begin(), val.end(), isspace), val.end());
+                    vtValue = TfToken(val);
                 } else if (attr.defaultValue.IsHolding<SdfAssetPath>()) {
                     auto v = attr.defaultValue.UncheckedGet<SdfAssetPath>();
                     _GetAttribute(node, attrName, v, storeUserSetting);
