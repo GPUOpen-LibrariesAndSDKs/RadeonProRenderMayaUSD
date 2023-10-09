@@ -570,6 +570,8 @@ void ProductionSettings::MakeAttributeLogicalStructure()
     AddAttributeToGroupIfExist(hybridAdvancedGroupPtr, "rpr:viewportUpscaling", false);
     AddAttributeToGroupIfExist(hybridAdvancedGroupPtr, "rpr:viewportUpscalingQuality", true, "FSR");
 
+    AddAttributeToGroupIfExist(hybridAdvancedGroupPtr, "rpr:hybrid:displacement", true, "Enable Displacement");
+
     // memory params hybrid
     AddAttributeToGroupIfExist(hybridAdvancedGroupPtr, "rpr:hybrid:accelerationMemorySizeMb", true, "Acc. Struct. Memory Size (MB)");
     AddAttributeToGroupIfExist(hybridAdvancedGroupPtr, "rpr:hybrid:meshMemorySizeMb", true, "Mesh Memory Size(MB)");
