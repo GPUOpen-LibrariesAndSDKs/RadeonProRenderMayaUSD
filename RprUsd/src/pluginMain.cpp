@@ -149,7 +149,7 @@ PLUGIN_EXPORT MStatus uninitializePlugin(MObject obj)
     gsRenderOverrides.clear();
 
     // Clear any registered callbacks
-    MGlobal::executeCommand("callbacks -cc rprUsd;");
+    MGlobal::executeCommand("callbacks -cc -owner rprUsd;");
 
     if (!plugin.deregisterCommand(MtohViewCmd::name)) {
         status = MS::kFailure;
