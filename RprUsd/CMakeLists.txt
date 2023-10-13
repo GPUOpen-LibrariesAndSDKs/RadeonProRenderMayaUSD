@@ -212,7 +212,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
         "${CMAKE_CURRENT_SOURCE_DIR}/src/Maya2024_hdMaya"
     ">"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/ProductionRender"
-    "${CMAKE_CURRENT_SOURCE_DIR}/../Build_RPRUsdInstall/usdResolver/include/RenderStudioResolver"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../Build_RPRUsdInstall/usdResolver/include/RenderStudio"
 )
 
 ################################################################################
@@ -360,6 +360,7 @@ set(ADDITIONAL_LIBRARY_DEPENDENCIES
         "mayaUsd"
         "MaterialXFormatMayaUSD"
         "MaterialXCoreMayaUSD"
+        "RenderStudioKit"
         "RenderStudioResolver"
     ">"
     "OpenMaya;"
@@ -375,6 +376,6 @@ target_link_directories(${PROJECT_NAME} PUBLIC
         "$ENV{MAYA_x64_2024}/../MayaUSD/Maya2024/0.23.1/mayausd/MayaUSD/lib;"
         "${CMAKE_CURRENT_SOURCE_DIR}/lib/2024;"
         "$ENV{MAYA_SDK_2024}/devkit/ufe/lib"
-        "${CMAKE_CURRENT_SOURCE_DIR}/../Build_RPRUsdInstall/usdResolver/plugin/usd"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../Build_RPRUsdInstall/usdResolver/lib"
     ">"
 )

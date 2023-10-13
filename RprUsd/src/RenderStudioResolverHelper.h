@@ -16,11 +16,9 @@ limitations under the License.
 
 #include <maya/MTimerMessage.h>
 
-#include "Resolver.h"
+#include "Kit.h"
 
-PXR_NAMESPACE_USING_DIRECTIVE
-
-using LiveModeInfo = RenderStudioResolver::LiveModeInfo;
+using LiveModeInfo = RenderStudio::Kit::LiveSessionInfo;
 
 class RenderStudioResolverHelper
 {
