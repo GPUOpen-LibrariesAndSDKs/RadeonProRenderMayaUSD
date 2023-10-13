@@ -54,13 +54,13 @@ void RenderStudioResolverHelper::StopLiveMode()
 
 bool RenderStudioResolverHelper::IsUnresovableToRenderStudioPath(const std::string& path)
 {
-    return RenderStudio::Kit::IsUnresovableToRenderStudioPath(path);
+    return RenderStudio::Kit::IsUnresolvable(path);
 }
 
 
 std::string RenderStudioResolverHelper::Unresolve(const std::string& path)
 {
-    return RenderStudio::Kit::UnresolveToRenderStudioPath(path);
+    return RenderStudio::Kit::Unresolve(path);
 }
 
 void RenderStudioResolverHelper::LiveModeTimerCallbackId(float, float, void* pClientData)
