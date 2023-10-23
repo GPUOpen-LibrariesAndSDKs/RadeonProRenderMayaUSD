@@ -94,8 +94,14 @@ MStatus AssignMatXMaterial(
 
     UsdPrim materialPrim;
     if (materialName == "") {
-        materialPrim
-            = stage->GetPrimAtPath(path.AppendChild(TfToken { "Materials" })).GetChildren().front();
+        UsdPrim appendedPrim = stage->GetPrimAtPath(path.AppendChild(TfToken{ "Materials" }));
+
+        if (!appendedPrim.IsValid()) {
+            MGlobal::displayError("RprUsd: 'Materials' child was not created!");
+            return MStatus::kFailure;
+        }
+
+        materialPrim = appendedPrim.GetChildren().front();
     } else {
         materialPrim
             = stage->GetPrimAtPath(SdfPath((primPath + "/Materials/" + materialName).asChar()));

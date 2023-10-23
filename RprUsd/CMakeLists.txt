@@ -251,6 +251,14 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE
     "BOOST_CONTAINER_NO_LIB"
 )
 
+list (APPEND CMAKE_PREFIX_PATH "${CMAKE_SOURCE_DIR}/../Build_RPRUsdInstall/usdResolver/cmake")
+list (APPEND CMAKE_PREFIX_PATH "${CMAKE_SOURCE_DIR}/Boost_1_76_0/bin")
+
+find_package(Boost REQUIRED COMPONENTS python log)
+find_package(OpenSSL REQUIRED)
+
+find_package(RenderStudio REQUIRED COMPONENTS Kit)
+
 ################################################################################
 # Compile and link options
 ################################################################################
@@ -360,8 +368,7 @@ set(ADDITIONAL_LIBRARY_DEPENDENCIES
         "mayaUsd"
         "MaterialXFormatMayaUSD"
         "MaterialXCoreMayaUSD"
-        "RenderStudioKit"
-        "RenderStudioResolver"
+        "RenderStudio::Kit"
     ">"
     "OpenMaya;"
     "Foundation"
