@@ -18,13 +18,12 @@ limitations under the License.
 MCallbackId RenderStudioResolverHelper::g_LiveModeTimerCallbackId = 0;
 bool RenderStudioResolverHelper::m_IsLiveModeStarted = false;
 
-
 void RenderStudioResolverHelper::StartLiveMode(const LiveModeInfo& liveModeParams)
 {
     StopLiveMode();
 
     try {
-        RenderStudioResolver::StartLiveMode(liveModeParams);
+        RenderStudio::Kit::LiveSessionConnect(liveModeParams);
 
         MStatus status;
         // Run Usd Resolver Live updates   
@@ -49,22 +48,27 @@ void RenderStudioResolverHelper::StopLiveMode()
         g_LiveModeTimerCallbackId = 0;
     }
 
-    RenderStudioResolver::StopLiveMode();
+    RenderStudio::Kit::LiveSessionDisconnect();
     m_IsLiveModeStarted = false;
 }
 
 bool RenderStudioResolverHelper::IsUnresovableToRenderStudioPath(const std::string& path)
 {
-    return RenderStudioResolver::IsUnresovableToRenderStudioPath(path);
+    return RenderStudio::Kit::IsUnresolvable(path);
 }
 
 
 std::string RenderStudioResolverHelper::Unresolve(const std::string& path)
 {
-    return RenderStudioResolver::Unresolve(path);
+    return RenderStudio::Kit::Unresolve(path);
+}
+
+std::string RenderStudioResolverHelper::SetWorkspacePath(const std::string& path)
+{
+    RenderStudio::Kit::SetWorkspacePath(path);
 }
 
 void RenderStudioResolverHelper::LiveModeTimerCallbackId(float, float, void* pClientData)
 {
-    RenderStudioResolver::ProcessLiveUpdates();
+    RenderStudio::Kit::LiveSessionUpdate();
 }
