@@ -1083,10 +1083,7 @@ void RprUsdProductionRender::RegisterRenderer(
 
         $enableFSR = $value != "None";
 
-        $attrNameUpscaling = $nodeName + "HdRprPlugin_Prod___rpr_mtohns_viewportUpscaling";
-        setAttr $attrNameUpscaling $enableFSR;
-
-        $ctrlNameUpscalingQuality = "attrCtrlGrp_" + "HdRprPlugin_Prod___rpr_mtohns_viewportUpscalingQuality";
+        $ctrlNameUpscalingQuality = "attrCtrlGrp_" + "HdRprPlugin_Prod___rpr_mtohns_hybrid_mtohns_upscalingQuality";
         attrControlGrp -e -enable $enableFSR $ctrlNameUpscalingQuality;
     }
 
