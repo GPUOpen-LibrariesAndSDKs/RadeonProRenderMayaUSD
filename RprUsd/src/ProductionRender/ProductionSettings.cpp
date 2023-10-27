@@ -557,18 +557,12 @@ void ProductionSettings::MakeAttributeLogicalStructure()
     AddAttributeToGroupIfExist(raydepthGroupPtr, "rpr:quality:rayDepthGlossyRefraction");
     AddAttributeToGroupIfExist(raydepthGroupPtr, "rpr:quality:rayDepthShadow");
 
-    GroupDescriptionPtr denoisingGroupPtr(new GroupDescription("Denoising"));
-    AddAttributeToGroupIfExist(denoisingGroupPtr, "rpr:denoising:enable");
-    AddAttributeToGroupIfExist(denoisingGroupPtr, "rpr:denoising:minIter");
-    AddAttributeToGroupIfExist(denoisingGroupPtr, "rpr:denoising:iterStep");
-
     GroupDescriptionPtr hybridAdvancedGroupPtr(new GroupDescription("HybridPro Advanced Params"));
     AddAttributeToGroupIfExist(hybridAdvancedGroupPtr, "rpr:core:useGmon");
     AddAttributeToGroupIfExist(hybridAdvancedGroupPtr, "rpr:quality:reservoirSampling");
     AddAttributeToGroupIfExist(hybridAdvancedGroupPtr, "rpr:hybrid:denoising"); 
 
-    AddAttributeToGroupIfExist(hybridAdvancedGroupPtr, "rpr:viewportUpscaling", false);
-    AddAttributeToGroupIfExist(hybridAdvancedGroupPtr, "rpr:viewportUpscalingQuality", true, "FSR");
+    AddAttributeToGroupIfExist(hybridAdvancedGroupPtr, "rpr:hybrid:upscalingQuality", true, "FSR");
 
     // memory params hybrid
     AddAttributeToGroupIfExist(hybridAdvancedGroupPtr, "rpr:hybrid:accelerationMemorySizeMb", true, "Acc. Struct. Memory Size (MB)");
@@ -587,7 +581,6 @@ void ProductionSettings::MakeAttributeLogicalStructure()
     qualityTabDescPtr->groupVector.push_back(contourGroupPtr);
     qualityTabDescPtr->groupVector.push_back(renderingGroupPtr);
     qualityTabDescPtr->groupVector.push_back(raydepthGroupPtr);
-    qualityTabDescPtr->groupVector.push_back(denoisingGroupPtr);
 
     qualityTabDescPtr->groupVector.push_back(hybridAdvancedGroupPtr);
 
