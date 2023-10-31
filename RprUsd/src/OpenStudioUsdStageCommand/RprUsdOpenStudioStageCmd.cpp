@@ -144,7 +144,6 @@ MStatus RprUsdOpenStudioStageCmd::doIt(const MArgList& args)
         return MS::kFailure;
     }
 
-    MGlobal::displayInfo("RprUsd: usd stage for synchronization is opened");
     return MStatus::kSuccess;
 }
 
