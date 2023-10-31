@@ -101,16 +101,26 @@ MStatus RprUsdOpenStudioStageCmd::doIt(const MArgList& args)
 
         MGlobal::executeCommand(cmd);
 
-        LiveModeInfo liveModeInfo;
-        liveModeInfo.liveUrl = "wss://renderstudio.luxoft.com/livecpp";
+        std::string envUrl = ArchGetEnv("RENDER_STUDIO_WORKSPACE_URL");
 
-        std::string envLivUrl = ArchGetEnv("RENDER_STUDIO_LIVE_REMOTE_URL");
+        std::string baseUrl = "http://localhost";
 
-        if (!envLivUrl.empty()) {
-            liveModeInfo.liveUrl = envLivUrl;
+        if (!envUrl.empty()) {
+            baseUrl = envUrl;
+        }
+        else {
+            MFnDependencyNode node(GetSettingsNode());
+            std::string baseUrlAttr;
+            _GetAttribute(node, "HdRprPlugin_LiveModeBaseUrl", baseUrlAttr, true);
+
+            if (!baseUrlAttr.empty()) {
+                baseUrl = baseUrlAttr;
+            }
         }
 
-        liveModeInfo.storageUrl = "https://renderstudio.luxoft.com/storage";
+        LiveModeInfo liveModeInfo;
+        liveModeInfo.liveUrl = baseUrl + "/workspace/live";
+        liveModeInfo.storageUrl = baseUrl + "/workspace/storage";
         liveModeInfo.channelId = "Maya";
 
         MPlug channelNamePlug = MFnDependencyNode(GetSettingsNode())

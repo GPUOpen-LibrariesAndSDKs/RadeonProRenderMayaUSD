@@ -137,6 +137,7 @@ bool _RestoreValue(
     return valid;
 }
 
+
 void _CreateEnumAttribute(
     MFnDependencyNode&   node,
     const MString&       attrName,
@@ -399,58 +400,6 @@ void _CreateFloatAttribute(
         MGlobal::optionVarDoubleValue);
 }
 
-template <typename T> void _GetFromPlug(const MPlug& plug, T& out) { assert(false); }
-
-template <> void _GetFromPlug<bool>(const MPlug& plug, bool& out) { out = plug.asBool(); }
-
-template <> void _GetFromPlug<int>(const MPlug& plug, int& out) { out = plug.asInt(); }
-
-template <> void _GetFromPlug<float>(const MPlug& plug, float& out) { out = plug.asFloat(); }
-
-template <> void _GetFromPlug<std::string>(const MPlug& plug, std::string& out)
-{
-    out = plug.asString().asChar();
-}
-
-template <> void _GetFromPlug<TfEnum>(const MPlug& plug, TfEnum& out)
-{
-    out = TfEnum(out.GetType(), plug.asInt());
-}
-
-template <> void _GetFromPlug<SdfAssetPath>(const MPlug& plug, SdfAssetPath& out)
-{
-    out = SdfAssetPath(std::string(plug.asString().asChar()));
-}
-
-template <> void _GetFromPlug<TfToken>(const MPlug& plug, TfToken& out)
-{
-    MObject attribute = plug.attribute();
-
-    if (attribute.hasFn(MFn::kEnumAttribute)) {
-        MFnEnumAttribute enumAttr(attribute);
-        MString          value = enumAttr.fieldName(plug.asShort());
-        out = TfToken(value.asChar());
-    } else {
-        out = TfToken(plug.asString().asChar());
-    }
-}
-
-template <typename T>
-bool _GetAttribute(
-    const MFnDependencyNode& node,
-    const MString&           attrName,
-    T&                       out,
-    bool                     storeUserSetting)
-{
-    const auto plug = node.findPlug(attrName, true);
-    if (plug.isNull()) {
-        return false;
-    }
-    _GetFromPlug<T>(plug, out);
-
-    return true;
-}
-
 void _GetColorAttribute(
     const MFnDependencyNode&            node,
     const MString&                      attrName,
@@ -664,7 +613,10 @@ void ProductionSettings::CreateAttributes(
     TfTokenVector vec;
     TfToken       token;
     _CreateStringAttribute(
-        node, MString(g_attributePrefix.GetText()) + "Static_usdCameraSelected", "", userDefaults);
+        node, 
+        MString(g_attributePrefix.GetText()) + "Static_usdCameraSelected", 
+        "", 
+        userDefaults);
 
     // non production mode  attribute
     _CreateStringAttribute(
@@ -672,6 +624,12 @@ void ProductionSettings::CreateAttributes(
         MString(rendererName.c_str()) + "_LiveModeChannelName",
         "RenderStudioMaya",
         userDefaults);
+
+    _CreateStringAttribute(
+        node,
+        MString(rendererName.c_str()) + "_LiveModeBaseUrl",
+        "",
+        true);
 
     for (HdRenderSettingDescriptor& attr : rendererSettingDescriptors) {
 
@@ -842,11 +800,11 @@ void ProductionSettings::ApplySettings(HdRenderDelegate* renderDelegate)
                     vtValue = v;
                 } else if (attr.defaultValue.IsHolding<GfVec3f>()) {
                     auto v = attr.defaultValue.UncheckedGet<GfVec3f>();
-                    _GetAttribute(node, attrName, v, storeUserSetting);
+                    _GetColorAttribute(node, attrName, v, storeUserSetting);
                     vtValue = v;
                 } else if (attr.defaultValue.IsHolding<GfVec4f>()) {
                     auto v = attr.defaultValue.UncheckedGet<GfVec4f>();
-                    _GetAttribute(node, attrName, v, storeUserSetting);
+                    _GetColorAttribute(node, attrName, v, storeUserSetting);
                     vtValue = v;
                 } else if (attr.defaultValue.IsHolding<TfToken>()) {
                     auto v = attr.defaultValue.UncheckedGet<TfToken>();

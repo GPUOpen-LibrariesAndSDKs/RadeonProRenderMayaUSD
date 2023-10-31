@@ -901,7 +901,7 @@ void RprUsdProductionRender::RegisterRenderer(
 					setParent ..;	
 
 					attrControlGrp -label "Channel Name" -attribute defaultRenderGlobals.HdRprPlugin_LiveModeChannelName;
-
+                    attrControlGrp -label "Server Base Url" -attribute defaultRenderGlobals.HdRprPlugin_LiveModeBaseUrl;
 				setParent ..;
 			setParent ..;
 		setParent ..;

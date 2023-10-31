@@ -27,6 +27,9 @@
 #include <pxr/pxr.h>
 #include <pxr/usd/usd/primRange.h>
 
+#include <maya/MFnEnumAttribute.h>
+#include <maya/MGlobal.h>
+
 #pragma warning(pop)
 
 std::string GetRendererName();
@@ -35,5 +38,49 @@ MayaUsdProxyShapeBase* GetMayaUsdProxyShapeBase();
 UsdStageRefPtr         GetUsdStage();
 
 MObject GetSettingsNode();
+
+template <typename T> bool _SetOptionVar(const MString& attrName, const T& value)
+{
+    return MGlobal::setOptionVarValue(attrName, value);
+}
+
+bool _SetOptionVar(const MString& attrName, const bool& value);
+bool _SetOptionVar(const MString& attrName, const float& value);
+bool _SetOptionVar(const MString& attrName, const TfToken& value);
+bool _SetOptionVar(const MString& attrName, const std::string& value);
+bool _SetOptionVar(const MString& attrName, const SdfAssetPath& value);
+bool _SetOptionVar(const MString& attrName, const TfEnum& value);
+
+
+template <typename T> void _GetFromPlug(const MPlug& plug, T& out) { assert(false); }
+template <> void _GetFromPlug<bool>(const MPlug& plug, bool& out);
+template <> void _GetFromPlug<int>(const MPlug& plug, int& out);
+template <> void _GetFromPlug<float>(const MPlug& plug, float& out);
+template <> void _GetFromPlug<std::string>(const MPlug& plug, std::string& out);
+template <> void _GetFromPlug<TfEnum>(const MPlug& plug, TfEnum& out);
+template <> void _GetFromPlug<SdfAssetPath>(const MPlug& plug, SdfAssetPath& out);
+template <> void _GetFromPlug<TfToken>(const MPlug& plug, TfToken& out);
+
+
+template <typename T>
+bool _GetAttribute(
+    const MFnDependencyNode& node,
+    const MString& attrName,
+    T& out,
+    bool                     storeUserSetting)
+{
+    const auto plug = node.findPlug(attrName, true);
+    if (plug.isNull()) {
+        return false;
+    }
+    _GetFromPlug<T>(plug, out);
+
+    if (storeUserSetting) {
+        _SetOptionVar(attrName, out);
+    }
+
+    return true;
+}
+
 
 #endif
