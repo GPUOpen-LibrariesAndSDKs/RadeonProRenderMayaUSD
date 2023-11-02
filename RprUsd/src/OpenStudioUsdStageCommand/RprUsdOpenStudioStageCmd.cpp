@@ -103,7 +103,7 @@ MStatus RprUsdOpenStudioStageCmd::doIt(const MArgList& args)
 
         std::string envUrl = ArchGetEnv("RENDER_STUDIO_WORKSPACE_URL");
 
-        std::string baseUrl = "http://localhost";
+        std::string baseUrl = "http://localhost:10000";
 
         if (!envUrl.empty()) {
             baseUrl = envUrl;
@@ -124,8 +124,9 @@ MStatus RprUsdOpenStudioStageCmd::doIt(const MArgList& args)
 
         if (baseUrl.find("http://localhost") == std::string::npos) {
             liveModeInfo.liveUrl += "/workspace/live";
-            liveModeInfo.storageUrl += "/workspace/live";
         }
+
+        liveModeInfo.storageUrl = "https://renderstudio.luxoft.com/workspace/storage";
         liveModeInfo.channelId = "Maya";
 
         MPlug channelNamePlug = MFnDependencyNode(GetSettingsNode())
