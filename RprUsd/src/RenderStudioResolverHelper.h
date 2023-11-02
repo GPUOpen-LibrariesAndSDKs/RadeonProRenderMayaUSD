@@ -29,7 +29,7 @@ public:
 	static bool IsUnresovableToRenderStudioPath(const std::string& path);
 	static std::string Unresolve(const std::string& path);
 
-	static std::string SetWorkspacePath(const std::string& path);
+	static void SetWorkspacePath(const std::string& path);
 
 private:
 	static void LiveModeTimerCallbackId(float, float, void* pClientData);

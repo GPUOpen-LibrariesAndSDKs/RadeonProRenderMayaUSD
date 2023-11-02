@@ -119,8 +119,13 @@ MStatus RprUsdOpenStudioStageCmd::doIt(const MArgList& args)
         }
 
         LiveModeInfo liveModeInfo;
-        liveModeInfo.liveUrl = baseUrl + "/workspace/live";
-        liveModeInfo.storageUrl = baseUrl + "/workspace/storage";
+        liveModeInfo.liveUrl = baseUrl; 
+        liveModeInfo.storageUrl = baseUrl;
+
+        if (baseUrl.find("http://localhost") == std::string::npos) {
+            liveModeInfo.liveUrl += "/workspace/live";
+            liveModeInfo.storageUrl += "/workspace/live";
+        }
         liveModeInfo.channelId = "Maya";
 
         MPlug channelNamePlug = MFnDependencyNode(GetSettingsNode())
