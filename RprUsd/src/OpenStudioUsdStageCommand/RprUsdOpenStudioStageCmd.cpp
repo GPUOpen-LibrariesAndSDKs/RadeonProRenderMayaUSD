@@ -103,7 +103,7 @@ MStatus RprUsdOpenStudioStageCmd::doIt(const MArgList& args)
 
         std::string envUrl = ArchGetEnv("RENDER_STUDIO_WORKSPACE_URL");
 
-        std::string baseUrl = "http://localhost:10000";
+        std::string baseUrl = "http://localhost";
 
         if (!envUrl.empty()) {
             baseUrl = envUrl;
