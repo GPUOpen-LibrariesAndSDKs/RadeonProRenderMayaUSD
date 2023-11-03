@@ -101,30 +101,34 @@ MStatus RprUsdOpenStudioStageCmd::doIt(const MArgList& args)
 
         MGlobal::executeCommand(cmd);
 
+        // Base url from env variable
         std::string envUrl = ArchGetEnv("RENDER_STUDIO_WORKSPACE_URL");
+
+        // Base url from maya's ui
+        MFnDependencyNode node(GetSettingsNode());
+        std::string baseUrlAttr;
+        _GetAttribute(node, "HdRprPlugin_LiveModeBaseUrl", baseUrlAttr, true);
+
+        std::string prioritizeUIUrl = ArchGetEnv("MAYAUSD_WORKSPACE_PRIORITIZE_UI_OVER_ENV");
+        bool prioritizeUI = prioritizeUIUrl == "1";
 
         std::string baseUrl = "http://localhost";
 
-        if (!envUrl.empty()) {
+        if (!envUrl.empty() && !prioritizeUI) {
             baseUrl = envUrl;
         }
-        else {
-            MFnDependencyNode node(GetSettingsNode());
-            std::string baseUrlAttr;
-            _GetAttribute(node, "HdRprPlugin_LiveModeBaseUrl", baseUrlAttr, true);
-
-            if (!baseUrlAttr.empty()) {
-                baseUrl = baseUrlAttr;
-            }
+        else if (!baseUrlAttr.empty()) {
+            baseUrl = baseUrlAttr;
+        }
+        else if (!envUrl.empty()) {
+            baseUrl = envUrl;
         }
 
         LiveModeInfo liveModeInfo;
         liveModeInfo.liveUrl = baseUrl; 
         liveModeInfo.storageUrl = baseUrl;
 
-        if (baseUrl.find("http://localhost") == std::string::npos) {
-            liveModeInfo.liveUrl += "/workspace/live";
-        }
+        liveModeInfo.liveUrl += "/workspace/live";
 
         liveModeInfo.storageUrl = "https://renderstudio.luxoft.com/workspace/storage";
         liveModeInfo.channelId = "Maya";
