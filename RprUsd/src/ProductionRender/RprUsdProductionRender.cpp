@@ -1087,6 +1087,11 @@ void RprUsdProductionRender::RegisterRenderer(
         attrControlGrp -e -enable $enableFSR $ctrlNameUpscalingQuality;
     }
 
+    global proc string getMatXNameByIdWithoutBrowserRunning(string $id)
+    {
+        return python("import rprMaterialXBrowser; rprMaterialXBrowser.getMatXNameByIdWithoutBrowserRunning(\"" + $id + "\")");
+    }  
+
 	registerRprUsdRenderer();
 )mel";
 
