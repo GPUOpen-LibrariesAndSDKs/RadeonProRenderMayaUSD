@@ -1,4 +1,4 @@
-+ MAYAVERSION:<MAYA_VERSION> RprUsd 0.3.22 <PATH_TO_REPLACE>
++ MAYAVERSION:<MAYA_VERSION> RprUsd 0.3.23 <PATH_TO_REPLACE>
 PATH+:=bin
 scripts: scripts
 plug-ins: plug-ins/<MAYA_VERSION>
