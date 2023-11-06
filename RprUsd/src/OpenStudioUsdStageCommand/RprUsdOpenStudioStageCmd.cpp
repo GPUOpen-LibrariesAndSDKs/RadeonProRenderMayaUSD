@@ -101,16 +101,36 @@ MStatus RprUsdOpenStudioStageCmd::doIt(const MArgList& args)
 
         MGlobal::executeCommand(cmd);
 
-        LiveModeInfo liveModeInfo;
-        liveModeInfo.liveUrl = "wss://renderstudio.luxoft.com/livecpp";
+        // Base url from env variable
+        std::string envUrl = ArchGetEnv("RENDER_STUDIO_WORKSPACE_URL");
 
-        std::string envLivUrl = ArchGetEnv("RENDER_STUDIO_LIVE_REMOTE_URL");
+        // Base url from maya's ui
+        MFnDependencyNode node(GetSettingsNode());
+        std::string baseUrlAttr;
+        _GetAttribute(node, "HdRprPlugin_LiveModeBaseUrl", baseUrlAttr, true);
 
-        if (!envLivUrl.empty()) {
-            liveModeInfo.liveUrl = envLivUrl;
+        std::string prioritizeUIUrl = ArchGetEnv("MAYAUSD_WORKSPACE_PRIORITIZE_UI_OVER_ENV");
+        bool prioritizeUI = prioritizeUIUrl == "1";
+
+        std::string baseUrl = "http://localhost";
+
+        if (!envUrl.empty() && !prioritizeUI) {
+            baseUrl = envUrl;
+        }
+        else if (!baseUrlAttr.empty()) {
+            baseUrl = baseUrlAttr;
+        }
+        else if (!envUrl.empty()) {
+            baseUrl = envUrl;
         }
 
-        liveModeInfo.storageUrl = "https://renderstudio.luxoft.com/storage";
+        LiveModeInfo liveModeInfo;
+        liveModeInfo.liveUrl = baseUrl; 
+        liveModeInfo.storageUrl = baseUrl;
+
+        liveModeInfo.liveUrl += "/workspace/live";
+
+        liveModeInfo.storageUrl = "https://renderstudio.luxoft.com/workspace/storage";
         liveModeInfo.channelId = "Maya";
 
         MPlug channelNamePlug = MFnDependencyNode(GetSettingsNode())
@@ -134,7 +154,6 @@ MStatus RprUsdOpenStudioStageCmd::doIt(const MArgList& args)
         return MS::kFailure;
     }
 
-    MGlobal::displayInfo("RprUsd: usd stage for synchronization is opened");
     return MStatus::kSuccess;
 }
 

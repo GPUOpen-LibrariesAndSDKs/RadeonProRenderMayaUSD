@@ -63,7 +63,7 @@ std::string RenderStudioResolverHelper::Unresolve(const std::string& path)
     return RenderStudio::Kit::Unresolve(path);
 }
 
-std::string RenderStudioResolverHelper::SetWorkspacePath(const std::string& path)
+void RenderStudioResolverHelper::SetWorkspacePath(const std::string& path)
 {
     RenderStudio::Kit::SetWorkspacePath(path);
 }

@@ -70,3 +70,70 @@ MObject GetSettingsNode()
 
     return mayaObject;
 }
+
+template <> void _GetFromPlug<bool>(const MPlug& plug, bool& out) { out = plug.asBool(); }
+
+template <> void _GetFromPlug<int>(const MPlug& plug, int& out) { out = plug.asInt(); }
+
+template <> void _GetFromPlug<float>(const MPlug& plug, float& out) { out = plug.asFloat(); }
+
+template <> void _GetFromPlug<std::string>(const MPlug& plug, std::string& out)
+{
+    out = plug.asString().asChar();
+}
+
+template <> void _GetFromPlug<TfEnum>(const MPlug& plug, TfEnum& out)
+{
+    out = TfEnum(out.GetType(), plug.asInt());
+}
+
+template <> void _GetFromPlug<SdfAssetPath>(const MPlug& plug, SdfAssetPath& out)
+{
+    out = SdfAssetPath(std::string(plug.asString().asChar()));
+}
+
+template <> void _GetFromPlug<TfToken>(const MPlug& plug, TfToken& out)
+{
+    MObject attribute = plug.attribute();
+
+    if (attribute.hasFn(MFn::kEnumAttribute)) {
+        MFnEnumAttribute enumAttr(attribute);
+        MString          value = enumAttr.fieldName(plug.asShort());
+        out = TfToken(value.asChar());
+    }
+    else {
+        out = TfToken(plug.asString().asChar());
+    }
+}
+
+
+bool _SetOptionVar(const MString& attrName, const bool& value)
+{
+    return _SetOptionVar(attrName, int(value));
+}
+
+bool _SetOptionVar(const MString& attrName, const float& value)
+{
+    return _SetOptionVar(attrName, double(value));
+}
+
+bool _SetOptionVar(const MString& attrName, const TfToken& value)
+{
+    return _SetOptionVar(attrName, MString(value.GetText()));
+}
+
+bool _SetOptionVar(const MString& attrName, const std::string& value)
+{
+    return _SetOptionVar(attrName, MString(value.c_str()));
+}
+
+bool _SetOptionVar(const MString& attrName, const SdfAssetPath& value)
+{
+    return _SetOptionVar(attrName, MString(value.GetAssetPath().c_str()));
+}
+
+bool _SetOptionVar(const MString& attrName, const TfEnum& value)
+{
+    return _SetOptionVar(attrName, TfEnum::GetDisplayName(value));
+}
+
