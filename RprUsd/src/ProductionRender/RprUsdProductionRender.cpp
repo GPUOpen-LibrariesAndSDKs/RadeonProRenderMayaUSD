@@ -737,6 +737,7 @@ void RprUsdProductionRender::RegisterRenderer(
 			$parentForm;
 
         UpdateHybridDenoisersCtrls();
+        UpdateToonLegacy();
 	}
 
 	global proc updateRprUsdRenderQualityTab()
@@ -1064,6 +1065,12 @@ void RprUsdProductionRender::RegisterRenderer(
 
     global proc OnProdRenderAttributeChanged(string $nodeName, string $attrName, string $attrKey)
     {
+        if ($attrKey == "rpr:core:renderQuality")
+        {
+            UpdateToonLegacy();
+            return;
+        }       
+
         if ($attrKey != "rpr:hybrid:denoising")
         {
             return;
@@ -1085,6 +1092,14 @@ void RprUsdProductionRender::RegisterRenderer(
 
         $ctrlNameUpscalingQuality = "attrCtrlGrp_" + "HdRprPlugin_Prod___rpr_mtohns_hybrid_mtohns_upscalingQuality";
         attrControlGrp -e -enable $enableFSR $ctrlNameUpscalingQuality;
+    }
+
+    global proc UpdateToonLegacy()
+    {
+        $val = `getAttr -as "defaultRenderGlobals.HdRprPlugin_Prod___rpr_mtohns_core_mtohns_renderQuality"` == "Northstar"; // 5 is stand for NorthStar engine
+        $ctrlNameToonLegacy = "attrCtrlGrp_" + "HdRprPlugin_Prod___rpr_mtohns_core_mtohns_legacyToon";
+
+        attrControlGrp -e -enable $val $ctrlNameToonLegacy;
     }
 
 	registerRprUsdRenderer();

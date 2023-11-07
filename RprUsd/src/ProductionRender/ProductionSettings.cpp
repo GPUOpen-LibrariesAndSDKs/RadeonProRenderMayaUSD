@@ -576,6 +576,7 @@ void ProductionSettings::MakeAttributeLogicalStructure()
     AddAttributeToGroupIfExist(miscGroupPtr, "rpr:quality:raycastEpsilon");
     AddAttributeToGroupIfExist(miscGroupPtr, "rpr:quality:radianceClamping");
     AddAttributeToGroupIfExist(miscGroupPtr, "rpr:quality:imageFilterRadius");
+    AddAttributeToGroupIfExist(miscGroupPtr, "rpr:core:legacyToon", true, "Legacy Toon (Northstar only)");
 
     qualityTabDescPtr->groupVector.push_back(engineGroupPtr);
     qualityTabDescPtr->groupVector.push_back(contourGroupPtr);
