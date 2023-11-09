@@ -77,35 +77,32 @@ void AddColorSpaceAttribute(UsdShadeMaterial& material)
     }
 }
 
+MString GetMaterialXNameFromServer(MString id) {
+    MString result;
+    MGlobal::executeCommand("getMatXNameByIdWithoutBrowserRunning(\""+ id + "\")", result);
+
+    return result.asChar();
+}
+
 MStatus AssignMatXMaterial(
     UsdStageRefPtr      stage,
     const MString&      primPath,
     const SdfReference& sdfRef,
     const MString&      inMaterialName)
 {
-    SdfPath       path = SdfPath(primPath.asChar());
-    UsdPrim       prim = stage->GetPrimAtPath(path);
-    UsdReferences primRefs = prim.GetReferences();
+    SdfPath path = SdfPath(primPath.asChar());
+    UsdPrim prim = stage->GetPrimAtPath(path);
+
+    UsdPrim renderStudioMaterialPrim = stage->DefinePrim(SdfPath("/RenderStudioMaterials").AppendChild(TfToken(inMaterialName.asChar())));
+    UsdReferences primRefs = renderStudioMaterialPrim.GetReferences();
 
     primRefs.ClearReferences();
     primRefs.AddReference(sdfRef);
 
-    MString materialName = inMaterialName;
+    std::string materialName = inMaterialName.asChar();
 
     UsdPrim materialPrim;
-    if (materialName == "") {
-        UsdPrim appendedPrim = stage->GetPrimAtPath(path.AppendChild(TfToken{ "Materials" }));
-
-        if (!appendedPrim.IsValid()) {
-            MGlobal::displayError("RprUsd: 'Materials' child was not created!");
-            return MStatus::kFailure;
-        }
-
-        materialPrim = appendedPrim.GetChildren().front();
-    } else {
-        materialPrim
-            = stage->GetPrimAtPath(SdfPath((primPath + "/Materials/" + materialName).asChar()));
-    }
+    materialPrim = stage->GetPrimAtPath(SdfPath((renderStudioMaterialPrim.GetPath().AppendChild(TfToken{ "Materials" }).AppendChild(TfToken(materialName)))));
 
     UsdShadeMaterial material(materialPrim);
     if (material) {
@@ -123,7 +120,7 @@ MStatus AssignMatXMaterial(
     } else {
         MGlobal::displayError(
             MString("RprUsd: Cannot bind prim ") + primPath + " with material "
-            + materialName.asChar());
+            + materialName.c_str());
         return MS::kFailure;
     }
 
@@ -183,7 +180,14 @@ MStatus RprUsdBiodMtlxCmd::doIt(const MArgList& args)
             argData.getFlagArgument(kGpuOpenMatIdFlag, 0, id);
             SdfReference sdfRef = SdfReference(("gpuopen://" + id).asChar(), SdfPath("/MaterialX"));
 
-            return AssignMatXMaterial(stage, primPath, sdfRef, "");
+            MString matName = GetMaterialXNameFromServer(id);
+
+            if (matName.isEmpty()) {
+                MGlobal::displayError("RprUsd: material name could not be obtained! Id is wrong or there is no internet connection ?");
+                return MS::kFailure;
+            }
+
+            return AssignMatXMaterial(stage, primPath, sdfRef, matName);
         } else {
             MGlobal::displayError("RprUsd: -id parameter is required for MatX Bind in LiveMode");
             return MS::kFailure;
