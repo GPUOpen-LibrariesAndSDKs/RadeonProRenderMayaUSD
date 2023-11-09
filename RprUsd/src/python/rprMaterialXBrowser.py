@@ -17,17 +17,12 @@ import json
 import math
 from functools import partial
 from sys import platform
-from client import MatlibClient
 import zipfile
 import threading
+from client import MatlibClient
+import webServerUrlHelper
 
 import ufe
-
-g_WebMatXServerUrl = "https://api.matlib.gpuopen.com"
-
-def getMatXNameByIdWithoutBrowserRunning(uid):
-    matlibClient = MatlibClient(g_WebMatXServerUrl)    
-    return matlibClient.materials._get_by_id(uid)["mtlx_material_name"]
 
 # Show the material browser window.
 # -----------------------------------------------------------------------------
@@ -69,7 +64,7 @@ class RPRMaterialBrowser(object) :
         #load all material at one time. It's possible to rework to load in chunks if needs
         maxElementCount = 10000
 
-        self.matlibClient = MatlibClient(g_WebMatXServerUrl)
+        self.matlibClient = MatlibClient(webServerUrlHelper.g_WebMatXServerUrl)
         self.categoryListData = self.matlibClient.categories.get_list(maxElementCount, 0)
         self.pathRootThumbnail = os.environ["USERPROFILE"] + "/Documents/Maya/RprUsd/WebMatlibCache"
         os.makedirs(self.pathRootThumbnail, exist_ok=True)
