@@ -1094,12 +1094,6 @@ void RprUsdProductionRender::RegisterRenderer(
         attrControlGrp -e -enable $enableFSR $ctrlNameUpscalingQuality;
     }
 
-    global proc string getMatXNameByIdWithoutBrowserRunning(string $id)
-    {
-        python("import webServerUrlHelper");
-        return python("webServerUrlHelper.getMatXNameByIdWithoutBrowserRunning(\"" + $id + "\")");
-    }  
-
     global proc UpdateToonLegacy()
     {
         $val = `getAttr -as "defaultRenderGlobals.HdRprPlugin_Prod___rpr_mtohns_core_mtohns_renderQuality"` == "Northstar"; // 5 is stand for NorthStar engine

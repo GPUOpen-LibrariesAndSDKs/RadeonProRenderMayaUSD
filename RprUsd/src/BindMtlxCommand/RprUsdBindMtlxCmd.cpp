@@ -79,7 +79,9 @@ void AddColorSpaceAttribute(UsdShadeMaterial& material)
 
 MString GetMaterialXNameFromServer(MString id) {
     MString result;
-    MGlobal::executeCommand("getMatXNameByIdWithoutBrowserRunning(\""+ id + "\")", result);
+
+    MGlobal::executePythonCommand("import webServerUrlHelper");
+    MGlobal::executePythonCommand("webServerUrlHelper.getMatXNameByIdWithoutBrowserRunning(\""+ id + "\")", result);
 
     return result.asChar();
 }
