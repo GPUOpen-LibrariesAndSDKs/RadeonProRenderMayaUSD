@@ -1096,7 +1096,7 @@ void RprUsdProductionRender::RegisterRenderer(
 
     global proc string getMatXNameByIdWithoutBrowserRunning(string $id)
     {
-        return python("import webServerUrlHelper; webServerUrlHelper.getMatXNameByIdWithoutBrowserRunning(\"" + $id + "\")");
+        return python("import webServerUrlHelper\nwebServerUrlHelper.getMatXNameByIdWithoutBrowserRunning(\"" + $id + "\")");
     }  
 
     global proc UpdateToonLegacy()
