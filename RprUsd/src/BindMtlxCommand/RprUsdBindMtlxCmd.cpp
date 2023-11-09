@@ -182,6 +182,11 @@ MStatus RprUsdBiodMtlxCmd::doIt(const MArgList& args)
 
             MString matName = GetMaterialXNameFromServer(id);
 
+            if (matName.isEmpty()) {
+                MGlobal::displayError("RprUsd: material name could not be obtained! Id is wrong or there is no internet connection ?");
+                return MS::kFailure;
+            }
+
             return AssignMatXMaterial(stage, primPath, sdfRef, matName);
         } else {
             MGlobal::displayError("RprUsd: -id parameter is required for MatX Bind in LiveMode");
