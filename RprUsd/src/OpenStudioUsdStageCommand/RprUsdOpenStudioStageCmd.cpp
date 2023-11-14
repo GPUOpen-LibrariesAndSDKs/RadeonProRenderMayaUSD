@@ -130,7 +130,7 @@ MStatus RprUsdOpenStudioStageCmd::doIt(const MArgList& args)
 
         liveModeInfo.liveUrl += "/workspace/live";
 
-        liveModeInfo.storageUrl = "https://renderstudio.luxoft.com/workspace/storage";
+        liveModeInfo.storageUrl = "";
         liveModeInfo.channelId = "Maya";
 
         MPlug channelNamePlug = MFnDependencyNode(GetSettingsNode())
