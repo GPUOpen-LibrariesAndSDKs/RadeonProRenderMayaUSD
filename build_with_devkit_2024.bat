@@ -12,7 +12,7 @@ echo Maya_sdk=%Maya_sdk%
 echo Python_Include_Dir=%Python_Include_Dir%
 echo Python_Library=%Python_Library%
 
-set usd_build_fullpath=%MAYA_x64_2024%\..\MayaUSD\Maya2024\0.23.1\mayausd\USD
+set usd_build_fullpath=%MAYA_x64_2024%\..\MayaUSD\Maya2024\0.25.0\mayausd\USD
 
 echo Building RadeonProRenderUSD (hdRPR) against builtin Maya's USD package...
 
