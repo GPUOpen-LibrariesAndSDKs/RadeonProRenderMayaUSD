@@ -103,6 +103,9 @@ public:
     void NodeAdded(const MObject& obj);
 
     HDMAYA_API
+    void NodeRemoved(const MObject& obj);
+
+    HDMAYA_API
     void UpdateLightVisibility(const MDagPath& dag);
 
     HDMAYA_API
@@ -120,14 +123,15 @@ public:
         SdfPathVector&              selectedSdfPaths,
         const HdSelectionSharedPtr& selection) override;
 
-#if MAYA_API_VERSION >= 20210000
     HDMAYA_API
     void PopulateSelectionList(
         const HdxPickHitVector&          hits,
         const MHWRender::MSelectionInfo& selectInfo,
         MSelectionList&                  selectionList,
         MPointArray&                     worldSpaceHitPts) override;
-#endif
+
+    bool GetEnableMaterials() const { return _enableMaterials; }
+    void SetEnableMaterials(bool enable) { _enableMaterials = enable; }
 
 protected:
     HDMAYA_API
@@ -229,14 +233,6 @@ protected:
 
     HDMAYA_API
     VtValue GetMaterialResource(const SdfPath& id) override;
-
-#if PXR_VERSION < 2011
-    HDMAYA_API
-    HdTextureResource::ID GetTextureResourceID(const SdfPath& textureId) override;
-
-    HDMAYA_API
-    HdTextureResourceSharedPtr GetTextureResource(const SdfPath& textureId) override;
-#endif // PXR_VERSION < 2011
 
 private:
     template <typename AdapterPtr, typename Map>
