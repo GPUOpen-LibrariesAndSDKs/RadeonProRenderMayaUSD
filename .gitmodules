@@ -3,4 +3,4 @@
 	url = git@github.com:GPUOpen-LibrariesAndSDKs/RadeonProRenderUSD.git
 [submodule "RprUsd/RenderStudioResolver"]
 	path = RprUsd/RenderStudioResolver
-	url = git@github.com:Radeon-Pro/RenderStudioKit.git
+	url = git@github.com:GPUOpen-LibrariesAndSDKs/RenderStudioKit.git
