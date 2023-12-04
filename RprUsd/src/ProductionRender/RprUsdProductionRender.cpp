@@ -419,16 +419,7 @@ bool RprUsdProductionRender::InitHydraResources()
                             = pMayaSceneDelegate->GetPrimPath(proxyTransformPath, false);
                     }
 
-                    // Temporary Hack! We access private variable here because we cannot modify MtoH
-                    // directly. I want to contribute setter method for this variable in MtoH. If
-                    // they approve we will remove the hack. We are accessing privte variable
-                    // HdMayaSceneDelegate::_enableMaterials here
-                    unsigned int classAlignment = alignof(HdMayaSceneDelegate);
-                    char*        adr
-                        = ((char*)pMayaSceneDelegate) + sizeof(HdMayaSceneDelegate) - sizeof(bool);
-                    unsigned long long offset = (unsigned long long)adr % classAlignment;
-                    adr -= offset;
-                    *((bool*)adr) = true;
+                    pMayaSceneDelegate->SetEnableMaterials(true);
                 }
             }
 
@@ -452,12 +443,7 @@ bool RprUsdProductionRender::InitHydraResources()
         if (pProxyAdapter != nullptr) {
             UsdImagingDelegate* pImagingDelegate = nullptr;
 
-            // Temporary Hack! We access private variable here because we cannot modify MtoH
-            // directly. Getter method is contributed to MtoH. We will remove the hack once maya
-            // with fix is published.
-            void* addr = (char*)pProxyAdapter + sizeof(HdMayaShapeAdapter) + sizeof(TfWeakBase)
-                + sizeof(MayaUsdProxyShapeBase*);
-            pImagingDelegate = ((std::unique_ptr<HdMayaProxyUsdImagingDelegate>*)(addr))->get();
+            pImagingDelegate = pProxyAdapter->GetUsdImagingDelegate();
 
             pImagingDelegate->SetTime(pShapeBase->getTime());
             pImagingDelegate->SetSceneMaterialsEnabled(true);
